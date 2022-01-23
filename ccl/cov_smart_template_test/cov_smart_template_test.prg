@@ -35,6 +35,7 @@ prompt
 with OUTDEV, FIN, TEMPLATE
 
 execute cov_std_routines
+execute cov_std_html_routines
 
 record t_rec
 (
@@ -84,6 +85,8 @@ record  st_reply
 	  3 targetobjectvalue = c100
 ) 
 
+declare html_output = gvc with protect
+
 set t_rec->prompts.outdev = $OUTDEV
 set t_rec->prompts.fin = $FIN
 set t_rec->prompts.template = $TEMPLATE
@@ -125,9 +128,12 @@ call echorecord(st_request)
 
 call parser(t_rec->values.st_execution)
 
+set html_output = get_html_template(concat(trim(cnvtlower(curprog)),".html"))
+
 call echorecord(st_reply) 
 call echorecord(t_rec) 
+call echo(build2("html_output=",html_output))
 
-set _Memory_Reply_String = st_reply->text
+call put_html_output(t_rec->prompts.outdev,html_output)
 
 end go

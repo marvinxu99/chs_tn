@@ -36,13 +36,48 @@ declare k=i4 with noconstant(0), protect
  
 /* Subroutines */
 /**********************************************************************************************************************
+** Function PUT_HTML_OUTPUT()
+** ---------------------------------------------------------------------------------------
+** Put HTML content to the supplied output
+**********************************************************************************************************************/
+declare put_html_output(vOutput=vc,vContent=gvc(VALUE,"<html>Failure</html>")) = null with persist, copy
+subroutine put_html_output(vOutput,vContent)
+	
+	free record putrequest
+	record putrequest (
+	 
+	     1 source_dir = vc
+	     1 source_filename = vc
+	     1 nbrlines = i4
+	     1 line [* ]
+	       2 linedata = vc
+	     1 overflowpage [* ]
+	       2 ofr_qual [* ]
+	         3 ofr_line = vc
+	     1 isblob = c1
+	     1 document_size = i4
+	     1 document = gvc
+	)
+	 
+	set putrequest->source_dir	 	=  vOutput
+	set putrequest->isblob 			= "1"
+	set putrequest->document 		= vContent
+	set putrequest->document_size 	= size(putrequest->document)
+	
+	execute eks_put_source with replace ("REQUEST" ,putrequest ) , replace ("REPLY" ,putreply ) 
+
+end
+
+
+
+/**********************************************************************************************************************
 ** Function GET_HTML_TEMPLATE(vFilename,vDirectory[cust_script])
 ** ---------------------------------------------------------------------------------------
 ** Open an HTML template from the default (cust_script) or supplied directory and return the HTML as a string
 **
 ** NOTE: Currently the directory variable requires the logical version with the trailing colon (ccluserdir:)
 **********************************************************************************************************************/
-declare get_html_template(vFilename=vc,vDirectory=vc(VALUE,"cust_script:")) = i2 with persist, copy
+declare get_html_template(vFilename=vc,vDirectory=vc(VALUE,"cust_script:")) = gvc with persist, copy
 subroutine get_html_template(vFilename,vDirectory)
  
 	declare vReturnHTML = gvc with protect
