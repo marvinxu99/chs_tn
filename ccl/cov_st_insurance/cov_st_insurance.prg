@@ -38,7 +38,8 @@ set noaudvar = 1	;do not create audit = 1	, create audit = 0
 call writeLog(build2("************************************************************"))
 call writeLog(build2("* START Custom Section  ************************************"))
  
-execute cov_std_routines
+execute cov_std_encntr_routines
+execute cov_std_rtf_routines
  
 if (not(validate(reply,0)))
 record  reply
@@ -56,13 +57,19 @@ endif
  
 call set_codevalues(null)
 call set_rtf_commands(null)
+
+call get_rtf_definitions(null)
  
-;free set t_rec
 record t_rec
 (
 	1 cnt			= i4
 	1 encntr_id		= f8
-)
+	1 insurance
+	 2 primary = vc
+	 2 secondary = vc
+	 2 tertiary = vc
+	 2 quaternary = vc
+) with protect
  
  
 call writeLog(build2("* END   Custom Section  ************************************"))
@@ -95,6 +102,36 @@ set stat = cnvtjsontorec(sGetInsuranceByEncntrID(t_rec->encntr_id))
  
 if (stat = TRUE)
 	call echorecord(insurance_list)
+	
+	set t_rec->insurance.primary 		= concat(
+													 insurance_list->insurance.primary.plan_name
+													,rtf_definitions->st.rtab
+													," Group#: ",trim(insurance_list->insurance.primary.group_nbr)
+													,rtf_definitions->st.rtab
+													," Member#: ",trim(insurance_list->insurance.primary.member_nbr)
+												)
+	set t_rec->insurance.secondary 		= concat(
+													 insurance_list->insurance.secondary.plan_name 
+													 ,rtf_definitions->st.rtab
+													 ," Group#: ",trim(insurance_list->secondary.group_nbr)
+													 ,rtf_definitions->st.rtab
+													 ," Member#: ",trim(insurance_list->secondary.member_nbr)
+												)
+	set t_rec->insurance.tertiary	 	= concat(
+													 insurance_list->insurance.tertiary.plan_name 
+													 ,rtf_definitions->st.rtab
+													 ," Group#: ",trim(insurance_list->insurance.tertiary.group_nbr)
+													 ,rtf_definitions->st.rtab
+													 ," Member#: ",trim(insurance_list->insurance.tertiary.member_nbr)
+												) 
+	set t_rec->insurance.quaternary 	= concat(
+													 insurance_list->insurance.quaternary.plan_name 
+													 ,rtf_definitions->st.rtab
+													 ," Group#: ",trim(insurance_list->insurance.quaternary.group_nbr)
+													 ,rtf_definitions->st.rtab
+													 ," Member#: ",trim(insurance_list->insurance.quaternary.member_nbr)
+												) 
+	
 else
 	set reply->status_data.status = "F"
 	set reply->status_data.subeventstatus.operationname = "INSURANCE_LIST"
@@ -109,19 +146,54 @@ call writeLog(build2("**********************************************************
  
  
 call writeLog(build2("************************************************************"))
-call writeLog(build2("* START Custom   *******************************************"))
+call writeLog(build2("* START Building Reply  ************************************"))
  
-call RTFReply(rtf_commands->st.rhead)
+set reply->text =  build2(reply->text,rtf_definitions->st.rhead)
+set reply->text =  build2(reply->text,rtf_definitions->st.wr)
+
+call echorecord(rtf_definitions)
+
+if (t_rec->insurance.primary > "")
+	set reply->text =  build2(	 reply->text
+								,"Primary:"
+								,rtf_definitions->st.rtab
+								,t_rec->insurance.primary
+								,rtf_definitions->st.reol
+							)
+endif
+
+if (t_rec->insurance.secondary > "")
+	set reply->text =  build2(	 reply->text
+								," Secondary:"
+								,rtf_definitions->st.rtab
+								,t_rec->insurance.secondary
+								,rtf_definitions->st.reol
+							  )
+endif
+
+if (t_rec->insurance.tertiary > "")
+	set reply->text =  build2(	 reply->text
+								," Tertiary:"
+								,rtf_definitions->st.rtab
+								,t_rec->insurance.tertiary
+								,rtf_definitions->st.reol
+							  )
+endif
+
+if (t_rec->insurance.quaternary > "")
+	set reply->text =  build2(	 reply->text
+								," Quaternary:"
+								,rtf_definitions->st.rtab
+								,t_rec->insurance.quaternary
+								,rtf_definitions->st.reol
+							 )
+endif
+set reply->text =  build2(reply->text,rtf_definitions->st.rtfeof)
+
+call echorecord(reply)
+
  
-call RTFReply(rtf_commands->st.wr)
- 
-call RTFReply(build2(" ",trim(curprog)," ran successfully"))
- 
-call RTFReply(rtf_commands->st.rtfeof)
-set rtf_commands->end_ind = 1
-call RTFReply(reply)	;echo reply
- 
-call writeLog(build2("* END   Custom   *******************************************"))
+call writeLog(build2("* END   Building Reply  ************************************"))
 call writeLog(build2("************************************************************"))
  
 #exit_script

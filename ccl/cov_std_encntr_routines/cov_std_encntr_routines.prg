@@ -25,8 +25,8 @@ Mod   Mod Date    Developer              Comment
 ---   ----------  --------------------  --------------------------------------
 000   12/02/2021  Chad Cummings			initial build
 ******************************************************************************/
-drop program cov_std_routines:dba go
-create program cov_std_routines:dba
+drop program cov_std_encntr_routines:dba go
+create program cov_std_encntr_routines:dba
  
 call echo(build2("starting ",trim(cnvtlower(curprog))))
  
@@ -114,22 +114,30 @@ end
 ** 
 ** INSURANCE_LIST
 (
- 		1 ENCNTR_ID = F8
- 		1 PERSON_ID = F8
- 		1 FIN = VC
- 		1 INSURANCE
- 		 2 PRIMARY
- 		  3 PLAN_NAME = VC
- 		 2 SECONDARY 
- 		  3 PLAN_NAME = VC
- 		 2 TERTIARY
- 		  3 PLAN_NAME = VC
- 		 2 QUATERNARY
- 		  3 PLAN_NAME = VC
- 		1 PLAN_CNT = I4
- 		1 PLAN_QUAL[*]
- 		 2 PLAN_NAME = VC
- 		 2 PLAN_SEQ = I4 	
+ 		1 encntr_id = f8
+ 		1 person_id = f8
+ 		1 fin = vc
+ 		1 insurance
+ 		 2 primary
+ 		  3 plan_name = vc
+ 		  3 group_nbr = vc
+ 		  3 member_nbr = vc
+ 		 2 secondary 
+ 		  3 plan_name = vc
+ 		  3 group_nbr = vc
+ 		  3 member_nbr = vc
+ 		 2 tertiary
+ 		  3 plan_name = vc
+ 		  3 group_nbr = vc
+ 		  3 member_nbr = vc
+ 		 2 quaternary
+ 		  3 plan_name = vc
+ 		  3 group_nbr = vc
+ 		  3 member_nbr = vc
+ 		1 plan_cnt = i4
+ 		1 plan_qual[*]
+ 		 2 plan_name = vc
+ 		 2 plan_seq = i4  	
  	) 
 ** 
 ** NOTE: The record structure is destroyed on execution. 
@@ -147,12 +155,20 @@ subroutine sGetInsuranceByEncntrID(vEncntrID)
  		1 insurance
  		 2 primary
  		  3 plan_name = vc
+ 		  3 group_nbr = vc
+ 		  3 member_nbr = vc
  		 2 secondary 
  		  3 plan_name = vc
+ 		  3 group_nbr = vc
+ 		  3 member_nbr = vc
  		 2 tertiary
  		  3 plan_name = vc
+ 		  3 group_nbr = vc
+ 		  3 member_nbr = vc
  		 2 quaternary
  		  3 plan_name = vc
+ 		  3 group_nbr = vc
+ 		  3 member_nbr = vc
  		1 plan_cnt = i4
  		1 plan_qual[*]
  		 2 plan_name = vc
@@ -189,10 +205,18 @@ subroutine sGetInsuranceByEncntrID(vEncntrID)
 		insurance_list->person_id = e.person_id
 	head epr.priority_seq
 		case (epr.priority_seq)
-			of 1:	insurance_list->insurance.primary.plan_name = hp.plan_name
-			of 2:	insurance_list->insurance.secondary.plan_name = hp.plan_name
-			of 3:   insurance_list->insurance.tertiary.plan_name = hp.plan_name
-			of 4:   insurance_list->insurance.quaternary.plan_name = hp.plan_name
+			of 1:	insurance_list->insurance.primary.plan_name 		= hp.plan_name
+					insurance_list->insurance.primary.group_nbr 		= epr.group_nbr 
+					insurance_list->insurance.primary.member_nbr		= epr.member_nbr
+			of 2:	insurance_list->insurance.secondary.plan_name 		= hp.plan_name
+					insurance_list->insurance.secondary.member_nbr		= epr.member_nbr
+					insurance_list->insurance.secondary.group_nbr		= epr.group_nbr
+			of 3:   insurance_list->insurance.tertiary.plan_name 		= hp.plan_name
+					insurance_list->insurance.tertiary.member_nbr		= epr.member_nbr
+					insurance_list->insurance.tertiary.group_nbr		= epr.group_nbr
+			of 4:   insurance_list->insurance.quaternary.plan_name 		= hp.plan_name
+					insurance_list->insurance.quaternary.group_nbr		= epr.group_nbr
+					insurance_list->insurance.quaternary.member_nbr		= epr.member_nbr
 		endcase
 		insurance_list->plan_cnt = (insurance_list->plan_cnt + 1)
 		stat = alterlist(insurance_list->plan_qual,insurance_list->plan_cnt)

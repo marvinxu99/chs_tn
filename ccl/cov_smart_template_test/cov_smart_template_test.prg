@@ -29,12 +29,13 @@ create program cov_smart_template_test
 
 prompt 
 	"Output to File/Printer/MINE" = "MINE"   ;* Enter or select the printer or file name to send this report to.
-	, "FIN" = ""
+	, "FIN" = "2122000324"
 	, "Template" = "cov_st_insurance" 
 
 with OUTDEV, FIN, TEMPLATE
 
-execute cov_std_routines
+execute cov_std_encntr_routines
+execute cov_std_rtf_routines
 execute cov_std_html_routines
 
 record t_rec
@@ -134,6 +135,9 @@ call echorecord(st_reply)
 call echorecord(t_rec) 
 call echo(build2("html_output=",html_output))
 
-call put_html_output(t_rec->prompts.outdev,html_output)
+set html_output = replace(html_output,"%%REPLACE_REPLY_TEXT%%",st_reply->text)
+set html_output = replace(html_output,"%%REPLACE_ST_REPLY_%%",cnvtrectojson(st_reply))
+
+call put_html_output(t_rec->prompts.outdev,st_reply->text)
 
 end go
