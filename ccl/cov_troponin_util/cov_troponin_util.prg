@@ -366,7 +366,7 @@ subroutine GetOrderSynonymbyOrderID(vOrderID)
 end ;GetOrderSynonymbyOrderID
  
 subroutine GetOrderPowerPlanbyOrderID(vOrderID)
-	declare vReturnPowerPlan = vc with noconstant("<not from a powerplan>"), protect
+	declare vReturnPowerPlan = vc with noconstant("(ad hoc)"), protect
  
 	select into "nl:"
 	from
@@ -694,7 +694,7 @@ subroutine DeterminehsTropAlg(vOrderID)
 		if (GetOrderSynonymbyOrderID(vOrderID) = "*(Symptoms >= 3 hrs)*")
 			set hsTroponin_data->algorithm_info.type = "ED"
 			set hsTroponin_data->algorithm_info.subtype = "GREATER"
-		elseif (GetOrderSynonymbyOrderID(vOrderID) = "*(Symptoms < 3 hrs))*")
+		elseif (GetOrderSynonymbyOrderID(vOrderID) = "*(Symptoms < 3 hrs)*")
 			set hsTroponin_data->algorithm_info.type = "ED"
 			set hsTroponin_data->algorithm_info.subtype = "LESS"
 		endif
