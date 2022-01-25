@@ -1478,8 +1478,8 @@ subroutine GethsTropAlgEC(null)
 	plan cv
 		where cv.code_set = 72
 		and   cv.active_ind = 1
-		;and   cv.display = "Pharmacy Waste"
-		and   cv.code_value = 3904321687.00; hs Troponin Algorithm Data
+		and   cv.display = "hs Troponin Algorithm Data"
+		;and   cv.code_value = 3904321687.00; hs Troponin Algorithm Data
 	order by
 		cv.begin_effective_dt_tm desc
 		,cv.display
