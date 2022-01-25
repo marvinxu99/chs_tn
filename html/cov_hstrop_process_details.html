@@ -1,0 +1,74 @@
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta http-equiv="Content-Type" content="XMLCCLREQUEST,APPLINK,MPAGES_EVENT,CCLLINK" name="discern"/>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+<style>
+table.patientTable {
+ 
+  background-color: #FFFFFF;
+  border-collapse: collapse;
+  border-width: 2px;
+  border-color: #7EA8F8;
+  border-style: solid;
+  color: #000000;
+  font-size:11px
+}
+ 
+table.patientTable td, table.patientTable th {
+  border-width: 2px;
+  border-color: #7EA8F8;
+  border-style: solid;
+  padding: 5px;
+  vertical-align: top;
+}
+ 
+table.patientTable thead {
+  background-color: #7EA8F8;
+}
+ 
+textarea#t_rec{
+    width:100%;
+    height:500px;
+}
+ 
+textarea#hsTroponin_data{
+    width:100%;
+    height:500px;
+}
+ 
+.divtext {
+    border: ridge 2px;
+    padding: 5px;
+    width: 20em;
+    min-height: 5em;
+    overflow: auto;
+}
+ 
+</style>
+ 
+ 
+<title>hsTroponin Details</title>
+ 
+ 
+</head>
+<body>
+hsTroponin Algorith Details
+ 
+<br><br><br>
+ 
+<pre id="t_rec"></pre>
+<br><br><br>
+ 
+<pre id=hsTroponin_data></pre>
+<br><br><br>
+ 
+<script>
+var t_recJSON = %%REPLACE_JSON%%
+document.getElementById("t_rec").textContent = JSON.stringify(t_recJSON, undefined, 2);
+var hsTrop_dataJSON = %%HSTROPONIN_DATA_JSON%%
+document.getElementById("hsTroponin_data").textContent = JSON.stringify(hsTrop_dataJSON, undefined, 2);
+ 
+</script>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta http-equiv="Content-Type" content="XMLCCLREQUEST,APPLINK,MPAGES_EVENT,CCLLINK" name="discern"/>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+ 
+<script type="text/javascript">
+/*
+var dPersonId = 20773851;
+var dEventId = 3654083804.0;
+var dEventId2 = 3654084039.0;
+ 
+var objPVViewerMPage = window.external.DiscernObjectFactory("PVVIEWERMPAGE");
+objPVViewerMPage.CreateEventViewer(dPersonId);
+objPVViewerMPage.AppendEvent(dEventId);
+objPVViewerMPage.AppendEvent(dEventId2);
+objPVViewerMPage.LaunchEventViewer();
+*/
+</script>
+<style>
+table.patientTable {
+ 
+  background-color: #FFFFFF;
+  border-collapse: collapse;
+  border-width: 2px;
+  border-color: #7EA8F8;
+  border-style: solid;
+  color: #000000;
+  font-size:11px
+}
+ 
+table.patientTable td, table.patientTable th {
+  border-width: 2px;
+  border-color: #7EA8F8;
+  border-style: solid;
+  padding: 5px;
+  vertical-align: top;
+}
+ 
+table.patientTable thead {
+  background-color: #7EA8F8;
+}
+ 
+textarea#t_rec{
+    width:100%;
+    height:500px;
+}
+ 
+</style>
+ 
+<title>hsTroponin Audit</title>
+ 
+ 
+</head>
+<body>
+ 
+%%REPLACE_PATIENT_TABLE%%
+ 
+<br><br>
+ 
+<pre id=t_rec></pre>
+ 
+<script>
+var t_recJSON = %%REPLACE_JSON%%
+document.getElementById("t_rec").textContent = JSON.stringify(t_recJSON, undefined, 2);
+</script>
+ 
+</body>
+</html>
