@@ -121,7 +121,7 @@ set t_rec->cons.run_dt_tm		= cnvtdatetime(curdate,curtime3)
  
 if (t_rec->dates.start_dt_tm = 0.0)
 	call writeLog(build2("->No start date and time found, setting to go live date"))
-	set t_rec->dates.start_dt_tm = cnvtdatetime("21-JUN-2021 00:00:00")
+	set t_rec->dates.start_dt_tm = cnvtdatetime(curdate,curtime3)
 endif
  
  

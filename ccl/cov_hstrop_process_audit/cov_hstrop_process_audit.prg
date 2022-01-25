@@ -321,18 +321,20 @@ from
 	,encounter e
 	,encntr_alias ea
 	,clinical_event ce
+	,(dummyt d2)
 plan d1
 join e
 	where e.encntr_id = t_rec->event_list[d1.seq].encntr_id
 join p
 	where p.person_id = e.person_id
+join ce
+	where ce.event_id = t_rec->event_list[d1.seq].event_id
+join d2
 join ea
 	where ea.encntr_id = e.encntr_id
 	and   ea.active_ind = 1
 	and   ea.encntr_alias_type_cd = value(uar_get_code_by("MEANING",319,"FIN NBR"))
 	and   cnvtdatetime(curdate,curtime3) between ea.beg_effective_dt_tm and ea.end_effective_dt_tm
-join ce
-	where ce.event_id = t_rec->event_list[d1.seq].event_id
 order by
 	 p.name_full_formatted
 	,p.person_id
@@ -401,7 +403,7 @@ foot e.encntr_id
 	patient_table = build2(patient_table,"</tr>")
 foot report
 	patient_table = build2(patient_table,"</table>")
-with nocounter,nullreport
+with nocounter,nullreport,outerjoin=d2
  
  
 set html_output = replace(html_output,^%%REPLACE_JSON%%^,cnvtrectojson(t_rec))
