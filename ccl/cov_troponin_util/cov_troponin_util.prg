@@ -366,7 +366,7 @@ subroutine GetOrderSynonymbyOrderID(vOrderID)
 end ;GetOrderSynonymbyOrderID
  
 subroutine GetOrderPowerPlanbyOrderID(vOrderID)
-	declare vReturnPowerPlan = vc with noconstant(""), protect
+	declare vReturnPowerPlan = vc with noconstant("<not from a powerplan>"), protect
  
 	select into "nl:"
 	from
@@ -377,6 +377,7 @@ subroutine GetOrderPowerPlanbyOrderID(vOrderID)
 		and   o.order_id > 0.0
 	join pc
 		where pc.pathway_catalog_id = o.pathway_catalog_id
+		and   pc.pathway_catalog_id > 0.0
 	detail
 		vReturnPowerPlan = pc.description
 	with nocounter
