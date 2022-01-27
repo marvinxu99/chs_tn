@@ -358,8 +358,10 @@ head e.encntr_id
 	patient_table = build2(patient_table,"<tr>")
 	patient_table = build2(patient_table,"<td rowspan=",trim(cnvtstring(i)),">",p.person_id,"</td>")
 	patient_table = build2(patient_table,"<td rowspan=",trim(cnvtstring(i)),">",p.name_full_formatted,"</td>")
+	
 	patient_table = build2(patient_table,"<td rowspan=",trim(cnvtstring(i)),">",uar_get_code_display(e.loc_nurse_unit_cd),"</td>")
-	patient_table = build2(patient_table,"<td rowspan=",trim(cnvtstring(i)),">",ea.alias,"</td>")
+	patient_table = build2(patient_table,"<td rowspan=",trim(cnvtstring(i)),">",ea.alias,
+		"(",uar_get_code_display(e.encntr_status_cd),")</td>")
 detail
 	if (k>0)
 		patient_table = build2(patient_table,"<tr>")
