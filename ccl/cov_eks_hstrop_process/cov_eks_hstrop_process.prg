@@ -379,7 +379,7 @@ else
 					call add_log_message("setup request for hour one ECG order")
 				endif
  
-		 		set stat = UpdateECGOrderDetailDtTm("REQSTARTDTTM",hsTroponin_data->one_hour.target_dt_tm)
+		 		set stat = UpdateECGOrderDetailDtTm("REQSTARTDTTM",hsTroponin_data->three_hour.target_dt_tm)
 		 		set stat = UpdateECGOrderDetailValueCd("PRIORITY",value(uar_get_code_by("MEANING",1304,"STAT")))
  
 				 set order_comment = build2(	 "Ordered automatically per rapid screening protocols. "
@@ -391,12 +391,12 @@ else
 									)
 				set stat = AddECGOrderComment(order_comment)
  
-				set hsTroponin_data->one_hour.ecg_order_id = CallNewECGOrderServer(null)
+				set hsTroponin_data->three_hour.ecg_order_id = CallNewECGOrderServer(null)
  
-				if (hsTroponin_data->one_hour.ecg_order_id > 0.0)
-					call add_log_message("created one hour ECG order")
-					if (AddOrderTohsTropList(hsTroponin_data->one_hour.ecg_order_id) = FALSE)
-						call add_log_message("unable to add one hour ecg_order_id to list")
+				if (hsTroponin_data->three_hour.ecg_order_id > 0.0)
+					call add_log_message("created three hour ECG order")
+					if (AddOrderTohsTropList(hsTroponin_data->three_hour.ecg_order_id) = FALSE)
+						call add_log_message("unable to add three hour ecg_order_id to list")
 						go to exit_script
 					endif
 				else

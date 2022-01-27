@@ -299,6 +299,7 @@ for (ii=1 to t_rec->event_cnt)
 			endif
  
 			;add one hour ecg
+		 if (hsTroponin_data->one_hour.ecg_order_id = 0.0)
 			if (SetupNewECGOrder(t_rec->event_list[ii].person_id,t_rec->event_list[ii].encntr_id) = FALSE)
 				call writeLog("unable to setup request for hour one ECG order")
 				go to exit_script
@@ -327,7 +328,7 @@ for (ii=1 to t_rec->event_cnt)
 			else
 				call writeLog("did not create one hour ECG order")
 			endif
- 
+ 		 endif
 		endif ;one_hour order now
  
 		if (t_rec->event_list[ii].three_hour.order_now_ind = 1)
