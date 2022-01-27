@@ -913,7 +913,8 @@ end ;GethsTropAlgListByEncntrID
  
 subroutine SetNormalcybyMilestone(vMilestone)
 	declare vReturnNormalcy = vc with noconstant("ERROR"), protect
- 
+ 	declare vMilestoneDisplay = vc with noconstat("ERROR"), protect
+ 	
 	if (validate(hsTroponin_data) = FALSE)
 		return (vReturnNormalcy)
 	else
@@ -1143,6 +1144,21 @@ subroutine SetNormalcybyMilestone(vMilestone)
 	else
 		set hsTroponin_data->algorithm_info.current_full_normalcy = "ERROR"
  	endcase
+
+
+	case (cnvtupper(vMilestone))
+		of "INITIAL":	set vMilestoneDisplay = "0h"
+		of "ONEHOUR":	set vMilestoneDisplay = "1h"
+		of "THREEHOUR":	set vMilestoneDisplay = "3h"
+	endcase
+	
+	set hsTroponin_data->algorithm_info.current_full_normalcy = concat(
+																		 	 hsTroponin_data->algorithm_info.current_full_normalcy
+																			," ["
+																			,vMilestoneDisplay
+																			,"]"
+																	   )
+																		
  
  	return (vReturnNormalcy)
 end ;SetNormalcybyMilestone
