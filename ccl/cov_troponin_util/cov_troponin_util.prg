@@ -232,7 +232,7 @@ subroutine AddAlgorithmCEResult(vCEventID)
 			case (hsTroponin_data->algorithm_info.current_normalcy)
 				of "RULED OUT": 		cerequest->clin_event.normalcy_cd = uar_get_code_by_cki("CKI.CODEVALUE!2690")	;Normal
 				of "NO INJURY":			cerequest->clin_event.normalcy_cd = uar_get_code_by_cki("CKI.CODEVALUE!2690")	;Normal
-				of "INDETERMINATE":		cerequest->clin_event.normalcy_cd = uar_get_code_by_cki("CKI.CODEVALUE!56554")	;Positive
+				of "INDETERMINATE":		cerequest->clin_event.normalcy_cd = uar_get_code_by_cki("CKI.CODEVALUE!2680")	;Abnormal
 				of "ABNORMAL":			cerequest->clin_event.normalcy_cd = uar_get_code_by_cki("CKI.CODEVALUE!3707")	;Extreme High
 			else
 				cerequest->clin_event.normalcy_cd = uar_get_code_by_cki("CKI.CODEVALUE!3707")	;>Extreme High
