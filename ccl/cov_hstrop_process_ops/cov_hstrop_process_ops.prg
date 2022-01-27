@@ -306,7 +306,7 @@ for (ii=1 to t_rec->event_cnt)
 				call writeLog("setup request for hour one ECG order")
 			endif
  
-	 		set stat = UpdateECGOrderDetailDtTm("REQSTARTDTTM",hsTroponin_data->algorithm_info.process_dt_tm)
+	 		set stat = UpdateECGOrderDetailDtTm("REQSTARTDTTM",hsTroponin_data->one_hour.target_dt_tm)
 	 		set stat = UpdateECGOrderDetailValueCd("PRIORITY",value(uar_get_code_by("MEANING",1304,"STAT")))
 			set order_comment = build2(	 "Ordered automatically per rapid screening protocols. "
 													,"Initiated from accession "

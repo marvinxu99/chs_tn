@@ -226,7 +226,7 @@ if (t_rec->algorithm_data.linked_eventid = 0.0)
                 call add_log_message("setup request for hour one ECG order")
             endif
  
-            set stat = UpdateECGOrderDetailDtTm("REQSTARTDTTM",hsTroponin_data->algorithm_info.process_dt_tm)
+            set stat = UpdateECGOrderDetailDtTm("REQSTARTDTTM",hsTroponin_data->one_hour.target_dt_tm)
             set stat = UpdateECGOrderDetailValueCd("PRIORITY",value(uar_get_code_by("MEANING",1304,"STAT")))
  
             set order_comment = build2(	 "Ordered automatically per rapid screening protocols. "
@@ -292,7 +292,7 @@ if (t_rec->algorithm_data.linked_eventid = 0.0)
 				call add_log_message("setup request for hour three ECG order")
 			endif
  
-	 		set stat = UpdateECGOrderDetailDtTm("REQSTARTDTTM",hsTroponin_data->algorithm_info.process_dt_tm)
+	 		set stat = UpdateECGOrderDetailDtTm("REQSTARTDTTM",hsTroponin_data->three_hour.target_dt_tm)
 	 		set stat = UpdateECGOrderDetailValueCd("PRIORITY",value(uar_get_code_by("MEANING",1304,"STAT")))
  
 			set order_comment = build2(	 "Ordered automatically per rapid screening protocols. "
@@ -379,7 +379,7 @@ else
 					call add_log_message("setup request for hour one ECG order")
 				endif
  
-		 		set stat = UpdateECGOrderDetailDtTm("REQSTARTDTTM",hsTroponin_data->algorithm_info.process_dt_tm)
+		 		set stat = UpdateECGOrderDetailDtTm("REQSTARTDTTM",hsTroponin_data->one_hour.target_dt_tm)
 		 		set stat = UpdateECGOrderDetailValueCd("PRIORITY",value(uar_get_code_by("MEANING",1304,"STAT")))
  
 				 set order_comment = build2(	 "Ordered automatically per rapid screening protocols. "
