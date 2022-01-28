@@ -1174,7 +1174,11 @@ subroutine GetResultbyCEventID(vCEventID)
 		where ce.clinical_event_id = vCEventID
 		and   ce.clinical_event_id > 0.0
 	detail
-		rResultVal = cnvtreal(ce.result_val)
+		if (trim(ce.result_val) = "<6")
+			rResultVal = 6.0
+		else
+			rResultVal = cnvtreal(ce.result_val)
+		endif
 	with nocounter
  
 	return(rResultVal)
