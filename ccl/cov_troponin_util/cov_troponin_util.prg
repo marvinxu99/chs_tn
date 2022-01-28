@@ -75,6 +75,7 @@ declare GetParentEventIDbyCEventID(vCEventID=f8) = f8 with copy, persist
 declare GetEncntrIDbyOrderID(vOrderID=f8) = f8 with copy, persist
  
 declare GetResultbyCEventID(vCEventID=f8) = f8 with copy, persist
+declare GetResultTextbyCEventID(vCEventID=f8) = vc with copy, persist
 declare SetNormalcybyMilestone(vMilestone=vc) = vc with copy, persist
 declare UpdateCurrentPhase(vCurrentPhase=vc) = vc with copy, persist
  
@@ -922,7 +923,11 @@ subroutine SetNormalcybyMilestone(vMilestone)
 			if (hsTroponin_data->algorithm_info.subtype = "GREATER")
 				;ED >3 Hours Algoritm
 				if (cnvtupper(vMilestone) = "INITIAL")
- 
+ 				 if (GetResultTextbyCEventID(GethsTropCEEventIDbyEventID(hsTroponin_data->initial.result_event_id)) = "<6")
+ 				 	set vReturnNormalcy = "RULED OUT"
+					set hsTroponin_data->one_hour.needed_ind = 0
+						set hsTroponin_data->three_hour.needed_ind = 0
+ 				 else
 					if (hsTroponin_data->initial.result_val < 6)
 						set vReturnNormalcy = "RULED OUT"
 						set hsTroponin_data->one_hour.needed_ind = 0
@@ -939,7 +944,7 @@ subroutine SetNormalcybyMilestone(vMilestone)
 						set hsTroponin_data->three_hour.needed_ind = 0
 						;0D
 					endif
- 
+ 				 endif
 				elseif (cnvtupper(vMilestone) = "ONEHOUR")
 					set hsTroponin_data->algorithm_info.immediate_orders = 0 ;Do not immediated drop 3hour orders if necessary
 					set hsTroponin_data->one_hour.delta = abs(hsTroponin_data->one_hour.result_val - hsTroponin_data->initial.result_val)
@@ -1183,6 +1188,25 @@ subroutine GetResultbyCEventID(vCEventID)
  
 	return(rResultVal)
 end ;GetResultbyCEventID
+
+
+subroutine GetResultTextbyCEventID(vCEventID)
+ 
+	declare rResultValText = vc with noconstant(" "), protect
+ 
+	select into "nl:"
+	from
+		clinical_event ce
+	plan ce
+		where ce.clinical_event_id = vCEventID
+		and   ce.clinical_event_id > 0.0
+	detail
+		rResultValText = trim(ce.result_val)
+	with nocounter
+ 
+	return(rResultValText)
+end ;GetResultTextbyCEventID
+
  
  
 subroutine GetParentEventIDbyCEventID(vCEventID)
