@@ -68,6 +68,8 @@ declare GetOrderLocationbyOrderID(vOrderID=f8) = vc with copy, persist
 declare GetOrderAccessionbyOrderID(vOrderID=f8) = vc with copy, persist
 
 declare GetPatientLocationbyEncntrID(vEncntrID=f8) = vc with copy, persist
+declare GetPatientTypebyEncntrID(vEncntrID=f8) = vc with copy, persist
+
 declare isPatientinED(vEncntrID = f8) = i2 with copy, persist
 declare isPatientOutpatient(vEncntrID = f8) = i2 with copy, persist
  
@@ -345,6 +347,23 @@ subroutine GetPatientLocationbyEncntrID(vEncntrID)
  
 end ;GetPatientLocationbyEncntrID
 
+subroutine GetPatientTypebyEncntrID(vEncntrID)
+
+	declare vReturnType = vc with noconstant(""), protect
+ 
+	select into "nl:"
+	from
+		 encounter e
+	plan e
+		where e.encntr_id = vEncntrID
+	detail
+		vReturnType = uar_get_code_display(e.encntr_type_cd)
+	with nocounter
+ 
+	return (vReturnType)
+ 
+end ;GetPatientTypebyEncntrID
+
 subroutine isPatientinED(vEncntrID)
 
 	declare vReturnResponse = i2 with noconstant(FALSE)
@@ -360,9 +379,9 @@ subroutine isPatientOutpatient(vEncntrID)
 
 	declare vReturnResponse = i2 with noconstant(FALSE)
 	
-	;if (GetPatientLocationbyEncntrID(vEncntrID) in("*ED","*EB"))
- 	;set vReturnResponse = TRUE
- 	;endif
+	if (GetPatientTypebyEncntrID(vEncntrID) in("Clinic","Outpatient"))
+ 		set vReturnResponse = TRUE
+ 	endif
 
 	return (vReturnResponse)
 end ;isPatientOutpatient
