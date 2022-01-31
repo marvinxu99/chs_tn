@@ -69,6 +69,7 @@ declare GetOrderAccessionbyOrderID(vOrderID=f8) = vc with copy, persist
 
 declare GetPatientLocationbyEncntrID(vEncntrID=f8) = vc with copy, persist
 declare isPatientinED(vEncntrID = f8) = i2 with copy, persist
+declare isPatientOutpatient(vEncntrID = f8) = i2 with copy, persist
  
 declare GetOrderPowerPlanbyOrderID(vOrderID=f8) = vc with copy, persist
  
@@ -354,6 +355,18 @@ subroutine isPatientinED(vEncntrID)
 
 	return (vReturnResponse)
 end ;isPatientinED
+
+subroutine isPatientOutpatient(vEncntrID)
+
+	declare vReturnResponse = i2 with noconstant(FALSE)
+	
+	;if (GetPatientLocationbyEncntrID(vEncntrID) in("*ED","*EB"))
+ 	;set vReturnResponse = TRUE
+ 	;endif
+
+	return (vReturnResponse)
+end ;isPatientOutpatient
+
  
 subroutine GetOrderLocationbyOrderID(vOrderID)
 	declare vReturnUnit = vc with noconstant(""), protect
@@ -512,6 +525,10 @@ subroutine SetupNewECGOrder(vPersonID,vEncntrID)
  
  	if (isPatientInED(vEncntrID) = FALSE)
  		set ecg_ordrequest_template = "cust_script:ecg_ordrequest.json"
+ 	endif
+ 
+ 	if (isPatientOutpatient(vEncntrID) = TRUE)
+ 		set ecg_ordrequest_template = "cust_script:out_ecg_ordrequest.json"
  	endif
  
 	free define rtl3
