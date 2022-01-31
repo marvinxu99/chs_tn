@@ -112,6 +112,8 @@ record t_rec
 	 	3 order_name   = vc
 	 	3 powerplan_name = vc
 	 	3 accession = vc
+	 	3 order_status = vc
+	 	3 order_update_prsnl = vc
 	 2 one_hour
 	    3 needed_ind 	= i4
 	 	3 order_id 		= f8
@@ -125,6 +127,8 @@ record t_rec
 		3 delta			= f8
 	 	3 normalcy      = vc
 	 	3 accession = vc
+	 	3 order_status = vc
+	 	3 order_update_prsnl = vc
 	 2 three_hour
 	    3 needed_ind 	= i4
 	 	3 order_id 		= f8
@@ -138,6 +142,8 @@ record t_rec
 		3 result_event_id = f8
 	 	3 normalcy      = vc
 	 	3 accession = vc
+	 	3 order_update_prsnl = vc
+	 	3 order_status = vc
 ) with protect
  
 declare html_output = gvc with noconstant("")
@@ -267,16 +273,28 @@ for (i=1 to t_rec->event_cnt)
 	from
 		accession_order_r aor
 		,accession a
+		,orders o
 	plan aor
 		where aor.order_id in( t_rec->event_list[i].initial.order_id,t_rec->event_list[i].one_hour.order_id,
 								t_rec->event_list[i].three_hour.order_id)
 	join a
 		where a.accession_id = aor.accession_id
+	join o
+		where o.order_id = aor.order_id
 	detail
 		case (aor.order_id)
 			of t_rec->event_list[i].initial.order_id: 		t_rec->event_list[i].initial.accession = cnvtacc(a.accession)
+															t_rec->event_list[i].initial.order_status = concat(
+																uar_get_code_display(o.order_status_cd)," (",
+																uar_get_code_display(o.dept_status_cd),")")
 			of t_rec->event_list[i].one_hour.order_id:		t_rec->event_list[i].one_hour.accession = cnvtacc(a.accession)
+															t_rec->event_list[i].one_hour.order_status = concat(
+																uar_get_code_display(o.order_status_cd)," (",
+																uar_get_code_display(o.dept_status_cd),")")
 			of t_rec->event_list[i].three_hour.order_id:	t_rec->event_list[i].three_hour.accession = cnvtacc(a.accession)
+															t_rec->event_list[i].three_hour.order_status = concat(
+																uar_get_code_display(o.order_status_cd)," (",
+																uar_get_code_display(o.dept_status_cd),")")
 		endcase
 endfor
  
@@ -311,7 +329,8 @@ else
 	call writeLog(build2("HTML Template not found, exiting"))
 	go to exit_script
 endif
- 
+
+
  
 select into "nl:"
 	person_id = t_rec->event_list[d1.seq].person_id
@@ -375,7 +394,7 @@ detail
 							,~"~
 							,~)'>~
 							,~XX</div></td>~)
-	patient_table = build2(patient_table,^<td>^,ce.parent_event_id,^</td>^)
+	;patient_table = build2(patient_table,^<td>^,ce.parent_event_id,^</td>^)
 	patient_table = build2(patient_table,"<td>",format(ce.event_end_dt_tm,"DD-MMM-YYYY HH:MM:SS;;q"),"</td>")
 	patient_table = build2(patient_table,"<td>",t_rec->event_list[d1.seq].algorithm.type,"</td>")
 	patient_table = build2(patient_table,"<td>",t_rec->event_list[d1.seq].algorithm.subtype,"</td>")
@@ -396,10 +415,14 @@ detail
  
 	patient_table = build2(patient_table,"</td>")
 	patient_table = build2(patient_table,"<td>",t_rec->event_list[d1.seq].initial.order_name,"</td>")
-	patient_table = build2(patient_table,"<td>",t_rec->event_list[d1.seq].initial.powerplan_name,"</td>")
-	patient_table = build2(patient_table,"<td>",t_rec->event_list[d1.seq].initial.accession)
-	patient_table = build2(patient_table,"<br>",t_rec->event_list[d1.seq].one_hour.accession)
-	patient_table = build2(patient_table,"<br>",t_rec->event_list[d1.seq].three_hour.accession,"</td>")
+	patient_table = build2(patient_table,"<td width=50px>",t_rec->event_list[d1.seq].initial.powerplan_name,"</td>")
+	patient_table = build2(patient_table,"<td>",t_rec->event_list[d1.seq].initial.accession
+										," ",t_rec->event_list[d1.seq].initial.order_status)
+	patient_table = build2(patient_table,"<br>",t_rec->event_list[d1.seq].one_hour.accession
+										," ",t_rec->event_list[d1.seq].one_hour.order_status)
+	patient_table = build2(patient_table,"<br>",t_rec->event_list[d1.seq].three_hour.accession
+										," ",t_rec->event_list[d1.seq].three_hour.order_status
+										,"</td>")
 	k = (k + 1)
 foot e.encntr_id
 	patient_table = build2(patient_table,"</tr>")
