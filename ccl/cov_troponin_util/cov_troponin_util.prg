@@ -66,6 +66,9 @@ declare GethsTropOpsDate(vScript) = vc with copy, persist
 declare GetOrderSynonymbyOrderID(vOrderID=f8) = vc with copy, persist
 declare GetOrderLocationbyOrderID(vOrderID=f8) = vc with copy, persist
 declare GetOrderAccessionbyOrderID(vOrderID=f8) = vc with copy, persist
+
+declare GetPatientLocationbyEncntrID(vEncntrID=f8) = vc with copy, persist
+declare isPatientinED(vEncntrID = f8) = i2 with copy, persist
  
 declare GetOrderPowerPlanbyOrderID(vOrderID=f8) = vc with copy, persist
  
@@ -323,7 +326,34 @@ subroutine GethsTropAlgOrderMargin(null)
  
 	return (vReturnNumberofMinues)
 end ;GethsTropAlgOrderMargin
+
+subroutine GetPatientLocationbyEncntrID(vEncntrID)
+
+	declare vReturnUnit = vc with noconstant(""), protect
  
+	select into "nl:"
+	from
+		 encounter e
+	plan e
+		where e.encntr_id = vEncntrID
+	detail
+		vReturnUnit = uar_get_code_display(e.loc_nurse_unit_cd)
+	with nocounter
+ 
+	return (vReturnUnit)
+ 
+end ;GetPatientLocationbyEncntrID
+
+subroutine isPatientinED(vEncntrID)
+
+	declare vReturnResponse = i2 with noconstant(FALSE)
+	
+	if (GetPatientLocationbyEncntrID(vEncntrID) in("*ED","*EB"))
+ 		set vReturnResponse = TRUE
+ 	endif
+
+	return (vReturnResponse)
+end ;isPatientinED
  
 subroutine GetOrderLocationbyOrderID(vOrderID)
 	declare vReturnUnit = vc with noconstant(""), protect
@@ -477,8 +507,12 @@ end ;UpdateECGOrderDetailValueCd
 subroutine SetupNewECGOrder(vPersonID,vEncntrID)
  
 	declare vReturnSuccess = i2 with noconstant(FALSE), protect
-	declare ecg_ordrequest_template = vc with constant("cust_script:ecg_ordrequest.json")
+	declare ecg_ordrequest_template = vc with noconstant("cust_script:ed_ecg_ordrequest.json")
 	declare ecg_ordrequest_line_in = vc with noconstant(" ")
+ 
+ 	if (isPatientInED(vEncntrID) = FALSE)
+ 		set ecg_ordrequest_template = "cust_script:ecg_ordrequest.json"
+ 	endif
  
 	free define rtl3
 	define rtl3 is ecg_ordrequest_template
