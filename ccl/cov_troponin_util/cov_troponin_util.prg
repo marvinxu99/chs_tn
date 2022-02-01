@@ -1251,6 +1251,8 @@ subroutine GetResultbyCEventID(vCEventID)
 	detail
 		if (trim(ce.result_val) = "<6")
 			rResultVal = 6.0
+		elseif (trim(ce.result_val) = ">10000")
+			rResultVal = 10000.0
 		else
 			rResultVal = cnvtreal(ce.result_val)
 		endif
