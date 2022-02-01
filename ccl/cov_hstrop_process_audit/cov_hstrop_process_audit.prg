@@ -30,12 +30,13 @@ Mod 	Mod Date	  Developer				      Comment
 drop program cov_hstrop_process_audit:dba go
 create program cov_hstrop_process_audit:dba
  
-prompt
+prompt 
 	"Output to File/Printer/MINE" = "MINE"   ;* Enter or select the printer or file name to send this report to.
 	, "Start Date Time" = "SYSDATE"
 	, "End Date and Time" = "SYSDATE"
- 
-with OUTDEV, BEG_DT_TM, END_DT_TM
+	, "FIN" = "" 
+
+with OUTDEV, BEG_DT_TM, END_DT_TM, FIN
  
  
 call echo(build("loading script:",curprog))
@@ -73,6 +74,7 @@ record t_rec
 	 2 outdev		= vc
 	 2 beg_dt_tm	= dq8
 	 2 end_dt_tm	= dq8
+	 2 fin = vc
 	1 files
 	 2 records_attachment		= vc
 	1 dminfo
@@ -82,6 +84,9 @@ record t_rec
 	 2 run_dt_tm 				= dq8
 	 2 hsTrop_cd				= f8
 	 2 order_dt_tm_margin_min	= i4
+	 2 fin						= vc
+	 2 encntr_id 				= f8
+	 2 encntr_operator			= vc
 	1 dates
 	 2 start_dt_tm	= dq8
 	 2 stop_dt_tm	= dq8
@@ -154,6 +159,7 @@ set t_rec->files.records_attachment = concat(trim(cnvtlower(curprog)),"_rec_",tr
 set t_rec->prompts.outdev    = $OUTDEV
 set t_rec->prompts.beg_dt_tm = cnvtdatetime($BEG_DT_TM)
 set t_rec->prompts.end_dt_tm = cnvtdatetime($END_DT_TM)
+set t_rec->prompts.fin 		 = $FIN
  
 set t_rec->cons.run_dt_tm		= cnvtdatetime(curdate,curtime3)
  
@@ -165,7 +171,27 @@ set t_rec->dates.stop_dt_tm = t_rec->prompts.end_dt_tm
  
 set t_rec->dates.last_ops_date = GethsTropOpsDate(concat(trim(cnvtupper("cov_hstrop_process_ops")),":","start_dt_tm"))
 set t_rec->dates.last_ops_date_vc = format(t_rec->dates.last_ops_date,";;q")
- 
+
+if (t_rec->prompts.fin > " ")
+	select into "nl:"
+	from encntr_alias ea
+	plan ea
+		where ea.alias = t_rec->prompts.fin
+		and   ea.active_ind = 1
+		and   ea.encntr_alias_type_cd = value(uar_get_code_by("MEANING",319,"FIN NBR"))
+		and   cnvtdatetime(curdate,curtime3) between ea.beg_effective_dt_tm and ea.end_effective_dt_tm
+	detail
+		t_rec->cons.fin = ea.alias
+		t_rec->cons.encntr_id = ea.encntr_id
+	with nocounter
+endif
+
+if (t_rec->cons.encntr_id > 0.0)
+	set t_rec->cons.encntr_operator = "="
+else
+	set t_rec->cons.encntr_operator = "!="
+endif
+
 call writeLog(build2("* END   Custom Section  ************************************"))
 call writeLog(build2("************************************************************"))
  
@@ -193,6 +219,7 @@ plan ce
 	and   ce.event_tag        != "Date\Time Correction"
 join e
 	where e.encntr_id = ce.encntr_id
+	and operator(e.encntr_id, 	t_rec->cons.encntr_operator, 	t_rec->cons.encntr_id)
 join p
 	where p.person_id = e.person_id
 join ceb
