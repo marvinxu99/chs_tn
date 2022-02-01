@@ -259,7 +259,7 @@ subroutine AddAlgorithmCEResult(vCEventID)
 			cerequest->ensure_type2 = 1
  
 			stat = alterlist(cerequest->clin_event.string_result,1)
-			cerequest->clin_event.string_result.string_result_text = hsTroponin_data->algorithm_info.current_normalcy
+			cerequest->clin_event.string_result.string_result_text = hsTroponin_data->algorithm_info.current_full_normalcy
 			cerequest->clin_event.string_result.string_result_format_cd = uar_get_code_by("MEANING",14113,"ALPHA")
 			cerequest->clin_event.string_result.last_norm_dt_tm_ind = 1
 			cerequest->clin_event.string_result.feasible_ind_ind = 1
