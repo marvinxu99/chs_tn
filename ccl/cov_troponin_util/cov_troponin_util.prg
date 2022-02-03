@@ -984,7 +984,7 @@ end ;GethsTropAlgListByEncntrID
  
 subroutine SetNormalcybyMilestone(vMilestone)
 	declare vReturnNormalcy = vc with noconstant("ERROR"), protect
- 	declare vMilestoneDisplay = vc with noconstat("ERROR"), protect
+ 	declare vMilestoneDisplay = vc with noconstant("ERROR"), protect
  	
 	if (validate(hsTroponin_data) = FALSE)
 		return (vReturnNormalcy)
