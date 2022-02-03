@@ -82,6 +82,8 @@ declare GetEncntrIDbyOrderID(vOrderID=f8) = f8 with copy, persist
  
 declare GetResultbyCEventID(vCEventID=f8) = f8 with copy, persist
 declare GetResultTextbyCEventID(vCEventID=f8) = vc with copy, persist
+declare GetResultTextbyEventID(vEventID=f8) = vc with copy, persist
+
 declare SetNormalcybyMilestone(vMilestone=vc) = vc with copy, persist
 declare UpdateCurrentPhase(vCurrentPhase=vc) = vc with copy, persist
  
@@ -1279,6 +1281,24 @@ subroutine GetResultTextbyCEventID(vCEventID)
 	return(rResultValText)
 end ;GetResultTextbyCEventID
 
+subroutine GetResultTextbyEventID(vEventID)
+ 
+	declare rResultValText = vc with noconstant(" "), protect
+ 
+	select into "nl:"
+	from
+		clinical_event ce
+	plan ce
+		where ce.event_id = vEventID
+		and   ce.event_id > 0.0
+		and   ce.valid_from_dt_tm <= cnvtdatetime(sysdate)
+		and   ce.valid_until_dt_tm >= cnvtdatetime(sysdate)
+	detail
+		rResultValText = trim(ce.result_val)
+	with nocounter
+ 
+	return(rResultValText)
+end ;GetResultTextbyEventID
  
  
 subroutine GetParentEventIDbyCEventID(vCEventID)
