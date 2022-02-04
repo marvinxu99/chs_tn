@@ -1259,7 +1259,7 @@ subroutine GetResultbyCEventID(vCEventID)
 			rResultVal = cnvtreal(ce.result_val)
 		endif
 	with nocounter
- 
+ 	
 	return(rResultVal)
 end ;GetResultbyCEventID
 
