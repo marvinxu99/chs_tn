@@ -149,7 +149,7 @@ if (t_rec->algorithm_data.linked_eventid = 0.0)
  	call add_log_message(GetResultTextbyCEventID(GethsTropCEEventIDbyEventID(hsTroponin_data->initial.result_event_id)))
  	call add_log_message(GetResultTextbyEventID(hsTroponin_data->initial.result_event_id))
  	call add_log_message(GetResultTextbyCEventID(t_rec->patient.clinical_event_id))
- 	
+ 	call add_log_message(cnvtstring(t_rec->patient.clinical_event_id))
  	;process the result by calculating detla and running through algorithm
  	set hsTroponin_data->initial.normalcy = SetNormalcybyMilestone(value(hsTroponin_data->algorithm_info.current_phase))
  

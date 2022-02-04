@@ -151,6 +151,7 @@ subroutine GethsTropCEEventIDbyEventID(vEventID)
 								)
 		and   ce3.valid_until_dt_tm >= cnvtdatetime(curdate, curtime3)
 		and   ce3.event_tag        != "Date\Time Correction"
+		and   ce3.view_level = 1
 	order by
 		 ce3.event_id
 		,ce3.valid_from_dt_tm
