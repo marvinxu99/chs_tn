@@ -996,10 +996,17 @@ subroutine SetNormalcybyMilestone(vMilestone)
 			if (hsTroponin_data->algorithm_info.subtype = "GREATER")
 				;ED >3 Hours Algoritm
 				if (cnvtupper(vMilestone) = "INITIAL")
- 				 if (GetResultTextbyCEventID(GethsTropCEEventIDbyEventID(hsTroponin_data->initial.result_event_id)) = "<6")
+ 				 if (validate(t_rec->patient.clinical_event_id))
+ 				 	if (GetResultTextbyCEventID(t_rec->patient.clinical_event_id) = "<6")
+	 				 	set vReturnNormalcy = "RULED OUT"
+						set hsTroponin_data->one_hour.needed_ind = 0
+						set hsTroponin_data->three_hour.needed_ind = 0
+ 				 	endif
+ 				 elseif (GetResultTextbyCEventID(GethsTropCEEventIDbyEventID(hsTroponin_data->initial.result_event_id)) = "<6")
  				 	set vReturnNormalcy = "RULED OUT"
 					set hsTroponin_data->one_hour.needed_ind = 0
-						set hsTroponin_data->three_hour.needed_ind = 0
+					set hsTroponin_data->three_hour.needed_ind = 0
+ 				 
  				 else
 					if (hsTroponin_data->initial.result_val < 6)
 						set vReturnNormalcy = "RULED OUT"
