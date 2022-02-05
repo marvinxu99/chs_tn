@@ -1001,12 +1001,28 @@ subroutine SetNormalcybyMilestone(vMilestone)
 	 				 	set vReturnNormalcy = "RULED OUT"
 						set hsTroponin_data->one_hour.needed_ind = 0
 						set hsTroponin_data->three_hour.needed_ind = 0
- 				 	endif
+					else
+						if (hsTroponin_data->initial.result_val < 6)
+							set vReturnNormalcy = "RULED OUT"
+							set hsTroponin_data->one_hour.needed_ind = 0
+							set hsTroponin_data->three_hour.needed_ind = 0
+							;0A
+						elseif ((hsTroponin_data->initial.result_val >= 6) and (hsTroponin_data->initial.result_val <= 51))
+							set vReturnNormalcy = "INDETERMINATE"
+							set hsTroponin_data->one_hour.needed_ind = 1
+							set hsTroponin_data->three_hour.needed_ind = 0
+							;0B and 0C
+						elseif (hsTroponin_data->initial.result_val >= 52)
+							set vReturnNormalcy = "ABNORMAL"
+							set hsTroponin_data->one_hour.needed_ind = 1
+							set hsTroponin_data->three_hour.needed_ind = 0
+							;0D
+	 				 	endif
+	 				 endif
  				 elseif (GetResultTextbyCEventID(GethsTropCEEventIDbyEventID(hsTroponin_data->initial.result_event_id)) = "<6")
  				 	set vReturnNormalcy = "RULED OUT"
 					set hsTroponin_data->one_hour.needed_ind = 0
 					set hsTroponin_data->three_hour.needed_ind = 0
- 				 
  				 else
 					if (hsTroponin_data->initial.result_val < 6)
 						set vReturnNormalcy = "RULED OUT"
