@@ -988,6 +988,7 @@ end ;GethsTropAlgListByEncntrID
 subroutine SetNormalcybyMilestone(vMilestone)
 	declare vReturnNormalcy = vc with noconstant("ERROR"), protect
  	declare vMilestoneDisplay = vc with noconstant("ERROR"), protect
+ 	declare vCollectDtTm = vc with noconstant("ERROR"), protect
  	
 	if (validate(hsTroponin_data) = FALSE)
 		return (vReturnNormalcy)
@@ -1249,14 +1250,49 @@ subroutine SetNormalcybyMilestone(vMilestone)
 
 	case (cnvtupper(vMilestone))
 		of "INITIAL":	set vMilestoneDisplay = "0h"
+						set vCollectDtTm = format(hsTroponin_data->initial.collect_dt_tm,"dd-mmm-yyyy hh:mm:ss zzz;;q")
 		of "ONEHOUR":	set vMilestoneDisplay = "1h"
+						set vCollectDtTm = format(hsTroponin_data->one_hour.collect_dt_tm,"dd-mmm-yyyy hh:mm:ss zzz;;q")
 		of "THREEHOUR":	set vMilestoneDisplay = "3h"
+						set vCollectDtTm = format(hsTroponin_data->three_hour.collect_dt_tm,"dd-mmm-yyyy hh:mm:ss zzz;;q")
 	endcase
+	
+	select into "nl:"
+	from
+		clinical_event ce
+	plan ce
+		where ce.event_id in(
+								 hsTroponin_data->initial.result_event_id
+								,hsTroponin_data->one_hour.result_event_id
+								,hsTroponin_data->three_hour.result_event_id
+								)
+		and   ce.valid_from_dt_tm <= cnvtdatetime(curdate,curtime3)
+		and	  ce.result_status_cd in(
+									  value(uar_get_code_by("MEANING",8,"AUTH"))
+									 ,value(uar_get_code_by("MEANING",8,"MODIFIED"))
+									 ,value(uar_get_code_by("MEANING",8,"ALTERED"))
+								)
+		and   ce.valid_until_dt_tm >= cnvtdatetime(curdate, curtime3)
+		and   ce.event_tag        != "Date\Time Correction"
+		and   ce.view_level = 1
+	order by
+		 ce.event_id
+		,ce.valid_from_dt_tm
+	head ce.event_id
+		case (ce.event_id)
+		of hsTroponin_data->initial.result_event_id:	
+			vCollectDtTm = format(ce.valid_from_dt_tm,"dd-mmm-yyyy hh:mm:ss zzz;;q")
+		of hsTroponin_data->one_hour.result_event_id:	
+			vCollectDtTm = format(ce.valid_from_dt_tm,"dd-mmm-yyyy hh:mm:ss zzz;;q")
+		of hsTroponin_data->three_hour.result_event_id:	
+			vCollectDtTm = format(ce.valid_from_dt_tm,"dd-mmm-yyyy hh:mm:ss zzz;;q")
+	endcase
+	with nocounter
 	
 	set hsTroponin_data->algorithm_info.current_full_normalcy = concat(
 																		 	 hsTroponin_data->algorithm_info.current_full_normalcy
 																			," ["
-																			,vMilestoneDisplay
+																			,vCollectDtTm
 																			,"]"
 																	   )
 																		
