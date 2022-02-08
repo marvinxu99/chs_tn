@@ -82,6 +82,12 @@ record t_rec
 	 2 start_dt_tm	= dq8
 	 2 stop_dt_tm	= dq8
 	1 ord_process_ind = i2
+	1 task_cnt = i2
+	1 task_qual[*]
+	 2 task_id = f8
+	 2 current_task_dt_tm = dq8
+	 2 order_start_dt_tm = dq8
+	 2 new_task_dt_tm = dq8
 	1 event_cnt     = i4
 	1 event_list[*]
 	 2 event_id		= f8
@@ -388,6 +394,70 @@ for (ii=1 to t_rec->event_cnt)
 endfor
  
 call writeLog(build2("* END   Creating Required Orders ***************************"))
+call writeLog(build2("************************************************************"))
+
+call writeLog(build2("************************************************************"))
+call writeLog(build2("* START Finding Tasks **************************************"))
+
+select into "nl:"
+from
+	 orders o
+	,order_catalog oc
+	,order_container_r ocr
+	,task_activity ta
+	,person p
+	,encounter e
+	,encntr_alias ea
+plan oc
+	where oc.description = "Troponin HS"
+join o
+	where o.catalog_cd = oc.catalog_cd
+	and   o.order_status_cd in(value(uar_get_code_by("MEANING",6004,"ORDERED")))
+join ocr
+	where ocr.order_id = o.order_id
+join ta
+	where ta.container_id = ocr.container_id
+	and   ta.task_dt_tm >= cnvtdatetime(sysdate)
+	and   ta.task_status_cd in(
+										value(uar_get_code_by("MEANING",79,"PENDING"))
+									)
+join p
+	where p.person_id = ta.person_id
+join e
+	where e.encntr_id = ta.encntr_id
+join ea
+	where ea.encntr_id = ta.encntr_id
+	and   ea.active_ind = 1
+	and   ea.encntr_alias_type_cd = value(uar_get_code_by("MEANING",319,"FIN NBR"))
+	and   cnvtdatetime(curdate,curtime3) between ea.beg_effective_dt_tm and ea.end_effective_dt_tm
+order by
+	ta.task_id
+head report
+	null
+head ta.task_id
+	if (cnvtlookbehind("30,MIN",cnvtdatetime(ta.scheduled_dt_tm)) < cnvtdatetime(sysdate))
+		t_rec->task_cnt = (t_rec->task_cnt + 1)
+		stat = alterlist(t_rec->task_qual,t_rec->task_cnt)
+		t_rec->task_qual[t_rec->task_cnt].task_id = ta.task_id
+		t_rec->task_qual[t_rec->task_cnt].current_task_dt_tm = ta.task_dt_tm
+		t_rec->task_qual[t_rec->task_cnt].new_task_dt_tm = cnvtdatetime(sysdate)
+		call writeLog(build("person=",p.name_full_formatted))
+		call writeLog(build("FIN=",ea.alias))
+		call writeLog(build("location=",uar_get_code_display(e.loc_nurse_unit_cd)))
+		call writeLog(build("scheduled_dt_tm=",format(ta.scheduled_dt_tm,"dd-mmm-yyyy hh:mm:ss zzz;;q")))
+		call writeLog(build("current_dt_tm=",format(sysdate,"dd-mmm-yyyy hh:mm:ss zzz;;q")))
+		call writeLog(build("difference=",datetimediff(ta.scheduled_dt_tm,cnvtdatetime(sysdate),4)))
+	endif
+with nocounter
+
+for (i=1 to t_rec->task_cnt)
+	set t_rec->ord_process_ind = 1
+	update into task_activity set task_dt_tm = cnvtdatetime(t_rec->task_qual[i].new_task_dt_tm)
+	where task_id = t_rec->task_qual[i].task_id
+	commit 
+endfor
+
+call writeLog(build2("* END   Finding Tasks **************************************"))
 call writeLog(build2("************************************************************"))
  
 call writeLog(build2("************************************************************"))
