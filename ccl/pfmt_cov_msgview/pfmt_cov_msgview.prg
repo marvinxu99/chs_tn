@@ -27,7 +27,7 @@ Mod 	Mod Date	  Developer				      Comment
 drop program pfmt_cov_msgview:dba go
 create program pfmt_cov_msgview:dba
 
-%i cust_scirpt:cov_script_logging.inc  
+%i cust_script:cov_script_logging.inc  
 
 free set t_rec
 record t_rec
