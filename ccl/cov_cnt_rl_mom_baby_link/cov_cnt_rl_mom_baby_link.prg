@@ -1,3 +1,29 @@
+/*****************************************************************************
+  Covenant Health Information Technology
+  Knoxville, Tennessee
+******************************************************************************
+ 
+  Author:             Chad Cummings
+  Date Written:      
+  Solution:
+  Source file name:   cov_cnt_rl_mom_baby_link.prg
+  Object name:        cov_cnt_rl_mom_baby_link
+  Request #:
+ 
+  Program purpose:
+ 
+  Executing from:     CCL
+ 
+  Special Notes:      copied from lh_cnt_rl_mom_baby_link
+ 
+******************************************************************************
+  GENERATED MODIFICATION CONTROL LOG
+******************************************************************************
+ 
+Mod   Mod Date    Developer              Comment
+---   ----------  --------------------  --------------------------------------
+001   			  Chad Cummings			initial build
+******************************************************************************/
 DROP PROGRAM cov_cnt_rl_mom_baby_link :dba GO
 CREATE PROGRAM cov_cnt_rl_mom_baby_link :dba
  DECLARE script_version = vc WITH protect ,noconstant ("002 12/14/12 cerpdj" )
@@ -19,7 +45,7 @@ CREATE PROGRAM cov_cnt_rl_mom_baby_link :dba
 		,person p2
 		,encounter e
 	plan p1
-		where p1.person_id = 20735788
+		where p1.person_id = link_personid
 	join ppr
 		where ppr.person_id = p1.person_id
 		and   ppr.person_reltn_cd in(value(uar_get_code_by("DISPLAYKEY",40,"MOTHER")))
