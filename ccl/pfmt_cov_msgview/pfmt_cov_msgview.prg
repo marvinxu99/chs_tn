@@ -36,6 +36,7 @@ record t_rec
 	1 filename_a      = vc
 	1 filename_b    = vc
 	1 filename_c = vc
+	1 server = i4
 	1 audit_cnt = i4
 	1 audit[*]
 	 2 section = vc
@@ -50,10 +51,12 @@ set t_rec->filename_a = concat(	 "cclscratch:"
 								,trim(cnvtstring(reqinfo->updt_req))
 								,"_"
 								,trim(format(sysdate,"yyyy_mm_dd_hh_mm_ss;;d")),".dat")
+set t_rec->server = curserver
+
+call log_message(concat("debug start execution..."), 0)
+call log_message(build2("curserver=",t_rec->server), 0)
+
 call echojson(t_rec, t_rec->filename_a , 0) 
-
-call log_message(concat(cnvtlower(curprog)," debug start execution..."), 0)
-
 if (validate(reqinfo))
 	call log_message(concat(cnvtrectojson(reqinfo)), 0)
 	call echojson(reqinfo, t_rec->filename_a , 1) 
