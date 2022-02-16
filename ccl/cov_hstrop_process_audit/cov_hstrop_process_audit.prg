@@ -112,6 +112,7 @@ record t_rec
 	 	3 order_id		= f8
 	 	3 collect_dt_tm = dq8
 	 	3 result_val	= f8
+	 	3 result_val2 = vc
 	 	3 result_event_id = f8
 	 	3 normalcy     = vc
 	 	3 order_name   = vc
@@ -119,6 +120,8 @@ record t_rec
 	 	3 accession = vc
 	 	3 order_status = vc
 	 	3 order_update_prsnl = vc
+	 	3 ecg_order_id = f8
+	 	3 ecg_order_table = vc
 	 2 one_hour
 	    3 needed_ind 	= i4
 	 	3 order_id 		= f8
@@ -134,6 +137,8 @@ record t_rec
 	 	3 accession = vc
 	 	3 order_status = vc
 	 	3 order_update_prsnl = vc
+	 	3 ecg_order_id = f8
+	 	3 ecg_order_table = vc
 	 2 three_hour
 	    3 needed_ind 	= i4
 	 	3 order_id 		= f8
@@ -149,6 +154,8 @@ record t_rec
 	 	3 accession = vc
 	 	3 order_update_prsnl = vc
 	 	3 order_status = vc
+	 	3 ecg_order_id = f8
+	 	3 ecg_order_table = vc
 ) with protect
  
 declare html_output = gvc with noconstant("")
@@ -284,16 +291,19 @@ for (i=1 to t_rec->event_cnt)
 		set t_rec->event_list[i].initial.order_name				= GetOrderSynonymbyOrderID(hsTroponin_data->initial.order_id)
 		set t_rec->event_list[i].initial.powerplan_name			= GetOrderPowerPlanbyOrderID(hsTroponin_data->initial.order_id)
  		set t_rec->event_list[i].initial.result_event_id		= hsTroponin_data->initial.result_event_id
+ 		set t_rec->event_list[i].initial.ecg_order_id			= hsTroponin_data->initial.ecg_order_id
  
 		set t_rec->event_list[i].one_hour.result_val			= hsTroponin_data->one_hour.result_val
 		set t_rec->event_list[i].one_hour.delta					= hsTroponin_data->one_hour.delta
 		set t_rec->event_list[i].one_hour.normalcy				= hsTroponin_data->one_hour.normalcy
- 		set t_rec->event_list[i].one_hour.result_event_id		= hsTroponin_data->initial.result_event_id
+ 		set t_rec->event_list[i].one_hour.result_event_id		= hsTroponin_data->one_hour.result_event_id
+ 		set t_rec->event_list[i].one_hour.ecg_order_id			= hsTroponin_data->one_hour.ecg_order_id
  
 		set t_rec->event_list[i].three_hour.result_val			= hsTroponin_data->three_hour.result_val
 		set t_rec->event_list[i].three_hour.delta				= hsTroponin_data->three_hour.delta
 		set t_rec->event_list[i].three_hour.normalcy			= hsTroponin_data->three_hour.normalcy
-		set t_rec->event_list[i].three_hour.result_event_id		= hsTroponin_data->initial.result_event_id
+		set t_rec->event_list[i].three_hour.result_event_id		= hsTroponin_data->three_hour.result_event_id
+		set t_rec->event_list[i].three_hour.ecg_order_id		= hsTroponin_data->initial.ecg_order_id
 	endif
  
 	select into "nl:"
@@ -357,7 +367,9 @@ else
 	go to exit_script
 endif
 
-
+for (i=1 to t_rec->event_cnt)
+	set t_rec->event_list[i].initial.result_val2 = GetResultTextbyEventID(t_rec->event_list[i].initial.result_event_id)
+endfor
  
 select into "nl:"
 	person_id = t_rec->event_list[d1.seq].person_id
@@ -369,6 +381,9 @@ from
 	,clinical_event ce
 	,(dummyt d2)
 plan d1
+	;where t_rec->event_list[d1.seq].algorithm.subtype = "GREATER"
+	;and t_rec->event_list[d1.seq].initial.result_val2 = "<6"
+	;and t_rec->event_list[d1.seq].initial.normalcy = "INDETERMINATE"
 join e
 	where e.encntr_id = t_rec->event_list[d1.seq].encntr_id
 join p
@@ -382,7 +397,8 @@ join ea
 	and   ea.encntr_alias_type_cd = value(uar_get_code_by("MEANING",319,"FIN NBR"))
 	and   cnvtdatetime(curdate,curtime3) between ea.beg_effective_dt_tm and ea.end_effective_dt_tm
 order by
-	 p.name_full_formatted
+	 ce.event_end_dt_tm desc
+	,p.name_full_formatted
 	,p.person_id
 	,e.encntr_id
 	,ce.event_end_dt_tm desc
@@ -398,7 +414,8 @@ head report
 	patient_table = build2(patient_table,"</tr>")
 	i = 0
 	k = 0
-head e.encntr_id
+;head e.encntr_id
+detail
 	k = 0
 	i = t_rec->event_list[d1.seq].result_cnt
 	patient_table = build2(patient_table,"<tr>")
@@ -408,7 +425,7 @@ head e.encntr_id
 	patient_table = build2(patient_table,"<td rowspan=",trim(cnvtstring(i)),">",uar_get_code_display(e.loc_nurse_unit_cd),"</td>")
 	patient_table = build2(patient_table,"<td rowspan=",trim(cnvtstring(i)),">",ea.alias,
 		"(",uar_get_code_display(e.encntr_status_cd),")</td>")
-detail
+;detail
 	if (k>0)
 		patient_table = build2(patient_table,"<tr>")
 	endif
@@ -429,15 +446,19 @@ detail
 	patient_table = build2(patient_table,"<td>",t_rec->event_list[d1.seq].algorithm.current_normalcy)
  
 	patient_table = build2(patient_table,"<br>",t_rec->event_list[d1.seq].initial.result_val)
- 
+	patient_table = build2(patient_table," (",t_rec->event_list[d1.seq].initial.result_val2,")")
+ 	patient_table = build2(patient_table," [",t_rec->event_list[d1.seq].initial.normalcy,"]")
+ 	
 	if (t_rec->event_list[d1.seq].one_hour.result_val > 0)
 		patient_table = build2(patient_table,"<br>",t_rec->event_list[d1.seq].one_hour.result_val)
 		patient_table = build2(patient_table," [",t_rec->event_list[d1.seq].one_hour.delta,"]")
+		patient_table = build2(patient_table," [",t_rec->event_list[d1.seq].one_hour.normalcy,"]")
 	endif
  
 	if (t_rec->event_list[d1.seq].three_hour.result_val > 0)
 		patient_table = build2(patient_table,"<br>",t_rec->event_list[d1.seq].three_hour.result_val)
 		patient_table = build2(patient_table," [",t_rec->event_list[d1.seq].three_hour.delta,"]")
+		patient_table = build2(patient_table," [",t_rec->event_list[d1.seq].three_hour.normalcy,"]")
 	endif
  
 	patient_table = build2(patient_table,"</td>")

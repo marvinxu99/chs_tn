@@ -6,8 +6,8 @@
 	Author:				Chad Cummings
 	Date Written:
 	Solution:
-	Source file name:	cov_hstrop_process_audit.prg
-	Object name:		cov_hstrop_process_audit
+	Source file name:	cov_hstrop_process_report.prg
+	Object name:		cov_hstrop_process_report
 	Request #:
  
 	Program purpose:
@@ -114,6 +114,8 @@ record t_rec
 	 	3 result_val	= f8
 	 	3 result_val2 = vc
 	 	3 result_event_id = f8
+	 	3 result_dt_tm = dq8
+	 	3 result_hr	   = i2
 	 	3 normalcy     = vc
 	 	3 order_name   = vc
 	 	3 powerplan_name = vc
@@ -132,6 +134,8 @@ record t_rec
 		3 order_now_ind = i4
 		3 result_val	= f8
 		3 result_event_id = f8
+		3 result_dt_tm = dq8
+		3 result_hr	   = i2
 		3 delta			= f8
 	 	3 normalcy      = vc
 	 	3 accession = vc
@@ -150,13 +154,41 @@ record t_rec
 		3 result_val	= f8
 		3 delta			= f8
 		3 result_event_id = f8
+		3 result_dt_tm = dq8
+		3 result_hr	   = i2
 	 	3 normalcy      = vc
 	 	3 accession = vc
 	 	3 order_update_prsnl = vc
 	 	3 order_status = vc
 	 	3 ecg_order_id = f8
 	 	3 ecg_order_table = vc
+	 1 ruled_out_cnt = i4
+	 1 ruled_out_qual[*]
+	  2 person_id = f8
+	  2 encntr_id = f8
+	  2 ruled_out_milestone = vc
+	  2 ruled_out_dt_tm = dq8
+	  2 ruled_out_hr = i2
 ) with protect
+
+declare GetResultDtTmbyEventID(vEventID=f8) = dq8 with copy, persist
+subroutine GetResultDtTmbyEventID(vEventID)
+ 
+	declare rResultDtTm = dq8 with noconstant(0.0), protect
+ 
+	select into "nl:"
+	from clinical_event ce where ce.event_id = vEventID
+							and ce.valid_from_dt_tm <= cnvtdatetime(sysdate)
+							and ce.valid_until_dt_tm >= cnvtdatetime(sysdate)
+							and ce.view_level = 1
+	detail
+		rResultDtTm = ce.valid_from_dt_tm
+	with nocounter
+ 
+	
+	return (rResultDtTm)
+ 
+end ;GetCollectDtTmbyEventID
  
 declare html_output = gvc with noconstant("")
 declare patient_table = vc with noconstant("")
@@ -178,6 +210,9 @@ set t_rec->dates.stop_dt_tm = t_rec->prompts.end_dt_tm
  
 set t_rec->dates.last_ops_date = GethsTropOpsDate(concat(trim(cnvtupper("cov_hstrop_process_ops")),":","start_dt_tm"))
 set t_rec->dates.last_ops_date_vc = format(t_rec->dates.last_ops_date,";;q")
+
+declare i = i4 with noconstant(0), protect
+declare j = i4 with noconstant(0), protect
 
 if (t_rec->prompts.fin > " ")
 	select into "nl:"
@@ -304,6 +339,19 @@ for (i=1 to t_rec->event_cnt)
 		set t_rec->event_list[i].three_hour.normalcy			= hsTroponin_data->three_hour.normalcy
 		set t_rec->event_list[i].three_hour.result_event_id		= hsTroponin_data->three_hour.result_event_id
 		set t_rec->event_list[i].three_hour.ecg_order_id		= hsTroponin_data->initial.ecg_order_id
+		
+		
+		set t_rec->event_list[i].initial.collect_dt_tm = GetCollectDtTmbyEventID(t_rec->event_list[i].initial.result_event_id)
+		set t_rec->event_list[i].one_hour.collect_dt_tm = GetCollectDtTmbyEventID(t_rec->event_list[i].one_hour.result_event_id)
+		set t_rec->event_list[i].three_hour.collect_dt_tm = GetCollectDtTmbyEventID(t_rec->event_list[i].three_hour.result_event_id)
+		
+		set t_rec->event_list[i].initial.result_dt_tm = GetResultDtTmbyEventID(t_rec->event_list[i].initial.result_event_id)
+		set t_rec->event_list[i].one_hour.result_dt_tm = GetResultDtTmbyEventID(t_rec->event_list[i].one_hour.result_event_id)
+		set t_rec->event_list[i].three_hour.result_dt_tm = GetResultDtTmbyEventID(t_rec->event_list[i].three_hour.result_event_id)
+		
+		set t_rec->event_list[i].initial.result_hr = hour(t_rec->event_list[i].initial.result_dt_tm)
+		set t_rec->event_list[i].one_hour.result_hr = hour(t_rec->event_list[i].one_hour.result_dt_tm)
+		set t_rec->event_list[i].three_hour.result_hr = hour(t_rec->event_list[i].three_hour.result_dt_tm)
 	endif
  
 	select into "nl:"
@@ -333,25 +381,111 @@ for (i=1 to t_rec->event_cnt)
 																uar_get_code_display(o.order_status_cd)," (",
 																uar_get_code_display(o.dept_status_cd),")")
 		endcase
+		
+	
 endfor
- 
+
+
+for (i=1 to t_rec->event_cnt)
+	if (
+				(t_rec->event_list[i].initial.normalcy in("RULED OUT","NO INJURY"))
+			or	(t_rec->event_list[i].one_hour.normalcy in("RULED OUT","NO INJURY"))
+			or	(t_rec->event_list[i].three_hour.normalcy in("RULED OUT","NO INJURY"))
+		)
+
+		set j = (j + 1)
+		set stat = alterlist(t_rec->ruled_out_qual,j)
+		set t_rec->ruled_out_qual[j].encntr_id = t_rec->event_list[i].encntr_id
+		set t_rec->ruled_out_qual[j].person_id = t_rec->event_list[i].person_id
+		
+		if (t_rec->event_list[i].initial.normalcy in("RULED OUT","NO INJURY"))
+			set t_rec->ruled_out_qual[j].ruled_out_milestone = "INIITIAL"
+			set t_rec->ruled_out_qual[j].ruled_out_dt_tm = t_rec->event_list[i].initial.result_dt_tm
+			set t_rec->ruled_out_qual[j].ruled_out_hr = t_rec->event_list[i].initial.result_hr
+		elseif (t_rec->event_list[i].one_hour.normalcy in("RULED OUT","NO INJURY"))
+			set t_rec->ruled_out_qual[j].ruled_out_milestone = "ONE HOUR"
+			set t_rec->ruled_out_qual[j].ruled_out_dt_tm = t_rec->event_list[i].one_hour.result_dt_tm
+			set t_rec->ruled_out_qual[j].ruled_out_hr = t_rec->event_list[i].one_hour.result_hr
+		elseif (t_rec->event_list[i].three_hour.normalcy in("RULED OUT","NO INJURY"))
+			set t_rec->ruled_out_qual[j].ruled_out_milestone = "THREE HOUR"
+			set t_rec->ruled_out_qual[j].ruled_out_dt_tm = t_rec->event_list[i].three_hour.result_dt_tm
+			set t_rec->ruled_out_qual[j].ruled_out_hr = t_rec->event_list[i].three_hour.result_hr
+		endif
+	endif
+	set t_rec->ruled_out_cnt = j
+endfor
+
+
 call writeLog(build2("* END   Getting hsTroponin Algorithms on active patients ***"))
 call writeLog(build2("************************************************************"))
 
 for (i=1 to t_rec->event_cnt)
 	set t_rec->event_list[i].initial.result_val2 = GetResultTextbyEventID(t_rec->event_list[i].initial.result_event_id)
 endfor
- 
+
 select into t_rec->prompts.outdev 
-	 location = uar_get_code_display(e.loc_nurse_unit_cd)
-	,fin = ea.alias
-	,name = p.name_full_formatted
+	 location = substring(1,15,uar_get_code_display(e.loc_nurse_unit_cd))
+	,fin = substring(1,15,ea.alias)
+	,name = substring(1,100,p.name_full_formatted)
+	,e.reg_dt_tm 
+	,e.disch_dt_tm
+	,encntr_type = substring(1,40,uar_get_code_display(e.encntr_type_cd))
+	,disch_disposition = substring(1,40,uar_get_code_display(e.disch_disposition_cd))
+	,milestone = substring(1,15,t_rec->ruled_out_qual[d1.seq].ruled_out_milestone)
+	,result_dt_tm = format(t_rec->ruled_out_qual[d1.seq].ruled_out_dt_tm,"dd-mmm-yyyy hh:mm:ss;;q")
+	,result_hr = t_rec->ruled_out_qual[d1.seq].ruled_out_hr
+	,person_id = t_rec->ruled_out_qual[d1.seq].person_id
+	,encntr_id = t_rec->ruled_out_qual[d1.seq].encntr_id
+from
+	(dummyt d1 with seq=t_rec->ruled_out_cnt)
+	,person p
+	,encounter e
+	,encntr_alias ea
+plan d1
+join e
+	where e.encntr_id = t_rec->ruled_out_qual[d1.seq].encntr_id
+join p
+	where p.person_id = e.person_id
+join ea
+	where ea.encntr_id = e.encntr_id
+	and   ea.active_ind = 1
+	and   ea.encntr_alias_type_cd = value(uar_get_code_by("MEANING",319,"FIN NBR"))
+	and   cnvtdatetime(curdate,curtime3) between ea.beg_effective_dt_tm and ea.end_effective_dt_tm
+order by
+	 p.name_full_formatted
+	,p.person_id
+	,e.encntr_id
+;with nocounter,nullreport,format,seperator=" ",format(date,"dd-mmm-yyyy hh:mm:ss;;q")
+with nocounter, pcformat (^"^, ^,^, 1,0), format, format=stream, formfeed=none  ;no padding
+/*
+select into t_rec->prompts.outdev 
+	 location = substring(1,15,uar_get_code_display(e.loc_nurse_unit_cd))
+	,fin = substring(1,15,ea.alias)
+	,name = substring(1,100,p.name_full_formatted)
+	,e.reg_dt_tm 
+	,e.disch_dt_tm
+	,encntr_type = substring(1,40,uar_get_code_display(e.encntr_type_cd))
+	,disch_disposition = substring(1,40,uar_get_code_display(e.disch_disposition_cd))
+	,0hr_status = substring(1,15,uar_get_code_display(o1.order_status_cd))
+	,0hr_coll_dttm = substring(1,25,format(t_rec->event_list[d1.seq].initial.collect_dt_tm,"dd-mmm-yyyy hh:mm:ss;;q"))
+	,0hr_result_dttm = substring(1,25,format(t_rec->event_list[d1.seq].initial.result_dt_tm,"dd-mmm-yyyy hh:mm:ss;;q"))
+	,0hr_hour = t_rec->event_list[d1.seq].initial.result_hr
+	,0hr_interp = substring(1,25,t_rec->event_list[d1.seq].initial.normalcy)
+	,1hr_status = substring(1,15,uar_get_code_display(o2.order_status_cd))
+	,1hr_coll_dttm = substring(1,25,format(t_rec->event_list[d1.seq].one_hour.collect_dt_tm,"dd-mmm-yyyy hh:mm:ss;;q"))
+	,1hr_result_dttm = substring(1,25,format(t_rec->event_list[d1.seq].one_hour.result_dt_tm,"dd-mmm-yyyy hh:mm:ss;;q"))
+	,1hr_hour = t_rec->event_list[d1.seq].one_hour.result_hr
+	,1hr_interp = substring(1,25,t_rec->event_list[d1.seq].one_hour.normalcy)
+	,3hr_status = substring(1,15,uar_get_code_display(o3.order_status_cd))
+	,3hr_coll_dttm = substring(1,25,format(t_rec->event_list[d1.seq].three_hour.collect_dt_tm,"dd-mmm-yyyy hh:mm:ss;;q"))
+	,3hr_result_dttm = substring(1,25,format(t_rec->event_list[d1.seq].three_hour.result_dt_tm,"dd-mmm-yyyy hh:mm:ss;;q"))
+	,3hr_hour = t_rec->event_list[d1.seq].three_hour.result_hr
+	,3hr_interp = substring(1,25,t_rec->event_list[d1.seq].three_hour.normalcy)
+	,alg_type = substring(1,10,t_rec->event_list[d1.seq].algorithm.type)
+	,alg_subtype = substring(1,10,t_rec->event_list[d1.seq].algorithm.subtype)
 	,initial_oid = t_rec->event_list[d1.seq].initial.order_id
-	,initial_status = uar_get_code_display(o1.order_status_cd)
 	,onehour_oid = t_rec->event_list[d1.seq].one_hour.order_id
-	,onehour_status = uar_get_code_display(o2.order_status_cd)
 	,threehour_oid = t_rec->event_list[d1.seq].three_hour.order_id
-	,threehour_status = uar_get_code_display(o3.order_status_cd)
 	,person_id = t_rec->event_list[d1.seq].person_id
 	,encntr_id = t_rec->event_list[d1.seq].encntr_id
 from
@@ -363,12 +497,7 @@ from
 	,orders o1
 	,orders o2
 	,orders o3
-
-	,(dummyt d2)
 plan d1
-	;where t_rec->event_list[d1.seq].algorithm.subtype = "GREATER"
-	;and t_rec->event_list[d1.seq].initial.result_val2 = "<6"
-	;and t_rec->event_list[d1.seq].initial.normalcy = "INDETERMINATE"
 join e
 	where e.encntr_id = t_rec->event_list[d1.seq].encntr_id
 join p
@@ -381,8 +510,6 @@ join o2
 	where o2.order_id = t_rec->event_list[d1.seq].one_hour.order_id
 join o3
 	where o3.order_id = t_rec->event_list[d1.seq].three_hour.order_id
-
-join d2
 join ea
 	where ea.encntr_id = e.encntr_id
 	and   ea.active_ind = 1
@@ -394,9 +521,9 @@ order by
 	,p.person_id
 	,e.encntr_id
 	,ce.event_end_dt_tm desc
-
-with nocounter,nullreport,format,seperator=" ",outerjoin=d2
- 
+;with nocounter,nullreport,format,seperator=" ",format(date,"dd-mmm-yyyy hh:mm:ss;;q")
+with nocounter, pcformat (^"^, ^,^, 1,0), format, format=stream, formfeed=none  ;no padding
+*/
  
 set reply->status_data.status = "S"
 #exit_script
