@@ -239,11 +239,14 @@ set stat = tdbexecute(600005, 600107, 1000001, "REC", 1000001_request, "REC", 10
 call echorecord(1000001_reply)
 */
 
+<<<<<<< HEAD
 ;adding pause to ensure results have posted.
 
 call pause(1)
 call pause(1)
 
+=======
+>>>>>>> 4c4c67bf63c96905dfd2ed5d575034d21ce03f66
 select into "nl:"
 from
 	clinical_event ce
