@@ -1,8 +1,8 @@
 DROP PROGRAM 3cov_ic_dot_report_layout :dba GO
 CREATE PROGRAM 3cov_ic_dot_report_layout :dba
- prompt
+ prompt 
 	"Output to File/Printer/MINE" = "MINE"   ;* Enter or select the printer or file name to send this report to.
-	, "From Date/Time" = ""
+	, "From Date/Time:" = ""
 	, "To Date/Time" = ""
 	, "Facility Name" = 0
 	, "Facility Wide Reporting" = ""
@@ -14,9 +14,9 @@ CREATE PROGRAM 3cov_ic_dot_report_layout :dba
 	, "File Location:" = "i:\custom\au"
 	, "DEBUG_IND" = 0
 	, "Denominator Data" = 0
-	, "Admission Count" = 0
- 
-with OUTDEV, FROMDATE, THRUDATE, FACILITY, FACWIDE, NHSNLOC, UNITS, MEDICATION, ROUTE,
+	, "Admission Count" = 0 
+
+with OUTDEV, FROMDATE, THRUDATE, FACILITY, FACWIDE, NHSNLOC, UNITS, MEDICATION, ROUTE, 
 	OUTPUT, FILE, DEBUG_IND, DENOM, ADMISSIONS
  EXECUTE reportrtl
  
