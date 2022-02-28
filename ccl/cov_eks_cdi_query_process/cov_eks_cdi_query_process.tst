@@ -2,6 +2,7 @@ declare link_encntrid = f8 go
 declare link_personid = f8 go
 declare link_clinicaleventid = f8 go
 
+/*
 set link_clinicaleventid =    3646128577 go;3618766902 go
 
 
@@ -14,4 +15,50 @@ detail
 	link_personid	= ce.person_id
 with nocounter go
 
+*/
+
 execute cov_eks_cdi_query_process link_clinicaleventid go
+/*
+execute mp_add_diagnosis 
+								^MINE^, 						;"Output to File/Printer/MINE" = "MINE"
+								15556726.00, 						;"person_id" = 0.0
+								16908168.00, 						;"user_id" = 0.0
+								124043747.00, 						;"encntr_id" = 0.
+								681274.0, 						;"ppr_code" = 0.0
+								13246904.0, 						;"nomenclature_id:" = 0.0
+								441.0, 							;"position_cd" = 0.0
+								13246904.0, 						;"originating_nomen_id" = 0.0
+								1,												;"bedrock_config_ind" = 0
+	 	 						89.0, 											;"add_type_cd:" = 0.0
+	 	 						674232.0, 										;"classification_cd:" = 0.0
+	 	 						0,												;"dupCheckOnly" = 0
+	 	 						3305.0											;"confirmation_cd:" = 0.0
+	 	 																		;"priority:" = 0
+	 	 																		;"trans_nomen_id" = 0.0
+	 	 																		;"diagnosis_display" = ""
+go	 	 						
+*/
+/*
+
+delete from problem where person_id = 15556726 go
+delete from diagnosis where person_id = 15556726 go
+
+ 1 PATIENT
+  2 ENCNTR_ID=F8   {124043747.0000000000                    }
+  2 PERSON_ID=F8   {15556726.0000000000                     }
+ 1 EVENT
+  2 CLINICAL_EVENT_ID=F8   {3646128577.0000000000                   }
+  2 EVENT_ID=F8   {3646128578.0000000000                   }
+ 1 RETVAL= I2   {100}
+ 1 LOG_MESSAGE=VC62   {|A41.9,Ruled In;TRUE:15556726|124043747|3646128577|3646128578|}
+ 1 LOG_MISC1=VC0   {}
+ 1 RETURN_VALUE=VC4   {TRUE}
+ 1 DEBUG_IND= I2   {0}
+ 1 ACTIVE_IND= I2   {0}
+ 1 CONSTANTS
+  2 PRSNL_ID=F8   {16908168.0000000000                     }
+  2 CLASSIFICATION_CD=F8   {674232.0000000000                       }
+  2 CONFIRMED_CD=F8   {3305.0000000000                         }
+  2 POSITION_CD=F8   {441.0000000000                          }
+  2 PPR_CD=F8   {681274.0000000000                       }
+  */

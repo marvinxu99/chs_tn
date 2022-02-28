@@ -56,6 +56,7 @@ record t_rec
 	 2 confirmed_cd	= f8
 	 2 position_cd	= f8
 	 2 ppr_cd		= f8
+	 2 final_type_cd = f8
 	1 query_cnt	    = i2	
 	1 query_qual[*]
 	 2 code_value	= f8
@@ -67,9 +68,11 @@ record t_rec
 	  3	code_value	= f8
 	  3 display		= vc
 	  3 description	= vc
-	  3 code		= vc
+	  3 icd10code	= vc
+	  3 snomedcode 	= vc
 	  3 uuid		= vc
-	  3 nomenclature_id = f8
+	  3 diag_nomenclature_id = f8
+	  3 snomed_nomenclature_id = f8
 	  3 start_pos	= i4
 	  3 end_pos		= i4
 	  3 checked_value = vc
@@ -87,9 +90,12 @@ record t_rec
 	1 html_text 	= gvc
 	1 select_cnt	= i2
 	1 select_qual[*]
-	 2 select_text	= vc
-	 2 select_code	= vc
-	 2 nomenclature_id = f8
+	 2 select_diag_text	= vc
+	 2 select_diag_code	= vc
+	 2 select_snomed_text = vc
+	 2 select_snomed_code = vc
+	 2 diag_nomenclature_id = f8
+	 2 snomed_nomenclature_id = f8
 	 2 add_ind		= i2
 )
 
@@ -115,16 +121,9 @@ declare i = i4 with noconstant(0)
 declare j = i4 with noconstant(0)
 declare k = i4 with noconstant(0)
 declare coding_uuid_int = i2 with noconstant(2)
-declare _Memory_Reply_String = vc with noconstant("") 
 
-if (t_rec->patient.encntr_id <= 0.0)
-	set t_rec->log_message = concat("link_encntrid not found")
-	go to exit_script
-endif
-
-if (t_rec->patient.person_id <= 0.0)
-	set t_rec->log_message = concat("link_personid not found")
-	go to exit_script
+if (not(validate(_memory_reply_string)))
+	declare _memory_reply_string = gvc
 endif
 
 /* Use if parameters are needed
@@ -136,6 +135,7 @@ set t_rec->return_value = "FALSE"
 
 set t_rec->constants.classification_cd = uar_get_code_by("MEANING",12033,"MEDICAL")
 set t_rec->constants.confirmed_cd = uar_get_code_by("MEANING",12031,"CONFIRMED")
+set t_rec->constants.final_type_cd = uar_get_code_by("MEANING",17,"FINAL")
 
 if (t_rec->constants.classification_cd <= 0.0)
 	set t_rec->log_message = concat("medical classification code value not found")
@@ -194,7 +194,8 @@ detail
 	stat = alterlist(t_rec->query_qual[i].code_qual,j)
 	t_rec->query_qual[i].code_qual[j].code_value	= c.code_value
 	t_rec->query_qual[i].code_qual[j].display		= c.display
-	t_rec->query_qual[i].code_qual[j].code			= c.definition
+	t_rec->query_qual[i].code_qual[j].icd10code		= piece(c.definition,";",1,"<notfound>")
+	t_rec->query_qual[i].code_qual[j].snomedcode	= piece(c.definition,";",2,"<notfound>")
 	t_rec->query_qual[i].code_qual[j].description	= c.description
 	t_rec->query_qual[i].code_qual[j].uuid			= ce.field_value
 foot cv.code_value	
@@ -213,15 +214,45 @@ plan d1
 	where maxrec(d2,t_rec->query_qual[d1.seq].code_cnt)
 join d2
 join n
-	where n.source_identifier = t_rec->query_qual[d1.seq].code_qual[d2.seq].code
+	where n.source_identifier = t_rec->query_qual[d1.seq].code_qual[d2.seq].icd10code
 	and   n.source_vocabulary_cd = value(uar_get_code_by("DISPLAY",400,"ICD-10-CM")) 
 	and   n.active_ind = 1
 	and   cnvtdatetime(curdate,curtime3) between n.beg_effective_dt_tm and n.end_effective_dt_tm
 order by
 	n.beg_effective_dt_tm
 detail
-	t_rec->query_qual[d1.seq].code_qual[d2.seq].nomenclature_id = n.nomenclature_id
+	t_rec->query_qual[d1.seq].code_qual[d2.seq].diag_nomenclature_id = n.nomenclature_id
 with nocounter
+
+select into "nl:"
+from
+	 (dummyt d1 with seq=t_rec->query_cnt)
+	,(dummyt d2)
+	,nomenclature n
+plan d1
+	where maxrec(d2,t_rec->query_qual[d1.seq].code_cnt)
+join d2
+join n
+	where n.source_identifier = t_rec->query_qual[d1.seq].code_qual[d2.seq].snomedcode
+	and   n.source_vocabulary_cd = value(uar_get_code_by("DISPLAY",400,"SNOMED CT")) 
+	and   n.active_ind = 1
+	and   cnvtdatetime(curdate,curtime3) between n.beg_effective_dt_tm and n.end_effective_dt_tm
+order by
+	n.beg_effective_dt_tm
+detail
+	t_rec->query_qual[d1.seq].code_qual[d2.seq].snomed_nomenclature_id = n.nomenclature_id
+with nocounter
+
+if (t_rec->patient.encntr_id <= 0.0)
+	set t_rec->log_message = concat("link_encntrid not found")
+	go to exit_script
+endif
+
+if (t_rec->patient.person_id <= 0.0)
+	set t_rec->log_message = concat("link_personid not found")
+	go to exit_script
+endif
+
 select into "nl:"
 from 
 	clinical_event ce
@@ -377,36 +408,78 @@ endfor
 
 for (i=1 to t_rec->query_qual[t_rec->query_selected].code_cnt)
 	if (t_rec->query_qual[t_rec->query_selected].code_qual[i].checked_value = "X")
-		if (t_rec->query_qual[t_rec->query_selected].code_qual[i].nomenclature_id > 0.0)
+		if ((t_rec->query_qual[t_rec->query_selected].code_qual[i].diag_nomenclature_id > 0.0)
+		 or (t_rec->query_qual[t_rec->query_selected].code_qual[i].snomed_nomenclature_id > 0.0))
 			set t_rec->select_cnt = (t_rec->select_cnt + 1)
 			set stat = alterlist(t_rec->select_qual,t_rec->select_cnt)
-			set t_rec->select_qual[t_rec->select_cnt].select_code = t_rec->query_qual[t_rec->query_selected].code_qual[i].code
-			set t_rec->select_qual[t_rec->select_cnt].select_text = t_rec->query_qual[t_rec->query_selected].code_qual[i].description
-			set t_rec->select_qual[t_rec->select_cnt].nomenclature_id = t_rec->query_qual[t_rec->query_selected].code_qual[i].nomenclature_id
+			set t_rec->select_qual[t_rec->select_cnt].select_diag_code = t_rec->query_qual[t_rec->query_selected].code_qual[i].icd10code
+			set t_rec->select_qual[t_rec->select_cnt].select_diag_text = t_rec->query_qual[t_rec->query_selected].code_qual[i].description
+			set t_rec->select_qual[t_rec->select_cnt].select_snomed_text = t_rec->query_qual[t_rec->query_selected].code_qual[i].description
+			set t_rec->select_qual[t_rec->select_cnt].select_snomed_code = t_rec->query_qual[t_rec->query_selected].code_qual[i].snomedcode
+			set t_rec->select_qual[t_rec->select_cnt].diag_nomenclature_id = 
+				t_rec->query_qual[t_rec->query_selected].code_qual[i].diag_nomenclature_id
+			set t_rec->select_qual[t_rec->select_cnt].snomed_nomenclature_id =
+				t_rec->query_qual[t_rec->query_selected].code_qual[i].snomed_nomenclature_id
 		endif
 	endif
 endfor
 
 for (i=1 to t_rec->select_cnt)
-	execute mp_add_problem 
-							^MINE^, 
-							t_rec->patient.person_id, 
-							t_rec->patient.encntr_id, 
-							t_rec->constants.prsnl_id, 
-							t_rec->constants.position_cd, 
-							t_rec->constants.ppr_cd, 
-							t_rec->select_qual[i].nomenclature_id, 
-							t_rec->select_qual[i].nomenclature_id, 
-							1,
- 	 						1, 
- 	 						t_rec->constants.confirmed_cd, 
- 	 						t_rec->constants.classification_cd
- 	 set t_rec->select_qual[i].add_ind = 1
+	
+	if (t_rec->select_qual[i].diag_nomenclature_id > 0.0)
+		execute mp_add_diagnosis 
+								^MINE^, 										;"Output to File/Printer/MINE" = "MINE"
+								t_rec->patient.person_id, 						;"person_id" = 0.0
+								t_rec->constants.prsnl_id, 						;"user_id" = 0.0
+								t_rec->patient.encntr_id, 						;"encntr_id" = 0.
+								t_rec->constants.ppr_cd, 						;"ppr_code" = 0.0
+								t_rec->select_qual[i].diag_nomenclature_id, 	;"nomenclature_id:" = 0.0
+								t_rec->constants.position_cd, 					;"position_cd" = 0.0
+								t_rec->select_qual[i].diag_nomenclature_id, 	;"originating_nomen_id" = 0.0
+								1,												;"bedrock_config_ind" = 0
+	 	 						t_rec->constants.final_type_cd, 				;"add_type_cd:" = 0.0
+	 	 						t_rec->constants.classification_cd, 			;"classification_cd:" = 0.0
+	 	 						0,												;"dupCheckOnly" = 0
+	 	 						t_rec->constants.confirmed_cd,					;"confirmation_cd:" = 0.0
+	 	 						0,												;"priority:" = 0
+	 	 						0.0,											;"trans_nomen_id" = 0.0
+	 	 						""												;"diagnosis_display" = ""
+	 	 						
+	 	 						 						
+	 	 						
+	 	 						
+	 	 set t_rec->select_qual[i].add_ind = 1
+	 endif
+	 
+	 
+	 if (t_rec->select_qual[i].snomed_nomenclature_id > 0.0)
+		execute mp_add_problem 
+								^MINE^, 										;"Output to File/Printer/MINE" = "MINE"
+								t_rec->patient.person_id, 						;"personId:" = 0.0
+								t_rec->patient.encntr_id, 						;"encntrId:" = 0.0
+								t_rec->constants.prsnl_id, 						;"userId:" = 0.0
+								t_rec->constants.position_cd, 					;"positionCd:" = 0.0
+								t_rec->constants.ppr_cd, 						;"pprCd:" = 0.0
+								t_rec->select_qual[i].snomed_nomenclature_id, 	;"nomenclatureId:" = 0.0
+								t_rec->select_qual[i].snomed_nomenclature_id, 	;"originatingNomenId:" = 0.0
+								1,												;"lifeCycleStatusFlag:" = 0
+	 	 						1, 												;"bedrock_config_ind:" = 0
+	 	 						t_rec->constants.confirmed_cd, 					;"add_type_cd:" = 0.0
+	 	 						t_rec->constants.classification_cd				;"classification_cd:" = 0.0
+	 	 																		;"dupCheckOnly" = 0
+																				;"problem_display:" =""
+	 	 						
+	 	 						
+	 	 set t_rec->select_qual[i].add_ind = 1
+	 endif
+	 
+	 /*
  	 set t_rec->log_message = concat(
 										 trim(t_rec->log_message),"|",	
 										t_rec->select_qual[i].select_code,",",
-										t_rec->select_qual[i].select_text)				
- 	 call echo( _Memory_Reply_String)
+										t_rec->select_qual[i].select_text)	
+	 */			
+ 	 call echo(_memory_reply_string)
 endfor
 
 
@@ -419,6 +492,9 @@ set t_rec->log_misc1 = concat(
 							)
 */
 #exit_script
+
+set _memory_reply_string = cnvtrectojson(t_rec)
+;call echojson(t_rec,"cov_eks_cdi_query_process.dat")
 
 #exit_script_not_active
 
@@ -449,6 +525,7 @@ set log_misc1 								= t_rec->log_misc1
 call echo(build2("retval=",retval))
 call echo(build2("log_message=",log_message))
 call echo(build2("log_misc1=",log_misc1))
+call echo(build2("_Memory_Reply_String=",_Memory_Reply_String))
 
 end 
 go
