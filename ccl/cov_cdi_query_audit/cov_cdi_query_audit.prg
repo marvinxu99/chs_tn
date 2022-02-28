@@ -25,12 +25,18 @@ Mod   Mod Date    Developer              Comment
 001   03/01/2019  Chad Cummings			initial build
 ******************************************************************************/
 drop program cov_cdi_query_audit go
-create program cov_cdi_query_audit go
+create program cov_cdi_query_audit 
 
 prompt 
-	"Output to File/Printer/MINE" = "MINE"   ;* Enter or select the printer or file name to send this report to. 
+	"Output to File/Printer/MINE" = "MINE"
+	, "REQUEST" = "" 
 
-with OUTDEV
+with OUTDEV, REQUEST
+
+
+execute cov_cdi_routines
+
+declare mpage_content_url = vc with noconstant("mpage-content")
 
 free record 3011001Request
 record 3011001Request (
@@ -85,8 +91,18 @@ record 3011002Reply (
  
 declare html_output = vc with noconstant(" ")
 
+
+if ($REQUEST = "DEFINITIONS")
+
+	set _memory_reply_string = get_cdi_code_query_def(null)
+	call echo(build2("_memory_reply_string=",_memory_reply_string))
+	go to exit_script
+
+endif
+
+
 set 3011001Request->Module_Dir = "cust_script:"
-set 3011001Request->Module_Name = "cdi_html.html"
+set 3011001Request->Module_Name = "cdi_audit.html"
 set 3011001Request->bAsBlob = 1
 
 execute eks_get_source with replace ("REQUEST" ,3011001Request ) , replace ("REPLY" ,3011001Reply )
@@ -97,7 +113,16 @@ else
 	set html_output = "<html><body>Error with getting html source</body></html>"
 endif
 
-set html_output = replace(html_output,"_COMMUNICATIONTYPE_","THIS ORDER IS GOOD")
+select into "nl:"
+from
+	dm_info di
+plan di
+	where di.info_name = "CONTENT_SERVICE_URL"
+detail
+	mpage_content_url = di.info_char
+with nocounter
+
+set html_output = replace(html_output,"%%MPAGE_CONTENT_URL%%",mpage_content_url)
 
 set 3011002Request->source_dir = $OUTDEV
 set 3011002Request->IsBlob = "1"
@@ -107,6 +132,8 @@ set 3011002Request->document_size = size(3011002Request->document)
 execute eks_put_source with replace ("REQUEST" ,3011002Request ) , replace ("REPLY" ,3011002Reply )
 
 call echorecord(3011001Reply)
+
+#exit_script
 
 end
 go
