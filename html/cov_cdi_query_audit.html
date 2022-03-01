@@ -16,8 +16,25 @@
  
         createTable(CDIAuditData.CDI_DEFINITION);
 
-        console.log(JSON.stringify(CDIAuditTable))
         $("#CDIAuditTableHTML").html(CDIAuditTable.join(''))
+
+        $('.cdi_code_update').click(function () {
+                var cdicodevalue = $(this).parentsUntil('tr.cdi_code_qual').siblings().children('#cdicodevalue').text();
+                var icd10code = $(this).parentsUntil('tr.cdi_code_qual').siblings().children('#icd10code').val();
+                var snomedcode = $(this).parentsUntil('tr.cdi_code_qual').siblings().children('#snomedcode').val();
+                var uuid = $(this).parentsUntil('tr.cdi_code_qual').siblings().children('#uuid').val();
+
+                var param_set = []
+                param_set.push("~MINE~")
+                param_set.push("~UPDATE_CDI_CODE~")
+                param_set.push(cdicodevalue)
+                param_set.push("~"+icd10code+"~") 
+                param_set.push("~"+snomedcode+"~") 
+                param_set.push("~"+uuid+"~") 
+
+                console.log("------- param_set="+param_set.join(','))
+                
+        });
 
         console.log("finishing DisplayCDIAudit")
     }
@@ -53,7 +70,43 @@
             CDIAuditTable.push("<td>")
                 CDIAuditTable.push(obj.QUERY_QUAL[i].CODE_CNT)
             CDIAuditTable.push("</td>")
+
             CDIAuditTable.push("</tr>")
+
+            for (j=0;j<obj.QUERY_QUAL[i].CODE_CNT;j++)  {
+                CDIAuditTable.push("<tr class='cdi_code_qual'>")
+
+                    CDIAuditTable.push("<td colspan=2>")
+                        CDIAuditTable.push("<div class=hidden id=cdicodevalue>"+obj.QUERY_QUAL[i].CODE_QUAL[j].CODE_VALUE+"</div>")
+                    CDIAuditTable.push("</td>")
+                    CDIAuditTable.push("<td>")
+                        CDIAuditTable.push(obj.QUERY_QUAL[i].CODE_QUAL[j].DISPLAY)
+                    CDIAuditTable.push("</td>")
+                    CDIAuditTable.push("<td>")
+                    if (obj.QUERY_QUAL[i].CODE_QUAL[j].DIAG_NOMENCLATURE_ID > 0)    {
+                        var pass_fail = 'pass'
+                    } else {
+                        var pass_fail = 'fail'
+                    }
+                        CDIAuditTable.push("<input class="+pass_fail+" id=icd10code type=textbox value='"+obj.QUERY_QUAL[i].CODE_QUAL[j].ICD10CODE+"'></input>")
+                    CDIAuditTable.push("</td>")
+                    CDIAuditTable.push("<td>")
+                    if (obj.QUERY_QUAL[i].CODE_QUAL[j].SNOMED_NOMENCLATURE_ID > 0)    {
+                        var pass_fail = 'pass'
+                    } else {
+                        var pass_fail = 'fail'
+                    }
+                        CDIAuditTable.push("<input class="+pass_fail+" id=snomedcode type=textbox value='"+obj.QUERY_QUAL[i].CODE_QUAL[j].SNOMEDCODE+"'></input>")
+                    CDIAuditTable.push("</td>")
+                    CDIAuditTable.push("<td>")
+                        CDIAuditTable.push("<input id=uuid type=textbox value='"+obj.QUERY_QUAL[i].CODE_QUAL[j].UUID+"'></input>")
+                    CDIAuditTable.push("</td>")
+                    CDIAuditTable.push("<td>")
+                        CDIAuditTable.push("<button class=cdi_code_update>Update</button>")
+                    CDIAuditTable.push("</td>")
+
+                CDIAuditTable.push("</tr>")
+            }
         }
         CDIAuditTable.push("</table>")
     }
@@ -76,8 +129,22 @@
         }
     }
 
+    .hidden {
+        visibility: hidden;
+    }
+
+    input[class=fail] {
+        border: 4px solid red;
+        border-radius: 2px;
+    }
+
+    input[class=pass] {
+        border: 4px solid green;
+        border-radius: 2px;
+    }
+
     table.CDIAuditTable {
-        margin: 5px;
+        margin: 15px;
         width: auto;
     }
 
