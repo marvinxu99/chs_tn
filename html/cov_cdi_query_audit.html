@@ -1,0 +1,90 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="MPAGES_SVC_AUTH,XMLCCLREQUEST,APPLINK,MPAGES_EVENT,CCLLINK,CCLNEWWINDOW,CCLEVENT,CCLEKSREPLYOBJECT" name="discern"/>
+<meta http-equiv="x-ua-compatible" content="IE=edge" />
+<!--script type="text/javascript" src="%%MPAGE_CONTENT_URL%%/custom_mpage_content/jquery/jquery-3.6.0.min.js"></script-->
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.slim.min.js"></script>
+
+<script type="text/javascript">
+ 
+    function DisplayCDIAudit(CDIAuditData)  {
+        console.log("starting DisplayCDIAudit")
+ 
+        console.log(CDIAuditData)
+ 
+        createTable(CDIAuditData.CDI_DEFINITION);
+ 
+        console.log("finishing DisplayCDIAudit")
+    }
+ 
+    function createTable(obj) {
+ 
+          alert(obj.QUERY_CNT)
+ 
+    }
+</script>
+ 
+<style>
+ 
+    * {
+        font-family: arial;
+    }
+ 
+    body {
+        background-color: black;
+        color: white;
+    }
+    @media screen and (prefers-color-scheme: light) {
+        body {
+            background-color: white;
+            color: black;
+        }
+    }
+ 
+</style>
+</head>
+ 
+<body>
+ 
+    <script>
+        /* Non-CCL Development */
+        var CDIConfigData = $.getJSON('../json/cdi_definitions/mock.json', function(data) {
+            if (CDIConfigData.readyState == 4 && CDIConfigData.status == 200) {
+                DisplayCDIAudit(data);
+                console.log("-------- request processed")
+            } else {
+                console.log("-------- request failed readyState="+CDIConfigData.readyState+" CDIConfigData.status="+CDIConfigData.status)
+            }
+        });
+ 
+        /* CCL Development */
+        /*
+        var CDIConfigData = window.external.XMLCclRequest();
+ 
+ 
+        CDIConfigData.open("GET","cov_cdi_query_audit",false);
+        CDIConfigData.send("~MINE~,~DEFINITIONS~");
+      	var CDIConfigJSON = JSON.parse(CDIConfigData.responseText)
+ 
+        if (CDIConfigData.readyState == 4 && CDIConfigData.status == 200) {
+            console.log("-------- request processed")
+            DisplayCDIAudit(CDIConfigJSON)
+        } else {
+ 
+            console.log("-------- request failed readyState="+CDIConfigData.readyState+" CDIConfigData.status="+CDIConfigData.status)
+        }
+        */
+    </script>
+ 
+<table id="CDIAuditTable" border="1" width="100%">
+    <thead>
+      <td>CDI Query Definition</td>
+      <td></td>
+      <td></td>
+    </thead>
+    <tbody></tbody>
+  </table>
+ 
+</body>
+</html>
