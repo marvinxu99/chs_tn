@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="MPAGES_SVC_AUTH,XMLCCLREQUEST,APPLINK,MPAGES_EVENT,CCLLINK,CCLNEWWINDOW,CCLEVENT,CCLEKSREPLYOBJECT" name="discern"/>
 <meta http-equiv="x-ua-compatible" content="IE=edge" />
 <!--script type="text/javascript" src="%%MPAGE_CONTENT_URL%%/custom_mpage_content/jquery/jquery-3.6.0.min.js"></script-->
-<script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.slim.min.js"></script>
+<script src="http://chs_tn.local/js/jquery/jquery-3.6.0.min.js"></script>
 
 <script type="text/javascript">
  
@@ -20,7 +20,7 @@
  
     function createTable(obj) {
  
-          alert(obj.QUERY_CNT)
+          alert(obj.QUERY_CNT) 
  
     }
 </script>
@@ -49,7 +49,7 @@
  
     <script>
         /* Non-CCL Development */
-        var CDIConfigData = $.getJSON('../json/cdi_definitions/mock.json', function(data) {
+        var CDIConfigData = $.getJSON('http://chs_tn.local/json/cdi_definitions/mock.json', function(data) {
             if (CDIConfigData.readyState == 4 && CDIConfigData.status == 200) {
                 DisplayCDIAudit(data);
                 console.log("-------- request processed")
