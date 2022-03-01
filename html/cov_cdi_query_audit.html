@@ -6,6 +6,7 @@
 <!--script type="text/javascript" src="%%MPAGE_CONTENT_URL%%/custom_mpage_content/jquery/jquery-3.6.0.min.js"></script-->
 <script src="http://chs_tn.local/js/jquery/jquery-3.6.0.min.js"></script>
 
+<!--COPY START HERE-->
 <script type="text/javascript">
  
     function DisplayCDIAudit(CDIAuditData)  {
@@ -14,14 +15,47 @@
         console.log(CDIAuditData)
  
         createTable(CDIAuditData.CDI_DEFINITION);
- 
+
+        console.log(JSON.stringify(CDIAuditTable))
+        $("#CDIAuditTableHTML").html(CDIAuditTable.join(''))
+
         console.log("finishing DisplayCDIAudit")
     }
  
     function createTable(obj) {
- 
-          alert(obj.QUERY_CNT) 
- 
+        CDIAuditTable = [];
+        CDIAuditTable.push("<table class=CDIAuditTable>")
+        CDIAuditTable.push("<tr>")
+        CDIAuditTable.push("<th colspan=4>CDI Definition</th>")
+        CDIAuditTable.push("</tr>")
+
+        CDIAuditTable.push("<tr>")
+        CDIAuditTable.push("<th>Document Definition</th>")
+        CDIAuditTable.push("<th>Coding Section</th>")
+        CDIAuditTable.push("<th>Coding Definition Count</th>")
+        CDIAuditTable.push("</tr>")
+
+        for (i=0;i<obj.QUERY_CNT;i++)   {
+            console.log("-->adding new row")
+            CDIAuditTable.push("<tr><td colspan=4>")
+            CDIAuditTable.push(obj.QUERY_QUAL[i].DISPLAY)
+            CDIAuditTable.push("</td></tr>")
+
+            CDIAuditTable.push("<tr>")
+            CDIAuditTable.push("<td>")
+                CDIAuditTable.push("<input type=textbox value='"+obj.QUERY_QUAL[i].DEFINITION+"'></input>")
+            CDIAuditTable.push("</td>")
+            
+            CDIAuditTable.push("<td>")
+                CDIAuditTable.push("<input type=textbox value='"+obj.QUERY_QUAL[i].CODING_SECTION+"'></input>")
+            CDIAuditTable.push("</td>")
+
+            CDIAuditTable.push("<td>")
+                CDIAuditTable.push(obj.QUERY_QUAL[i].CODE_CNT)
+            CDIAuditTable.push("</td>")
+            CDIAuditTable.push("</tr>")
+        }
+        CDIAuditTable.push("</table>")
     }
 </script>
  
@@ -41,12 +75,24 @@
             color: black;
         }
     }
- 
+
+    table.CDIAuditTable {
+        margin: 5px;
+        width: auto;
+    }
+
+    table.CDIAuditTable th, table.CDIAuditTable td  {
+        text-align: left;
+    }
+
 </style>
 </head>
  
 <body>
- 
+    <div id="CDIAuditTableHTML"></div>
+    
+<!--COPY END HERE-->
+    
     <script>
         /* Non-CCL Development */
         var CDIConfigData = $.getJSON('http://chs_tn.local/json/cdi_definitions/mock.json', function(data) {
@@ -76,15 +122,6 @@
         }
         */
     </script>
- 
-<table id="CDIAuditTable" border="1" width="100%">
-    <thead>
-      <td>CDI Query Definition</td>
-      <td></td>
-      <td></td>
-    </thead>
-    <tbody></tbody>
-  </table>
  
 </body>
 </html>
