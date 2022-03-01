@@ -105,7 +105,31 @@ subroutine get_html_template(vFilename,vDirectory)
  
 	return (vReturnHTML)
 end
- 
+
+
+
+/**********************************************************************************************************************
+** Function GET_CONTENT_SERVICE_URL(null)
+** ---------------------------------------------------------------------------------------
+** Get the base URL for the MPage static content
+**
+**********************************************************************************************************************/
+declare get_content_service_url(null) = vc with persist, copy
+subroutine get_content_service_url(null)
+	
+	declare vReturnURL = vc with noconstant("http://<notfound>"), protect
+	
+	select into "nl:"
+	from
+		dm_info di
+	plan di
+		where di.info_name = "CONTENT_SERVICE_URL"
+	detail
+		vReturnURL = di.info_char
+	with nocounter 
+	
+	return (vReturnURL)
+end
 
 call echo(build2("finishing ",trim(cnvtlower(curprog))))
  
