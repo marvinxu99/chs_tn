@@ -314,13 +314,13 @@ call writeLog(build2("**********************************************************
 call writeLog(build2("************************************************************"))
 call writeLog(build2("* START Adding Report Definitions **************************"))
  
-;Report 1 Cov - BCMA Compliance Patent Level (COV_PHQ_BCMA_LEAPFROG_COMPL)
+;Report 1 Cov - BCMA Compliance Patient Level (COV_PHQ_BCMA_LEAPFROG_COMPL)
 set t_rec->cnt = 1
 set j = 0 ;reset instance counter
 set stat = alterlist(t_rec->reports,t_rec->cnt)
 set k = t_rec->cnt
  
-set t_rec->reports[k].title 			= "Cov - BCMA Compliance Patent Level (Weekly)"
+set t_rec->reports[k].title 			= "Cov - BCMA Compliance Patient Level (Weekly)"
 set t_rec->reports[k].object 			= "COV_CSV_BCMA_LEAPFROG_COMPL" ;"COV_PHQ_BCMA_LEAPFROG_COMPL"
 set t_rec->reports[k].param_template	= ^"FILENAME", "START_DT_TM_VAR", "END_DT_TM_VAR", ACUTE_FACILITY, VALUE(0.0), VALUE(0.0)^
 set t_rec->reports[k].start_dt_tm		= t_rec->cons.dates.prev_week_start_dt_tm
