@@ -165,7 +165,8 @@ subroutine CallOrderServer(null)
  
  	free record ordreply
 	set stat = tdbexecute(560210,500210,560201,"REC",ordrequest,"REC",ordreply)
- 
+ 	call echo(build2("stat=",stat))
+ 	
 	for (i=1 to size(ordreply->orderlist,5))
 		set vNewOrderID = ordreply->orderlist[i].orderid
 	endfor

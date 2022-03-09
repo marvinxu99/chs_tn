@@ -9,5 +9,5 @@ call echo(AddOrderComment(concat("adding a comment to see if this works"
 									,"how long can the comment be"
 									,"i was running into a limit i think when adding one through"
 									,"ordering process. It should be much longer than that"))) go
-call echorecord(ordrequest) go
+;call echorecord(ordrequest) go
 call echo(CallOrderServer(null)) go
