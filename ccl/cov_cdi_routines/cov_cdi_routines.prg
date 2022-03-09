@@ -34,6 +34,69 @@ declare i=i4 with noconstant(0), protect
 declare j=i4 with noconstant(0), protect
 declare k=i4 with noconstant(0), protect
 
+
+/**********************************************************************************************************************
+** Function VALIDATE_CDI_CODE_VALUE(code_value)
+** ---------------------------------------------------------------------------------------
+** Return TRUE or FALSE if the code value supplied is a valid CDI coding definition
+**
+**********************************************************************************************************************/
+declare validate_cdi_code_value(vCDICodeValue=f8) = i2 with persist, copy
+subroutine validate_cdi_code_value(vCDICodeValue)
+
+	declare vReturnResponse = i2 with protect, noconstant(FALSE)
+	
+	select into "nl:"
+	from
+		code_value cv
+		,code_value_set cvs
+	plan cv
+		where cv.code_value = vCDICodeValue
+		and   cv.cdf_meaning = "CDI_CODE"
+		and   cv.active_ind = 1
+		and   cv.begin_effective_dt_tm <= cnvtdatetime(curdate,curtime3)
+		and   cv.end_effective_dt_tm >= cnvtdatetime(curdate,curtime3)
+	join cvs
+		where cvs.code_set = cv.code_set
+		and   cvs.definition = "COVCUSTOM"
+	detail
+		vReturnResponse = TRUE
+	with nocounter
+	
+	return (vReturnResponse)
+end
+
+/**********************************************************************************************************************
+** Function VALIDATE_CDI_VALUE(code_value)
+** ---------------------------------------------------------------------------------------
+** Return TRUE or FALSE if the code value supplied is a valid CDI definition
+**
+**********************************************************************************************************************/
+declare validate_cdi_value(vCDIValue=f8) = i2 with persist, copy
+subroutine validate_cdi_value(vCDIValue)
+
+	declare vReturnResponse = i2 with protect, noconstant(FALSE)
+	
+	select into "nl:"
+	from
+		code_value cv
+		,code_value_set cvs
+	plan cv
+		where cv.code_value = vCDIValue
+		and   cv.cdf_meaning = "CDI_QUERY"
+		and   cv.active_ind = 1
+		and   cv.begin_effective_dt_tm <= cnvtdatetime(curdate,curtime3)
+		and   cv.end_effective_dt_tm >= cnvtdatetime(curdate,curtime3)
+	join cvs
+		where cvs.code_set = cv.code_set
+		and   cvs.definition = "COVCUSTOM"
+	detail
+		vReturnResponse = TRUE
+	with nocounter
+	
+	return (vReturnResponse)
+end
+
 /**********************************************************************************************************************
 ** Function GET_CDI_CODE_QUERY_DEF(null)
 ** ---------------------------------------------------------------------------------------
