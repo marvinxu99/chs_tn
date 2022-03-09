@@ -33,8 +33,37 @@
                 param_set.push("~"+uuid+"~") 
 
                 console.log("------- param_set="+param_set.join(','))
+
+                window.location.reload();
                 
         });
+
+        $('.cdi_update').click(function () {
+                var cdivalue = $(this).parentsUntil('tr.cdi_qual').siblings().children('#cdivaluecd').text();
+                var definition = $(this).parentsUntil('tr.cdi_qual').siblings().children('#definition').val();
+                var section = $(this).parentsUntil('tr.cdi_qual').siblings().children('#section').val();
+
+                var param_set = []
+                param_set.push("~MINE~")
+                param_set.push("~UPDATE_CDI~")
+                param_set.push(cdivalue)
+                param_set.push("~"+definition+"~") 
+                param_set.push("~"+section+"~") 
+
+                console.log("------- param_set="+param_set.join(','))
+                
+
+
+                var CDIUpdateParams = window.external.XMLCclRequest();						
+                CDIUpdateParams.open("GET","cov_cdi_query_audit",false);
+                CDIUpdateParams.send(param_set.join(','));
+                if (CDIUpdateParams.readyState == 4 && CDIUpdateParams.status == 200) {
+                    console.log("-------- request processed")
+                    } else {
+                    	console.log("-------- request failed readyState="+CDIUpdateParams.readyState+" CDIUpdateParams.status="+CDIUpdateParams.status)
+                    }
+                window.location.reload();
+            });              
 
         console.log("finishing DisplayCDIAudit")
     }
@@ -54,21 +83,24 @@
 
         for (i=0;i<obj.QUERY_CNT;i++)   {
             console.log("-->adding new row")
-            CDIAuditTable.push("<tr><td colspan=4>")
+            CDIAuditTable.push("<tr class='cdi_qual'><td colspan=3>")
             CDIAuditTable.push(obj.QUERY_QUAL[i].DISPLAY)
             CDIAuditTable.push("</td></tr>")
 
             CDIAuditTable.push("<tr>")
             CDIAuditTable.push("<td>")
-                CDIAuditTable.push("<input type=textbox value='"+obj.QUERY_QUAL[i].DEFINITION+"'></input>")
+                CDIAuditTable.push("<input id=definition type=textbox value='"+obj.QUERY_QUAL[i].DEFINITION+"'></input>")
             CDIAuditTable.push("</td>")
             
             CDIAuditTable.push("<td>")
-                CDIAuditTable.push("<input type=textbox value='"+obj.QUERY_QUAL[i].CODING_SECTION+"'></input>")
+                CDIAuditTable.push("<input id=section type=textbox value='"+obj.QUERY_QUAL[i].CODING_SECTION+"'></input>")
+            CDIAuditTable.push("</td>")
+            CDIAuditTable.push("<td><span class=hidden id=cdivaluecd>"+obj.QUERY_QUAL[i].CODE_VALUE+"</span>")
+                CDIAuditTable.push(obj.QUERY_QUAL[i].CODE_CNT)
             CDIAuditTable.push("</td>")
 
             CDIAuditTable.push("<td>")
-                CDIAuditTable.push(obj.QUERY_QUAL[i].CODE_CNT)
+                CDIAuditTable.push("<button class=cdi_update>Update</button>")
             CDIAuditTable.push("</td>")
 
             CDIAuditTable.push("</tr>")
@@ -131,6 +163,8 @@
 
     .hidden {
         visibility: hidden;
+        display: inline-block;
+        white-space: nowrap;
     }
 
     input[class=fail] {
@@ -191,4 +225,4 @@
     </script>
  
 </body>
-</html>
+</html> 
