@@ -6,8 +6,8 @@
 	Author:				Chad Cummings
 	Date Written:		07/15/2021
 	Solution:
-	Source file name:	cov_pha_ops_prev_month.prg
-	Object name:		cov_pha_ops_prev_month
+	Source file name:	cov_pha_ops_prev_week.prg
+	Object name:		cov_pha_ops_prev_week
 	Request #:
  
 	Program purpose:
