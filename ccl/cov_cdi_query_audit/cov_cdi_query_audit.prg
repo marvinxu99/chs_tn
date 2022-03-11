@@ -37,7 +37,7 @@ prompt
 
 with OUTDEV, REQUEST, PARAM1, PARAM2, PARAM3, PARAM4
 
-
+execute cov_std_log_routines
 execute cov_cdi_routines
 execute cov_std_html_routines
 
@@ -65,6 +65,7 @@ call echorecord(prompts)
 
 if (prompts->request = "DEFINITIONS")
 	set _memory_reply_string = get_cdi_code_query_def(null)
+	call echo(_memory_reply_string)
 	go to exit_script
 elseif (prompts->request = "UPDATE_CDI_CODE")
 	if (validate_cdi_code_value(prompts->param1))
