@@ -164,6 +164,7 @@ end
 ; USAGE: call SubroutineLog("record_structure","RECORD") 
 ;        call SubroutineLog("Log Message") 
 ;==========================================================================================
+declare SubroutineLog(pMessage=vc,pParam=vc(value,'message')) = null with copy, persist
 subroutine SubroutineLog(pMessage,pParam)
     declare vMessage = vc with constant(pMessage), protect
     declare vParam = vc with constant(pParam), protect
@@ -185,6 +186,7 @@ end ;SubroutineLog
 ; 
 ; USAGE: set DEBUG = SubroutineDebug(null)
 ;==========================================================================================
+declare SubroutineDebug(null) = i2 with copy, persist
 subroutine SubroutineDebug(null)
     declare pDebugVar = f8 with noconstant(FALSE), protect
 
