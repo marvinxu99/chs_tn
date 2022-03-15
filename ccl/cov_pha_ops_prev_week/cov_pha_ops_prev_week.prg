@@ -155,7 +155,7 @@ set t_rec->cons.paths.astream	= build("/nfs/middle_fs/to_client_site/"
 										,trim(cnvtlower(curdomain)),"/ClinicalAncillary/Pharmacy/R2W/")
 ;\\chstn_astream_prod.cernerasp.com\middle_fs\to_client_site\p0665\ClinicalAncillary\Pharmacy\R2W
  
-set t_rec->cons.paths.astream	= build("/nfs/middle_fs/to_client_site/",trim(cnvtlower(curdomain)),"/CernerCCL/")
+;set t_rec->cons.paths.astream	= build("/nfs/middle_fs/to_client_site/",trim(cnvtlower(curdomain)),"/CernerCCL/")
  
 set reply->status_data.status = "Z"
  
