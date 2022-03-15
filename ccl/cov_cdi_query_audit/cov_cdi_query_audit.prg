@@ -82,7 +82,7 @@ endif
 
 set html_output = get_html_template("cov_cdi_query_audit.html")
 
-set html_output = replace(html_output,"%%MPAGE_CONTENT_URL%%",get_content_service_url(null))
+set html_output = replace(html_output,"%%MPAGE_CONTENT_URL%%",get_static_content_base(null))
 	
 call put_html_output(prompts->outdev,html_output)
 
