@@ -1,0 +1,229 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="MPAGES_SVC_AUTH,XMLCCLREQUEST,APPLINK,MPAGES_EVENT,CCLLINK,CCLNEWWINDOW,CCLEVENT,CCLEKSREPLYOBJECT" name="discern"/>
+<meta http-equiv="x-ua-compatible" content="IE=edge" />
+<script type="text/javascript" src="%%MPAGE_CONTENT_URL%%/custom_mpage_content/jquery/jquery-3.6.0.min.js"></script>
+<script src="http://chs_tn.local/js/jquery/jquery-3.6.0.min.js"></script>
+ 
+<!--COPY START HERE-->
+<script type="text/javascript">
+ 
+    function DisplayCDIAudit(CDIAuditData)  {
+        console.log("starting DisplayCDIAudit")
+ 
+        console.log(CDIAuditData)
+ 
+        createTable(CDIAuditData.CDI_DEFINITION);
+ 
+        $("#CDIAuditTableHTML").html(CDIAuditTable.join(''))
+ 
+        $('.cdi_code_update').click(function () {
+                var cdicodevalue = $(this).parentsUntil('tr.cdi_code_qual').siblings().children('#cdicodevalue').text();
+                var icd10code = $(this).parentsUntil('tr.cdi_code_qual').siblings().children('#icd10code').val();
+                var snomedcode = $(this).parentsUntil('tr.cdi_code_qual').siblings().children('#snomedcode').val();
+                var uuid = $(this).parentsUntil('tr.cdi_code_qual').siblings().children('#uuid').val();
+ 
+                var param_set = []
+                param_set.push("~MINE~")
+                param_set.push("~UPDATE_CDI_CODE~")
+                param_set.push(cdicodevalue)
+                param_set.push("~"+icd10code+"~")
+                param_set.push("~"+snomedcode+"~")
+                param_set.push("~"+uuid+"~")
+ 
+                console.log("------- param_set="+param_set.join(','))
+ 
+                window.location.reload();
+ 
+        });
+ 
+        $('.cdi_update').click(function () {
+                var cdivalue = $(this).parentsUntil('tr.cdi_qual').siblings().children('#cdivaluecd').text();
+                var definition = $(this).parentsUntil('tr.cdi_qual').siblings().children('#definition').val();
+                var section = $(this).parentsUntil('tr.cdi_qual').siblings().children('#section').val();
+ 
+                var param_set = []
+                param_set.push("~MINE~")
+                param_set.push("~UPDATE_CDI~")
+                param_set.push(cdivalue)
+                param_set.push("~"+definition+"~")
+                param_set.push("~"+section+"~")
+ 
+                console.log("------- param_set="+param_set.join(','))
+ 
+ 
+ 
+                var CDIUpdateParams = window.external.XMLCclRequest();
+                CDIUpdateParams.open("GET","cov_cdi_query_audit",false);
+                CDIUpdateParams.send(param_set.join(','));
+                if (CDIUpdateParams.readyState == 4 && CDIUpdateParams.status == 200) {
+                    console.log("-------- request processed")
+                    } else {
+                    	console.log("-------- request failed readyState="+CDIUpdateParams.readyState+" CDIUpdateParams.status="+CDIUpdateParams.status)
+                    }
+                window.location.reload();
+            });
+ 
+ 
+        console.log("finishing DisplayCDIAudit")
+    }
+ 
+    function createTable(obj) {
+        CDIAuditTable = [];
+        CDIAuditTable.push("<table class=CDIAuditTable>")
+        CDIAuditTable.push("<tr>")
+        CDIAuditTable.push("<th colspan=4>CDI Definition</th>")
+        CDIAuditTable.push("</tr>")
+ 
+        CDIAuditTable.push("<tr>")
+        CDIAuditTable.push("<th>Document Definition</th>")
+        CDIAuditTable.push("<th>Coding Section</th>")
+        CDIAuditTable.push("<th>Coding Definition Count</th>")
+        CDIAuditTable.push("</tr>")
+ 
+        for (i=0;i<obj.QUERY_CNT;i++)   {
+            console.log("-->adding new row")
+            CDIAuditTable.push("<tr class='cdi_qual'><td colspan=3>")
+            CDIAuditTable.push(obj.QUERY_QUAL[i].DISPLAY)
+            CDIAuditTable.push("</td></tr>")
+ 
+            CDIAuditTable.push("<tr>")
+            CDIAuditTable.push("<td>")
+                CDIAuditTable.push("<input id=definition type=textbox value='"+obj.QUERY_QUAL[i].DEFINITION+"'></input>")
+            CDIAuditTable.push("</td>")
+ 
+            CDIAuditTable.push("<td>")
+                CDIAuditTable.push("<input id=section type=textbox value='"+obj.QUERY_QUAL[i].CODING_SECTION+"'></input>")
+            CDIAuditTable.push("</td>")
+            CDIAuditTable.push("<td><span class=hidden id=cdivaluecd>"+obj.QUERY_QUAL[i].CODE_VALUE+"</span>")
+                CDIAuditTable.push(obj.QUERY_QUAL[i].CODE_CNT)
+            CDIAuditTable.push("</td>")
+ 
+            CDIAuditTable.push("<td>")
+                CDIAuditTable.push("<button class=cdi_update>Update</button>")
+            CDIAuditTable.push("</td>")
+ 
+            CDIAuditTable.push("</tr>")
+ 
+            for (j=0;j<obj.QUERY_QUAL[i].CODE_CNT;j++)  {
+                CDIAuditTable.push("<tr class='cdi_code_qual'>")
+ 
+                    CDIAuditTable.push("<td colspan=2>")
+                        CDIAuditTable.push("<div class=hidden id=cdicodevalue>"+obj.QUERY_QUAL[i].CODE_QUAL[j].CODE_VALUE+"</div>")
+                    CDIAuditTable.push("</td>")
+                    CDIAuditTable.push("<td>")
+                        CDIAuditTable.push(obj.QUERY_QUAL[i].CODE_QUAL[j].DISPLAY)
+                    CDIAuditTable.push("</td>")
+                    CDIAuditTable.push("<td>")
+                    if (obj.QUERY_QUAL[i].CODE_QUAL[j].DIAG_NOMENCLATURE_ID > 0)    {
+                        var pass_fail = 'pass'
+                    } else {
+                        var pass_fail = 'fail'
+                    }
+                        CDIAuditTable.push("<input class="+pass_fail+" id=icd10code type=textbox value='"+obj.QUERY_QUAL[i].CODE_QUAL[j].ICD10CODE+"'></input>")
+                    CDIAuditTable.push("</td>")
+                    CDIAuditTable.push("<td>")
+                    if (obj.QUERY_QUAL[i].CODE_QUAL[j].SNOMED_NOMENCLATURE_ID > 0)    {
+                        var pass_fail = 'pass'
+                    } else {
+                        var pass_fail = 'fail'
+                    }
+                        CDIAuditTable.push("<input class="+pass_fail+" id=snomedcode type=textbox value='"+obj.QUERY_QUAL[i].CODE_QUAL[j].SNOMEDCODE+"'></input>")
+                    CDIAuditTable.push("</td>")
+                    CDIAuditTable.push("<td>")
+                        CDIAuditTable.push("<input id=uuid type=textbox value='"+obj.QUERY_QUAL[i].CODE_QUAL[j].UUID+"'></input>")
+                    CDIAuditTable.push("</td>")
+                    CDIAuditTable.push("<td>")
+                        CDIAuditTable.push("<button class=cdi_code_update>Update</button>")
+                    CDIAuditTable.push("</td>")
+ 
+                CDIAuditTable.push("</tr>")
+            }
+        }
+        CDIAuditTable.push("</table>")
+    }
+</script>
+ 
+<style>
+ 
+    * {
+        font-family: arial;
+    }
+ 
+    body {
+        background-color: black;
+        color: white;
+    }
+    @media screen and (prefers-color-scheme: light) {
+        body {
+            background-color: white;
+            color: black;
+        }
+    }
+ 
+    .hidden {
+        visibility: hidden;
+        display: inline-block;
+        white-space: nowrap;
+    }
+ 
+    input[class=fail] {
+        border: 4px solid red;
+        border-radius: 2px;
+    }
+ 
+    input[class=pass] {
+        border: 4px solid green;
+        border-radius: 2px;
+    }
+ 
+    table.CDIAuditTable {
+        margin: 15px;
+        width: auto;
+    }
+ 
+    table.CDIAuditTable th, table.CDIAuditTable td  {
+        text-align: left;
+    }
+ 
+</style>
+</head>
+ 
+<body>
+    <div id="CDIAuditTableHTML"></div>
+ 
+<!--COPY END HERE-->
+    <script>
+        /* Non-CCL Development *
+        var CDIConfigData = $.getJSON('http://chs_tn.local/json/cdi_definitions/mock.json', function(data) {
+            if (CDIConfigData.readyState == 4 && CDIConfigData.status == 200) {
+                DisplayCDIAudit(data);
+                console.log("-------- request processed")
+            } else {
+                console.log("-------- request failed readyState="+CDIConfigData.readyState+" CDIConfigData.status="+CDIConfigData.status)
+            }
+        });
+ 
+        /* CCL Development */
+ 
+        var CDIConfigData = window.external.XMLCclRequest();
+ 
+ 
+        CDIConfigData.open("GET","cov_cdi_query_audit",false);
+        CDIConfigData.send("~MINE~,~DEFINITIONS~");
+      	var CDIConfigJSON = JSON.parse(CDIConfigData.responseText)
+ 
+        if (CDIConfigData.readyState == 4 && CDIConfigData.status == 200) {
+            console.log("-------- request processed")
+            DisplayCDIAudit(CDIConfigJSON)
+        } else {
+ 
+            console.log("-------- request failed readyState="+CDIConfigData.readyState+" CDIConfigData.status="+CDIConfigData.status)
+        }
+ 
+    </script>
+ 
+ 
+</body>
+</html>

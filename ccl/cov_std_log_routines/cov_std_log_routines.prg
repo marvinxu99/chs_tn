@@ -155,7 +155,48 @@ subroutine get_dminfo_date(sdomain, sname)
  
   return (dtatgdminfovalue)
 end
- 
+
+;==========================================================================================
+; Capture and report logging for debug and testing
+; pMessage = Message to log
+; pParam = if set to 'record' then the pMessage is a record structure to be echorecord
+; 
+; USAGE: call SubroutineLog("record_structure","RECORD") 
+;        call SubroutineLog("Log Message") 
+;==========================================================================================
+declare SubroutineLog(pMessage=vc,pParam=vc(value,'message')) = null with copy, persist
+subroutine SubroutineLog(pMessage,pParam)
+    declare vMessage = vc with constant(pMessage), protect
+    declare vParam = vc with constant(pParam), protect
+    declare vEchoParser = vc with noconstant(" "), protect
+
+    if (SubroutineDebug(0)) ;check to make sure debug is on first
+        if (cnvtupper(vParam) = cnvtupper('RECORD')) ;check to see if the message is actually a record structure
+            set vEchoParser = concat(^call echorecord(^,trim(vMessage),^) go^)
+            call echo(trim(vEchoParser))
+            call parser(vEchoParser)
+        else
+            call echo(trim(vMessage))
+        endif
+    endif
+end ;SubroutineLog 
+
+;==========================================================================================
+; Check if the debug_ind variable is defined and set to 1 to turn on echos
+; 
+; USAGE: set DEBUG = SubroutineDebug(null)
+;==========================================================================================
+declare SubroutineDebug(null) = i2 with copy, persist
+subroutine SubroutineDebug(null)
+    declare pDebugVar = f8 with noconstant(FALSE), protect
+
+    if (validate(debug_ind))
+        if (debug_ind > 0)
+            set pDebugVar = TRUE
+        endif
+    endif
+    return (pDebugVar)
+end ;SubroutineDebug
  
 call echo(build2("finishing ",trim(cnvtlower(curprog))))
  
