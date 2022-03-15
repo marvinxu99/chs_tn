@@ -6,8 +6,8 @@
   Author:             Chad Cummings
   Date Written:       12/02/2021
   Solution:
-  Source file name:   cov_std_routines.prg
-  Object name:        cov_std_routines
+  Source file name:   cov_std_encntr_routines.prg
+  Object name:        cov_std_encntr_routines
   Request #:
  
   Program purpose:
@@ -231,7 +231,36 @@ subroutine sGetInsuranceByEncntrID(vEncntrID)
 	return (cnvtrectojson(insurance_list))
 end
  
- 
+
+
+
+/**********************************************************************************************************************
+** Function sGetPatientDemo(PERSON_ID,ENCNTR_ID)
+** ---------------------------------------------------------------------------------------
+** Returns a JSON object that is convertable to a record structure containting all the insurance information for the
+** encounter supplied.  
+** 
+** PATIENT_INFO
+
+** 
+** NOTE: The record structure is destroyed on execution. 
+**
+**********************************************************************************************************************/
+declare sGetPatientDemo(vPersonID=f8,vEncntrID=f8) = vc  with copy, persist
+subroutine sGetPatientDemo(vPersonID,vEncntrID)
+
+call SubroutineLog(build2('start sGetPatientDemo(',vPersonID,',',vEncntrID,')'))	
+ 	free record patient_info
+ 	
+ 	declare _memory_reply_string = vc with noconstant(" "), protect
+ 	execute mp_get_patient_demo ~MINE~,vPersonID,vEncntrID,0 
+ 	
+ 	set stat = cnvtjsontorec(_memory_reply_string)
+ 	set stat = copyrec(record_data,patient_info,1)
+ 	
+ 	call SubroutineLog(build2('end sGetPatientDemo(',vPersonID,',',vEncntrID,')'))
+ 	return (cnvtrectojson(patient_info))
+end 
 
  
 call echo(build2("finishing ",trim(cnvtlower(curprog))))
