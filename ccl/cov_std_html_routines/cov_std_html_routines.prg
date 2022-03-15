@@ -131,6 +131,34 @@ subroutine get_content_service_url(null)
 	return (vReturnURL)
 end
 
+
+/**********************************************************************************************************************
+** Function GET_STATIC_CONTENT_BASE(null)
+** ---------------------------------------------------------------------------------------
+** Get the base front-end file share for the MPage static content
+**
+**********************************************************************************************************************/
+declare get_static_content_base(null) = vc with persist, copy
+subroutine get_static_content_base(null)
+	
+	declare vReturnURL = vc with noconstant("I:/Winintel/static_content"), protect
+	
+	select into "nl:"
+	from
+		dm_info di
+	plan di
+		where di.info_name = "FE_WH"
+		and   di.info_domain = "INS"
+	detail
+		vReturnURL = concat(
+							trim(di.info_char)
+							,"Winintel/static_content"
+							)
+	with nocounter 
+	
+	return (vReturnURL)
+end
+
 call echo(build2("finishing ",trim(cnvtlower(curprog))))
  
 end go
