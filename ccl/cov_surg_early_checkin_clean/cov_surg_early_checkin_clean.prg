@@ -241,6 +241,7 @@ and sea.action_meaning = 'RESCHEDULE'
 and sea.reason_meaning= 'EARLYCHECKIN'
 join p where p.person_id = outerjoin(sc.checkin_by_id)
 order by sea.sch_event_id, sea.action_dt_tm 
+with nocounter, separator=" ", format
 
 /*
 	call writeAudit(build2(
