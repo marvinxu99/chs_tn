@@ -80,7 +80,7 @@ elseif (prompts->request = "UPDATE_CDI")
 endif
 
 
-set html_output = get_html_template("cdi_audit.html")
+set html_output = get_html_template("cov_cdi_query_audit.html")
 
 set html_output = replace(html_output,"%%MPAGE_CONTENT_URL%%",get_content_service_url(null))
 	
