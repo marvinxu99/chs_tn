@@ -1,9 +1,12 @@
 declare link_encntrid = f8 go
 declare link_personid = f8 go
 declare link_clinicaleventid = f8 go
-
+set debug_ind = 1 go
 /*
-set link_clinicaleventid =    3646128577 go;3618766902 go
+;TRUE:person_id=15556719|encntr_id=111688463|clinical_event_id=4453601848|event_id=4453601849| (0.31s)
+;TRUE:person_id=16799260|encntr_id=110765501|clinical_event_id=4453870681|event_id=4453870682| (0.57s)
+*/
+set link_clinicaleventid =    4453870681 go
 
 
 select into "nl:"
@@ -15,9 +18,9 @@ detail
 	link_personid	= ce.person_id
 with nocounter go
 
-*/
 
-execute cov_eks_cdi_query_process link_clinicaleventid go
+
+execute cov_eks_cdi_query_process ~MINE~,link_clinicaleventid go
 /*
 execute mp_add_diagnosis 
 								^MINE^, 						;"Output to File/Printer/MINE" = "MINE"
@@ -40,8 +43,9 @@ go
 */
 /*
 
-delete from problem where person_id = 15556726 go
-delete from diagnosis where person_id = 15556726 go
+	
+delete from problem where person_id = 16799260 go
+delete from diagnosis where person_id = 16799260 go
 
  1 PATIENT
   2 ENCNTR_ID=F8   {124043747.0000000000                    }

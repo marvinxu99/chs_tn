@@ -28,10 +28,23 @@ drop program cov_eks_cdi_query_process:dba go
 create program cov_eks_cdi_query_process:dba
 
 prompt 
-	"EVENTID" = 0 
+	"Output to File/Printer/MINE" = "MINE"   ;* Enter or select the printer or file name to send this report to.
+	, "EVENTID" = "0" 
 
-with EVENTID
+with OUTDEV, EVENTID
 
+call echo(build("loading script:",curprog))
+set nologvar = 0	;do not create log = 1		, create log = 0
+set noaudvar = 1	;do not create audit = 1	, create audit = 0
+%i ccluserdir:cov_custom_ccl_common.inc
+
+call writeLog(build2("************************************************************"))
+call writeLog(build2("* START Custom Section  ************************************"))
+
+call set_codevalues(null)
+call check_ops(null)
+
+call addEmailLog("chad.cummings@covhlth.com")
 
 set retval = -1
 
@@ -68,6 +81,7 @@ record t_rec
 	  3	code_value	= f8
 	  3 display		= vc
 	  3 description	= vc
+	  3 definition  = vc
 	  3 icd10code	= vc
 	  3 snomedcode 	= vc
 	  3 uuid		= vc
@@ -196,6 +210,7 @@ detail
 	t_rec->query_qual[i].code_qual[j].display		= c.display
 	t_rec->query_qual[i].code_qual[j].icd10code		= piece(c.definition,";",1,"<notfound>")
 	t_rec->query_qual[i].code_qual[j].snomedcode	= piece(c.definition,";",2,"<notfound>")
+	t_rec->query_qual[i].code_qual[j].definition	= c.definition
 	t_rec->query_qual[i].code_qual[j].description	= c.description
 	t_rec->query_qual[i].code_qual[j].uuid			= ce.field_value
 foot cv.code_value	
@@ -304,7 +319,7 @@ set 969503_request->mdoc_event_id = t_rec->event.event_id
 set 969503_request->read_only_flag = 1
 
 free record 969503_reply
-call echorecord(969503_request)
+;call echorecord(969503_request)
 set stat = tdbexecute(
             600005              /*appid - HNA: Powerchart*/
             , 3202004           /*taskid*/
@@ -316,7 +331,7 @@ set stat = tdbexecute(
             , 0                 /*mode*/
         ) 
 
-call echorecord(969503_reply)
+;call echorecord(969503_reply)
 
 for (i=1 to size(969503_reply->document->contributions,5))
 	;call echo(969503_reply->document->contributions[i].html_text)
@@ -361,25 +376,29 @@ else
 endif
 
 for (i=1 to t_rec->query_cnt)
-	call echo(build2("->checking:",t_rec->query_qual[i].definition," against ",t_rec->title_found))
+ if (t_rec->query_selected = 0) ;skip check if document title has already been found
+	call writeLog(build2("->checking:",t_rec->query_qual[i].definition," against ",t_rec->title_found))
 	if (t_rec->query_qual[i].definition = t_rec->title_found)
-		call echo(build2("->matched:",t_rec->query_qual[i].definition))
+		call writeLog(build2("->matched:",t_rec->query_qual[i].definition))
 		set t_rec->query_selected = i
 		set t_rec->coding_start = findstring(t_rec->query_qual[i].coding_section,t_rec->html_text,t_rec->title_end,0)
-		
+		call writeLog(build2("->t_rec->coding_start:",t_rec->coding_start))
 		if (t_rec->coding_start = 0)
 			set t_rec->log_message = build2("Coding section of ",t_rec->query_qual[i].coding_section," not found")
 			go to exit_script
 		else
 			set t_rec->coding_end = findstring("______________________________________________",t_rec->html_text,t_rec->coding_start,0)
+			call writeLog(build2("->t_rec->coding_end:",t_rec->coding_end))
 			if (t_rec->coding_end = 0)
 				set t_rec->log_message = build2("End of coding section ",t_rec->query_qual[i].coding_section," not found")
 				go to exit_script
 			else
 				set t_rec->coding_found = substring(t_rec->coding_start,(t_rec->coding_end - t_rec->coding_start),t_rec->html_text)
+				call writeLog(build2("->t_rec->coding_found:",t_rec->coding_found))
 			endif
 		endif	
 	endif
+ endif
 endfor
 
 if (t_rec->query_selected = 0)
@@ -388,7 +407,7 @@ if (t_rec->query_selected = 0)
 endif
 
 for (i=1 to t_rec->query_qual[t_rec->query_selected].code_cnt)
-	call echo(build2("->searching for uuid:",t_rec->query_qual[t_rec->query_selected].code_qual[i].uuid))
+	call writeLog(build2("->searching for uuid:",t_rec->query_qual[t_rec->query_selected].code_qual[i].uuid))
 	set t_rec->query_qual[t_rec->query_selected].code_qual[i].start_pos = findstring(
 																						 t_rec->query_qual[t_rec->query_selected].code_qual[i].uuid
 																						,t_rec->coding_found
@@ -396,6 +415,7 @@ for (i=1 to t_rec->query_qual[t_rec->query_selected].code_cnt)
 																						,0
 																					)
 	if (t_rec->query_qual[t_rec->query_selected].code_qual[i].start_pos > 0)
+		call writeLog(build2("-->start_pos=:",t_rec->query_qual[t_rec->query_selected].code_qual[i].start_pos))
 		set t_rec->query_qual[t_rec->query_selected].code_qual[i].checked_value 
 			= substring(
 				(t_rec->query_qual[t_rec->query_selected].code_qual[i].start_pos 
@@ -403,13 +423,19 @@ for (i=1 to t_rec->query_qual[t_rec->query_selected].code_cnt)
 											,1
 											,t_rec->coding_found
 										)
+		call writeLog(build2("-->checked_value=:",t_rec->query_qual[t_rec->query_selected].code_qual[i].checked_value))
 	endif
 endfor
 
 for (i=1 to t_rec->query_qual[t_rec->query_selected].code_cnt)
 	if (t_rec->query_qual[t_rec->query_selected].code_qual[i].checked_value = "X")
+		call writeLog(build2("-->checked_value=:",t_rec->query_qual[t_rec->query_selected].code_qual[i].checked_value))
 		if ((t_rec->query_qual[t_rec->query_selected].code_qual[i].diag_nomenclature_id > 0.0)
 		 or (t_rec->query_qual[t_rec->query_selected].code_qual[i].snomed_nomenclature_id > 0.0))
+			
+			call writeLog(build2("-->icd10code=:",t_rec->query_qual[t_rec->query_selected].code_qual[i].icd10code))
+			call writeLog(build2("-->snomedcode=:",t_rec->query_qual[t_rec->query_selected].code_qual[i].snomedcode))
+			
 			set t_rec->select_cnt = (t_rec->select_cnt + 1)
 			set stat = alterlist(t_rec->select_qual,t_rec->select_cnt)
 			set t_rec->select_qual[t_rec->select_cnt].select_diag_code = t_rec->query_qual[t_rec->query_selected].code_qual[i].icd10code
@@ -493,7 +519,7 @@ set t_rec->log_misc1 = concat(
 */
 #exit_script
 
-set _memory_reply_string = cnvtrectojson(t_rec)
+set _memory_reply_string = ""; cnvtrectojson(t_rec)
 ;call echojson(t_rec,"cov_eks_cdi_query_process.dat")
 
 #exit_script_not_active
@@ -509,23 +535,27 @@ endif
 set t_rec->log_message = concat(
 										trim(t_rec->log_message),";",
 										trim(cnvtupper(t_rec->return_value)),":",
-										trim(cnvtstring(t_rec->patient.person_id)),"|",
-										trim(cnvtstring(t_rec->patient.encntr_id)),"|",
-										trim(cnvtstring(t_rec->event.clinical_event_id)),"|",
-										trim(cnvtstring(t_rec->event.event_id)),"|"
+										"person_id=",trim(cnvtstring(t_rec->patient.person_id)),"|",
+										"encntr_id=",trim(cnvtstring(t_rec->patient.encntr_id)),"|",
+										"clinical_event_id=",trim(cnvtstring(t_rec->event.clinical_event_id)),"|",
+										"event_id=",trim(cnvtstring(t_rec->event.event_id)),"|"
 										;trim(t_rec->final_val.diag),"|",
 										;trim(t_rec->final_val.impact),"|"
 									)
-call echorecord(t_rec)
 
 set retval									= t_rec->retval
 set log_message 							= t_rec->log_message
 set log_misc1 								= t_rec->log_misc1
 
-call echo(build2("retval=",retval))
-call echo(build2("log_message=",log_message))
-call echo(build2("log_misc1=",log_misc1))
-call echo(build2("_Memory_Reply_String=",_Memory_Reply_String))
+call writeLog(build2("retval=",retval))
+call writeLog(build2("log_message=",log_message))
+call writeLog(build2("log_misc1=",log_misc1))
+call writeLog(build2("_Memory_Reply_String=",_Memory_Reply_String))
+
+call exitScript(null)
+call echorecord(t_rec)
+;call echorecord(code_values)
+;call echorecord(program_log)
 
 end 
 go
