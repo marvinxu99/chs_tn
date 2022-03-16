@@ -116,20 +116,11 @@
                         CDIAuditTable.push(obj.QUERY_QUAL[i].CODE_QUAL[j].DISPLAY)
                     CDIAuditTable.push("</td>")
                     CDIAuditTable.push("<td>")
-                    if (obj.QUERY_QUAL[i].CODE_QUAL[j].DIAG_NOMENCLATURE_ID > 0)    {
-                        var pass_fail = 'pass'
-                    } else {
-                        var pass_fail = 'fail'
-                    }
-                        CDIAuditTable.push("<input class="+pass_fail+" id=icd10code type=textbox value='"+obj.QUERY_QUAL[i].CODE_QUAL[j].ICD10CODE+"'></input>")
+                        var pass_fail = 'plain'
+                        CDIAuditTable.push("<input id=icd10code type=textbox value='"+obj.QUERY_QUAL[i].CODE_QUAL[j].ICD10CODE+"'></input>")
                     CDIAuditTable.push("</td>")
                     CDIAuditTable.push("<td>")
-                    if (obj.QUERY_QUAL[i].CODE_QUAL[j].SNOMED_NOMENCLATURE_ID > 0)    {
-                        var pass_fail = 'pass'
-                    } else {
-                        var pass_fail = 'fail'
-                    }
-                        CDIAuditTable.push("<input class="+pass_fail+" id=snomedcode type=textbox value='"+obj.QUERY_QUAL[i].CODE_QUAL[j].SNOMEDCODE+"'></input>")
+                        CDIAuditTable.push("<input id=snomedcode type=textbox value='"+obj.QUERY_QUAL[i].CODE_QUAL[j].SNOMEDCODE+"'></input>")
                     CDIAuditTable.push("</td>")
                     CDIAuditTable.push("<td>")
                         CDIAuditTable.push("<input id=uuid type=textbox value='"+obj.QUERY_QUAL[i].CODE_QUAL[j].UUID+"'></input>")
@@ -137,12 +128,40 @@
                     CDIAuditTable.push("<td>")
                         CDIAuditTable.push("<button class=cdi_code_update>Update</button>")
                     CDIAuditTable.push("</td>")
- 
+                
                 CDIAuditTable.push("</tr>")
+                    for (k=0;k<obj.QUERY_QUAL[i].CODE_QUAL[j].CODES_CNT;k++)  {
+                        CDIAuditTable.push("<tr>")
+                            if (obj.QUERY_QUAL[i].CODE_QUAL[j].CODES[k].ICD10_IND == 1)    {
+                                var colspan_cnt = '3'
+                                if (obj.QUERY_QUAL[i].CODE_QUAL[j].CODES[k].DIAG_NOMENCLATURE_ID > 0)    {
+                                var pass_fail = 'pass'
+                                } else {
+                                    var pass_fail = 'fail'
+                                }
+                            } else {
+                                var colspan_cnt = '4'
+                                if (obj.QUERY_QUAL[i].CODE_QUAL[j].CODES[k].SNOMED_NOMENCLATURE_ID > 0)    {
+                                var pass_fail = 'pass'
+                                } else {
+                                    var pass_fail = 'fail'
+                                }
+                            }
+                            CDIAuditTable.push("<td colspan="+colspan_cnt+">")
+                            CDIAuditTable.push("</td>")
+                            CDIAuditTable.push("<td>")
+                            if (obj.QUERY_QUAL[i].CODE_QUAL[j].CODES[k].ICD10_IND == 1)    {
+                                CDIAuditTable.push("<input class="+pass_fail+" id=codes type=textbox value='"+obj.QUERY_QUAL[i].CODE_QUAL[j].CODES[k].ICD10CODE+"'></input>")
+                            } else {
+                                CDIAuditTable.push("<input class="+pass_fail+" id=codes type=textbox value='"+obj.QUERY_QUAL[i].CODE_QUAL[j].CODES[k].SNOMEDCODE+"'></input>")
+                            }
+                            CDIAuditTable.push("</td>")
+                        CDIAuditTable.push("</tr>")
+                    }
+                }
             }
-        }
         CDIAuditTable.push("</table>")
-    }
+        }
 </script>
  
 <style>
@@ -177,7 +196,10 @@
         border: 4px solid green;
         border-radius: 2px;
     }
- 
+    input[class=plain] {
+        border: 0px solid white;
+        border-radius: 2px;
+    }
     table.CDIAuditTable {
         margin: 15px;
         width: auto;
