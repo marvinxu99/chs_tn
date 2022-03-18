@@ -29,21 +29,109 @@ drop program cov_std_ce_routines:dba go
 create program cov_std_ce_routines:dba
  
 call echo(build2("starting ",trim(cnvtlower(curprog))))
+
+execute cov_std_log_routines
  
 declare i=i4 with noconstant(0), protect
 declare j=i4 with noconstant(0), protect
 declare k=i4 with noconstant(0), protect
  
 /* Subroutines */
+
+
+/**********************************************************************************************************************
+** Function sGetPowerFormRefbyDesc(vPowerFormDesc)
+** ---------------------------------------------------------------------------------------
+** Return a dcp_forms_ref_id for a given Powerform description
+**********************************************************************************************************************/
+declare sGetPowerFormRefbyDesc(vPowerFormDesc) = f8 with copy, persist
+subroutine sGetPowerFormRefbyDesc(vPowerFormDesc)
+
+	declare vReturnDCPRefID = f8 with noconstant(0.0)
+	
+	select into "nl:"
+	from
+		dcp_forms_ref dfr
+	plan dfr
+		where dfr.description = vPowerFormDesc
+		and   dfr.active_ind = 1
+		and   cnvtdatetime(curdate,curtime3) between dfr.beg_effective_dt_tm and dfr.end_effective_dt_tm
+	order by
+		dfr.description
+		,dfr.beg_effective_dt_tm desc
+	head dfr.description
+		vReturnDCPRefID = dfr.dcp_forms_ref_id
+	with nocounter
+	
+	return (vReturnDCPRefID)
+end ;sGetPowerFormRefbyDesc
+
+/**********************************************************************************************************************
+** Function sMostRecentPowerForm(vPersonID,vEncntrID,vDCPRefID,vLookbackDays)
+** ---------------------------------------------------------------------------------------
+** Return a dcp_forms_activity_id for a given patient, encounter and PowerForm.  Leave vEncntrID 0.0 to
+** search all encounters
+**********************************************************************************************************************/
+declare sMostRecentPowerForm(vPersonID=f8,vEncntrID=f8,vDCPRefID=f8,vLookbackDays=i4(VALUE,0)) = f8 with copy, persist
+subroutine sMostRecentPowerForm(vPersonID,vEncntrID,vDCPRefID,vLookbackDays)
+
+	call SubroutineLog(build2(^start sMostRecentPowerForm(	^,vPersonID,^,^,vDCPRefID,^,^,vDCPRefID,^,^,vLookbackDays,^)^))
+	
+	declare vReturnDCPActID = f8 with noconstant(0.0)
+	declare encntrParser = vc with noconstant("1=1")
+	
+	if (vEncntrID > 0.0)
+		set encntrParser = build2("dfa.encntr_id = ",vEncntrID)
+	endif
+	
+	select into "nl:"
+	from
+    	 dcp_forms_activity dfa
+    	,dcp_forms_ref dfr
+	plan dfr
+		where dfr.dcp_forms_ref_id = vDCPRefID
+	join dfa 
+		where dfa.dcp_forms_ref_id 	= dfr.dcp_forms_ref_id
+	    and dfa.active_ind 			= 1
+	    and dfa.person_id 			= vPersonID
+	    and parser(encntrParser)
+	    and dfa.form_status_cd in(
+	    								 value(uar_get_code_by("MEANING", 8, "AUTH"))
+	                              		,value(uar_get_code_by("MEANING", 8, "MODIFIED"))
+	                              )
+		order by
+			 dfa.dcp_forms_ref_id
+			,dfa.form_dt_tm desc
+		head dfa.dcp_forms_ref_id
+			vReturnDCPActID = dfa.dcp_forms_activity_id
+		with nocounter
+	
+	return (vReturnDCPActID)
+end
+
 /**********************************************************************************************************************
 ** Function ()
 ** ---------------------------------------------------------------------------------------
 ** Return a record structure named  
 **********************************************************************************************************************/
 
-declare Add_CEResult(vEncntrID=f8,vEventCD=f8,vResult=vc,vEventDateTime=dq8(VALUE,cnvtdatetime(sysdate))) = f8 with copy, persist
-subroutine Add_CEResult(vEncntrID,vEventCD,vResult,vEventDateTime)
 
+declare Add_CEResult(
+						 vEncntrID=f8
+						,vEventCD=f8
+						,vResult=vc
+						,vEventDateTime=dq8(VALUE,sysdate)
+						,vEventClass=vc(VALUE,"TXT")
+		) = f8 with copy, persist	
+						
+subroutine Add_CEResult(vEncntrID,vEventCD,vResult,vEventDateTime,vEventClass)
+	
+	call SubroutineLog(build2(^start Add_CEResult(	^,vEncntrID,^,^
+													 ,vEventCD,^,^
+													 ,vResult,^,^
+													 ,vEventDateTime,^,^
+												  	 ,vEventClass,^)^))
+	
 	declare vReturnSuccess = f8 with noconstant(FALSE)
  
 	if ((vEventCD > 0.0) and (vEncntrID > 0.0) and (vResult > ""))
@@ -63,7 +151,7 @@ subroutine Add_CEResult(vEncntrID,vEventCD,vResult,vEventDateTime)
 			cerequest->clin_event.person_id = e.person_id
 			cerequest->clin_event.encntr_id = e.encntr_id
 			cerequest->clin_event.contributor_system_cd = uar_get_code_by("MEANING",89,"POWERCHART")
-			cerequest->clin_event.event_class_cd = uar_get_code_by("MEANING",53,"TXT")
+			cerequest->clin_event.event_class_cd = uar_get_code_by("MEANING",53,vEventClass)
 			cerequest->clin_event.event_cd = vEventCD
 			cerequest->clin_event.event_tag = vResult
 			cerequest->clin_event.event_start_dt_tm = vEventDateTime
