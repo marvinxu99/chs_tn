@@ -27,6 +27,10 @@ Mod   Mod Date    Developer              Comment
 drop program cov_eks_template:dba go
 create program cov_eks_template:dba
 
+execute cov_std_log_routines
+
+call SubroutineLog(build2("starting ",trim(curprog)))
+
 set retval = -1
 
 free record t_rec
