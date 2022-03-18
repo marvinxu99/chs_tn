@@ -27,13 +27,19 @@ Mod   Mod Date    Developer              Comment
 drop program cov_cdi_routines:dba go
 create program cov_cdi_routines:dba
 
-
 call echo(build2("starting ",trim(cnvtlower(curprog))))
+
+execute cov_std_log_routines
  
 declare i=i4 with noconstant(0), protect
 declare j=i4 with noconstant(0), protect
 declare k=i4 with noconstant(0), protect
+declare str= vc with noconstant(" "), protect
+declare notfnd= vc with constant("<not_found>"), protect
+declare pos= i4 with noconstant(0), protect
 
+call SubroutineLog(build2("notfnd=",notfnd))
+call SubroutineLog(build2("str=",str))
 
 /**********************************************************************************************************************
 ** Function VALIDATE_CDI_CODE_VALUE(code_value)
@@ -122,6 +128,7 @@ subroutine get_cdi_code_query_def(null)
 		  3	code_value	= f8
 		  3 display		= vc
 		  3 description	= vc
+		  3 definition  = vc
 		  3 icd10code	= vc
 		  3 snomedcode 	= vc
 		  3 uuid		= vc
@@ -130,6 +137,14 @@ subroutine get_cdi_code_query_def(null)
 		  3 start_pos	= i4
 		  3 end_pos		= i4
 		  3 checked_value = vc
+		  3 codes_cnt = i4
+	  	  3 codes[*]
+	   		4 diag_nomenclature_id = f8
+	   		4 snomed_nomenclature_id = f8
+	   		4 icd10code	= vc
+	   		4 snomedcode = vc
+	   		4 icd10_ind = i4
+	   		4 snomed_ind = i4
  	)
  	
  	select into "nl:"
@@ -166,6 +181,9 @@ subroutine get_cdi_code_query_def(null)
 	head report
 		i = 0
 		j = 0
+		pos = 0
+		notfnd = "<not_found>"
+		str=fillstring(100," ")
 	head cv.code_value
 		j = 0
 		i = (i + 1)
@@ -179,10 +197,49 @@ subroutine get_cdi_code_query_def(null)
 		stat = alterlist(cdi_definition->query_qual[i].code_qual,j)
 		cdi_definition->query_qual[i].code_qual[j].code_value	= c.code_value
 		cdi_definition->query_qual[i].code_qual[j].display		= c.display
-		cdi_definition->query_qual[i].code_qual[j].icd10code		= piece(c.definition,";",1,"<notfound>")
-		cdi_definition->query_qual[i].code_qual[j].snomedcode	= piece(c.definition,";",2,"<notfound>")
+		cdi_definition->query_qual[i].code_qual[j].definition	= c.definition
+		cdi_definition->query_qual[i].code_qual[j].icd10code	= piece(c.definition,";",1,notfnd)
+		cdi_definition->query_qual[i].code_qual[j].snomedcode	= piece(c.definition,";",2,notfnd)
 		cdi_definition->query_qual[i].code_qual[j].description	= c.description
 		cdi_definition->query_qual[i].code_qual[j].uuid			= ce.field_value
+		
+		call SubroutineLog(build2("notfnd=",notfnd))
+		call SubroutineLog(build2("str=",str))
+		
+		pos = 0
+		cnt = 0
+		if (piece(cdi_definition->query_qual[i].code_qual[j].icd10code,"%",1,notfnd) != notfnd)
+			pos = 1
+			str = " "
+			while (str != notfnd)
+				str = piece(cdi_definition->query_qual[i].code_qual[j].icd10code,'%',pos,notfnd)
+				call SubroutineLog(build2("->pos=",pos))
+				call SubroutineLog(build2("->str=",str))
+				if (str != notfnd)
+					cnt = (cnt + 1)
+					stat = alterlist(cdi_definition->query_qual[i].code_qual[j].codes,cnt)
+					cdi_definition->query_qual[i].code_qual[j].codes[cnt].icd10_ind = 1
+					cdi_definition->query_qual[i].code_qual[j].codes[cnt].icd10code = str
+				endif
+				pos = pos+1
+			endwhile
+		endif
+	
+		if (piece(cdi_definition->query_qual[i].code_qual[j].snomedcode,"%",1,notfnd) != notfnd)
+			pos = 1
+			str = ""
+			while (str != notfnd)
+				str = piece(cdi_definition->query_qual[i].code_qual[j].snomedcode,'%',pos,notfnd)
+				if (str != notfnd)
+					cnt = (cnt + 1)
+					stat = alterlist(cdi_definition->query_qual[i].code_qual[j].codes,cnt)
+					cdi_definition->query_qual[i].code_qual[j].codes[cnt].snomed_ind = 1
+					cdi_definition->query_qual[i].code_qual[j].codes[cnt].snomedcode = str
+				endif
+				pos = pos+1
+			endwhile
+		endif
+		cdi_definition->query_qual[i].code_qual[j].codes_cnt = cnt
 	foot cv.code_value	
 		cdi_definition->query_qual[i].code_cnt = j
 	foot report
@@ -194,39 +251,47 @@ subroutine get_cdi_code_query_def(null)
 	from
 		 (dummyt d1 with seq=cdi_definition->query_cnt)
 		,(dummyt d2)
+		,(dummyt d3)
 		,nomenclature n
 	plan d1
 		where maxrec(d2,cdi_definition->query_qual[d1.seq].code_cnt)
 	join d2
-	join n
-		where n.source_identifier = cdi_definition->query_qual[d1.seq].code_qual[d2.seq].icd10code
+		where maxrec(d3,cdi_definition->query_qual[d1.seq].code_qual[d2.seq].codes_cnt)
+	join d3
+		join n
+		where n.source_identifier = cdi_definition->query_qual[d1.seq].code_qual[d2.seq].codes[d3.seq].icd10code
 		and   n.source_vocabulary_cd = value(uar_get_code_by("DISPLAY",400,"ICD-10-CM")) 
 		and   n.active_ind = 1
 		and   cnvtdatetime(curdate,curtime3) between n.beg_effective_dt_tm and n.end_effective_dt_tm
 	order by
 		n.beg_effective_dt_tm
 	detail
-		cdi_definition->query_qual[d1.seq].code_qual[d2.seq].diag_nomenclature_id = n.nomenclature_id
+		cdi_definition->query_qual[d1.seq].code_qual[d2.seq].codes[d3.seq].diag_nomenclature_id = n.nomenclature_id
 	with nocounter
 	
 	select into "nl:"
 	from
 		 (dummyt d1 with seq=cdi_definition->query_cnt)
-		,(dummyt d2)
+		,(dummyt d2)		
+		,(dummyt d3)
 		,nomenclature n
 	plan d1
 		where maxrec(d2,cdi_definition->query_qual[d1.seq].code_cnt)
 	join d2
-	join n
-		where n.source_identifier = cdi_definition->query_qual[d1.seq].code_qual[d2.seq].snomedcode
+		where maxrec(d3,cdi_definition->query_qual[d1.seq].code_qual[d2.seq].codes_cnt)
+	join d3
+		join n
+		where n.source_identifier = cdi_definition->query_qual[d1.seq].code_qual[d2.seq].codes[d3.seq].snomedcode
 		and   n.source_vocabulary_cd = value(uar_get_code_by("DISPLAY",400,"SNOMED CT")) 
 		and   n.active_ind = 1
 		and   cnvtdatetime(curdate,curtime3) between n.beg_effective_dt_tm and n.end_effective_dt_tm
 	order by
 		n.beg_effective_dt_tm
 	detail
-		cdi_definition->query_qual[d1.seq].code_qual[d2.seq].snomed_nomenclature_id = n.nomenclature_id
+		cdi_definition->query_qual[d1.seq].code_qual[d2.seq].codes[d3.seq].snomed_nomenclature_id = n.nomenclature_id
 	with nocounter
+	
+	call SubroutineLog("cdi_definition","record")
 	
  	set vReturnJSON = cnvtrectojson(cdi_definition)
 	return (vReturnJSON)

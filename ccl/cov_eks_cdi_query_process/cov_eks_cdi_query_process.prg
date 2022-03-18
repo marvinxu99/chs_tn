@@ -90,6 +90,12 @@ record t_rec
 	  3 start_pos	= i4
 	  3 end_pos		= i4
 	  3 checked_value = vc
+	  3 codes_cnt = i4
+	  3 codes[*]
+	   4 diag_nomenclature_id = f8
+	   4 snomed_nomenclature_id = f8
+	   4 icd10code	= vc
+	   4 snomedcode = vc
 	1 prompts
 	 2 outdev		= vc
 	 2 eventid		= f8
@@ -195,8 +201,12 @@ order by
 head report
 	i = 0
 	j = 0
+	pos = 0
+	cnt = 0
 head cv.code_value
 	j = 0
+	pos = 0
+	cnt = 0
 	i = (i + 1)
 	stat = alterlist(t_rec->query_qual,i)
 	t_rec->query_qual[i].code_value		= cv.code_value
@@ -213,6 +223,37 @@ detail
 	t_rec->query_qual[i].code_qual[j].definition	= c.definition
 	t_rec->query_qual[i].code_qual[j].description	= c.description
 	t_rec->query_qual[i].code_qual[j].uuid			= ce.field_value
+	
+	pos = 0
+	cnt = 0
+	if (piece(t_rec->query_qual[i].code_qual[j].icd10code,"%",1,notfnd) != notfnd)
+		pos = 1
+		str = ""
+		while (str != notfnd)
+			str = piece(t_rec->query_qual[i].code_qual[j].icd10code,'%',pos,notfnd)
+			if (str != notfnd)
+				cnt = (cnt + 1)
+				stat = alterlist(t_rec->query_qual[i].code_qual[j].codes,cnt)
+				t_rec->query_qual[i].code_qual[j].codes[cnt].icd10code = str
+			endif
+			pos = pos+1
+		endwhile
+	endif
+
+	if (piece(t_rec->query_qual[i].code_qual[j].snomedcode,"%",1,notfnd) != notfnd)
+		pos = 1
+		str = ""
+		while (str != notfnd)
+			str = piece(t_rec->query_qual[i].code_qual[j].snomedcode,'%',pos,notfnd)
+			if (str != notfnd)
+				cnt = (cnt + 1)
+				stat = alterlist(t_rec->query_qual[i].code_qual[j].codes,cnt)
+				t_rec->query_qual[i].code_qual[j].codes[cnt].snomedcode = str
+			endif
+			pos = pos+1
+		endwhile
+	endif
+	
 foot cv.code_value	
 	t_rec->query_qual[i].code_cnt = j
 foot report
@@ -224,12 +265,15 @@ select into "nl:"
 from
 	 (dummyt d1 with seq=t_rec->query_cnt)
 	,(dummyt d2)
+	,(dummyt d3)
 	,nomenclature n
 plan d1
 	where maxrec(d2,t_rec->query_qual[d1.seq].code_cnt)
 join d2
+	where maxrec(d3,t_rec->query_qual[d1.seq].code_qual[d2.seq].codes_cnt)
+join d3
 join n
-	where n.source_identifier = t_rec->query_qual[d1.seq].code_qual[d2.seq].icd10code
+	where n.source_identifier = t_rec->query_qual[d1.seq].code_qual[d2.seq].codes[d3.seq].icd10code
 	and   n.source_vocabulary_cd = value(uar_get_code_by("DISPLAY",400,"ICD-10-CM")) 
 	and   n.active_ind = 1
 	and   cnvtdatetime(curdate,curtime3) between n.beg_effective_dt_tm and n.end_effective_dt_tm
@@ -243,12 +287,15 @@ select into "nl:"
 from
 	 (dummyt d1 with seq=t_rec->query_cnt)
 	,(dummyt d2)
+	,(dummyt d3)
 	,nomenclature n
 plan d1
 	where maxrec(d2,t_rec->query_qual[d1.seq].code_cnt)
 join d2
+	where maxrec(d3,t_rec->query_qual[d1.seq].code_qual[d2.seq].codes_cnt)
+join d3
 join n
-	where n.source_identifier = t_rec->query_qual[d1.seq].code_qual[d2.seq].snomedcode
+	where n.source_identifier = t_rec->query_qual[d1.seq].code_qual[d2.seq].codes[d3.seq].snomedcode
 	and   n.source_vocabulary_cd = value(uar_get_code_by("DISPLAY",400,"SNOMED CT")) 
 	and   n.active_ind = 1
 	and   cnvtdatetime(curdate,curtime3) between n.beg_effective_dt_tm and n.end_effective_dt_tm
