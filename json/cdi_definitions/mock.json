@@ -1,1319 +1,2441 @@
-{"CDI_DEFINITION":{
-    "QUERY_CNT":16,
-    "QUERY_QUAL":[
-    {
-     "CODE_VALUE":3886338215.000000,
-     "DISPLAY":"Sepsis Diagnosis Review",
-     "DEFINITION":"Sepsis Diagnosis Review",
-     "CODING_SECTION":"select all that apply:",
-     "CODE_CNT":3,
-     "CODE_QUAL":[
-     {
-      "CODE_VALUE":3886338993.000000,
-      "DISPLAY":"Still to be confirmed A41.9",
-      "DESCRIPTION":"Still to be confirmed",
-      "ICD10CODE":"A41.9",
-      "SNOMEDCODE":"151281010",
-      "UUID":"6961564d-6a6a-4e22-9125-496f5696ad3d",
-      "DIAG_NOMENCLATURE_ID":13246904.000000,
-      "SNOMED_NOMENCLATURE_ID":7214990.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3886334305.000000,
-      "DISPLAY":"Ruled In A41.9",
-      "DESCRIPTION":"Ruled In",
-      "ICD10CODE":"A41.9",
-      "SNOMEDCODE":"151281010",
-      "UUID":"c3d78483-8651-46a4-84fe-893bf20314fb",
-      "DIAG_NOMENCLATURE_ID":13246904.000000,
-      "SNOMED_NOMENCLATURE_ID":7214990.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3886338757.000000,
-      "DISPLAY":"Resolved A41.9",
-      "DESCRIPTION":"Resolved",
-      "ICD10CODE":"A41.9",
-      "SNOMEDCODE":"151281010",
-      "UUID":"9bf798a2-b221-4c25-894c-1e466e58e3e1",
-      "DIAG_NOMENCLATURE_ID":13246904.000000,
-      "SNOMED_NOMENCLATURE_ID":7214990.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     }
-     ]
-    },
-    {
-     "CODE_VALUE":3888323189.000000,
-     "DISPLAY":"Pneumonia",
-     "DEFINITION":"Pneumonia",
-     "CODING_SECTION":"select the organism being treated:",
-     "CODE_CNT":11,
-     "CODE_QUAL":[
-     {
-      "CODE_VALUE":3888323265.000000,
-      "DISPLAY":"E. Coli J15.5",
-      "DESCRIPTION":"E. Coli",
-      "ICD10CODE":"J15.5",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"6735fe51-1fa9-478d-8221-29b02fffc186",
-      "DIAG_NOMENCLATURE_ID":13260531.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3888321805.000000,
-      "DISPLAY":"Other streptococci J15.4",
-      "DESCRIPTION":"Other streptococci",
-      "ICD10CODE":"J15.4",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"7202e5d5-3137-408c-9ecf-8dc6b2e311cf",
-      "DIAG_NOMENCLATURE_ID":13260530.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3888321783.000000,
-      "DISPLAY":"Streptococcus pneumoniae J13",
-      "DESCRIPTION":"Streptococcus pneumoniae",
-      "ICD10CODE":"J13",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"482e6cd2-207b-4ff1-beb2-90f68b4ee981",
-      "DIAG_NOMENCLATURE_ID":13260518.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3888323317.000000,
-      "DISPLAY":"Unknown gram negative pneumonia J15.6",
-      "DESCRIPTION":"Unknown gram negative pneumonia",
-      "ICD10CODE":"J15.6",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"e5261af5-80bb-4aaa-bf71-720f234f6641",
-      "DIAG_NOMENCLATURE_ID":283294349.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3888321815.000000,
-      "DISPLAY":"Unknown gram positive pneumonia J15.9",
-      "DESCRIPTION":"Unknown gram positive pneumonia",
-      "ICD10CODE":"J15.9",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"42db4ad9-b81a-459d-a666-30355657b31c",
-      "DIAG_NOMENCLATURE_ID":13260637.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3888321865.000000,
-      "DISPLAY":"Aspiration pneumonia J69.0",
-      "DESCRIPTION":"Aspiration pneumonia",
-      "ICD10CODE":"J69.0",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"526ffff2-defb-4618-8316-7b5f12482225",
-      "DIAG_NOMENCLATURE_ID":13261215.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3888323327.000000,
-      "DISPLAY":"Unable to determine J18.9",
-      "DESCRIPTION":"Unable to determine",
-      "ICD10CODE":"J18.9",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"8feedf63-aa21-437a-ad69-217d49e620e9",
-      "DIAG_NOMENCLATURE_ID":13260647.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3888321851.000000,
-      "DISPLAY":"Pseudomonas J15.1",
-      "DESCRIPTION":"Pseudomonas",
-      "ICD10CODE":"J15.1",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"17bd7d0e-0840-4a81-b483-322c75959de4",
-      "DIAG_NOMENCLATURE_ID":13260522.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3888323307.000000,
-      "DISPLAY":"Klebsiella pneumoniae J15.0",
-      "DESCRIPTION":"Klebsiella pneumoniae",
-      "ICD10CODE":"J15.0",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"9c026c3c-b0f7-44b3-b942-dc52c385183b",
-      "DIAG_NOMENCLATURE_ID":13260521.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3888321729.000000,
-      "DISPLAY":"MRSA J152.12",
-      "DESCRIPTION":"MRSA",
-      "ICD10CODE":"J152.12",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"5ec06823-3174-4650-b9a0-dee470dd05d0",
-      "DIAG_NOMENCLATURE_ID":0.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3888321835.000000,
-      "DISPLAY":"Hemophilus influenzae J14",
-      "DESCRIPTION":"Hemophilus influenzae",
-      "ICD10CODE":"J14",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"d25bd481-20f9-47b0-bc36-34be911d17ae",
-      "DIAG_NOMENCLATURE_ID":13260519.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     }
-     ]
-    },
-    {
-     "CODE_VALUE":3888327185.000000,
-     "DISPLAY":"Organ Dysfunction and Sepsis",
-     "DEFINITION":"Organ Dysfunction&#xa0;and Sepsis",
-     "CODING_SECTION":"select all that apply:",
-     "CODE_CNT":6,
-     "CODE_QUAL":[
-     {
-      "CODE_VALUE":3888324711.000000,
-      "DISPLAY":"No,the organ dysfunction is due to A41.9",
-      "DESCRIPTION":"No, the organ dysfunction is due to (specify):",
-      "ICD10CODE":"A41.9",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"59c869b7-067a-4a0b-a773-56b0abe5e245",
-      "DIAG_NOMENCLATURE_ID":13246904.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3888327287.000000,
-      "DISPLAY":"Unable to determine A41.9",
-      "DESCRIPTION":"Unable to determine",
-      "ICD10CODE":"A41.9",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"88ef61a3-8516-4789-9632-197205899e59",
-      "DIAG_NOMENCLATURE_ID":13246904.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3888327241.000000,
-      "DISPLAY":"Yes; sepsis with severe sepsis R65.20",
-      "DESCRIPTION":"Yes; sepsis with severe sepsis",
-      "ICD10CODE":"R65.20",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"e22414a9-c344-4cdc-b78f-8eb2afb0c39d",
-      "DIAG_NOMENCLATURE_ID":13270975.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3888327269.000000,
-      "DISPLAY":"Yes; sepsis with septic shock A41.9",
-      "DESCRIPTION":"Yes; sepsis with septic shock",
-      "ICD10CODE":"A41.9",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"e991dd89-e4b0-427c-9820-34aeda12683c",
-      "DIAG_NOMENCLATURE_ID":13246904.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3888324699.000000,
-      "DISPLAY":"Yes; sepsis with septic shock R65.21",
-      "DESCRIPTION":"Yes; sepsis with septic shock",
-      "ICD10CODE":"R65.21",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"e991dd89-e4b0-427c-9820-34aeda12683c",
-      "DIAG_NOMENCLATURE_ID":13270976.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3888327223.000000,
-      "DISPLAY":"Yes; sepsis with severe sepsis A41.9",
-      "DESCRIPTION":"Yes; sepsis with severe sepsis",
-      "ICD10CODE":"A41.9",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"e22414a9-c344-4cdc-b78f-8eb2afb0c39d",
-      "DIAG_NOMENCLATURE_ID":13246904.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     }
-     ]
-    },
-    {
-     "CODE_VALUE":3888329561.000000,
-     "DISPLAY":"Encephalopathy",
-     "DEFINITION":"Encephalopathy",
-     "CODING_SECTION":"select all that apply",
-     "CODE_CNT":7,
-     "CODE_QUAL":[
-     {
-      "CODE_VALUE":3888329571.000000,
-      "DISPLAY":"Toxic Encephalopathy G92",
-      "DESCRIPTION":"Toxic Encephalopathy",
-      "ICD10CODE":"G92",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"03d0c5b3-41d4-4062-b19b-c688a83170e7",
-      "DIAG_NOMENCLATURE_ID":13255586.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3888329599.000000,
-      "DISPLAY":"Chronic K72.10",
-      "DESCRIPTION":"Chronic",
-      "ICD10CODE":"K72.10",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"c2a94d29-a73d-4fda-90f2-5c58f2c76b39",
-      "DIAG_NOMENCLATURE_ID":13257870.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3888325953.000000,
-      "DISPLAY":"Acute K72.00",
-      "DESCRIPTION":"Acute",
-      "ICD10CODE":"K72.00",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"c15cb2df-181c-46f5-b9c6-cea89fdb449d",
-      "DIAG_NOMENCLATURE_ID":13257867.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3888329623.000000,
-      "DISPLAY":"Hypertensive Encephalopathy I67.4",
-      "DESCRIPTION":"Hypertensive Encephalopathy",
-      "ICD10CODE":"I67.4",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"34ce8bb3-d8c6-481f-94f5-dc09ecceecf2",
-      "DIAG_NOMENCLATURE_ID":13259894.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3888329653.000000,
-      "DISPLAY":"Hypoxic\/Anoxic encephalopathy G93.1",
-      "DESCRIPTION":"Hypoxic\/Anoxic encephalopathy (Permanent)",
-      "ICD10CODE":"G93.1",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"63832499-4134-427e-ad3d-4393368a9afd",
-      "DIAG_NOMENCLATURE_ID":13255589.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3888325849.000000,
-      "DISPLAY":"Metabolic Encephalopathy G93.41",
-      "DESCRIPTION":"Metabolic Encephalopathy",
-      "ICD10CODE":"G93.41",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"b2b5d6f7-7c85-444a-8304-1dbcac690802",
-      "DIAG_NOMENCLATURE_ID":13255594.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3888329587.000000,
-      "DISPLAY":"Septic Encephalopathy G93.41",
-      "DESCRIPTION":"Septic Encephalopathy",
-      "ICD10CODE":"G93.41",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"fae497c8-6f89-42fc-9965-65657f2fabf9",
-      "DIAG_NOMENCLATURE_ID":13255594.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     }
-     ]
-    },
-    {
-     "CODE_VALUE":3888992849.000000,
-     "DISPLAY":"Impaired Gas Exchange",
-     "DEFINITION":"Impaired Gas Exchange",
-     "CODING_SECTION":"select all that apply:",
-     "CODE_CNT":7,
-     "CODE_QUAL":[
-     {
-      "CODE_VALUE":3888999597.000000,
-      "DISPLAY":"Hypercapnic Chronic J96.12",
-      "DESCRIPTION":"Hypercapnic Chronic",
-      "ICD10CODE":"J96.12",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"483c5243-fd92-4d03-a905-d7f165884982",
-      "DIAG_NOMENCLATURE_ID":13261728.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3888995117.000000,
-      "DISPLAY":"Hypercapnic Acute J96.02",
-      "DESCRIPTION":"Hypercapnic Acute",
-      "ICD10CODE":"J96.02",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"52606ceb-aabd-427f-9f94-a6999e1e21ee",
-      "DIAG_NOMENCLATURE_ID":13261627.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3888996373.000000,
-      "DISPLAY":"Hypercapnic Hypoxia R09.02",
-      "DESCRIPTION":"Hypercapnic Hypoxia",
-      "ICD10CODE":"R09.02",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"9457c6bc-aa7a-4b01-bc01-71c8dad84f1a",
-      "DIAG_NOMENCLATURE_ID":13271510.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3888994831.000000,
-      "DISPLAY":"Hypoxemic Acute on Chronic J96.21",
-      "DESCRIPTION":"Hypoxemic Acute on Chronic",
-      "ICD10CODE":"J96.21",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"422069e9-cb2f-4e69-9336-f8a9532b7010",
-      "DIAG_NOMENCLATURE_ID":13261731.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3888993535.000000,
-      "DISPLAY":"Hypoxemic Acute J96.01",
-      "DESCRIPTION":"Hypoxemic Acute",
-      "ICD10CODE":"J96.01",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"13465792-b3c3-4ae5-974f-cc52c5871f0b",
-      "DIAG_NOMENCLATURE_ID":13261626.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3888996179.000000,
-      "DISPLAY":"Hypercapnic Acute on Chronic J96.22",
-      "DESCRIPTION":"Hypercapnic Acute on Chronic",
-      "ICD10CODE":"J96.22",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"e7834703-3357-4ed5-8f61-59903d1832a3",
-      "DIAG_NOMENCLATURE_ID":13261732.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3888994447.000000,
-      "DISPLAY":"Hypoxemic Chronic J96.11",
-      "DESCRIPTION":"Hypoxemic Chronic",
-      "ICD10CODE":"J96.11",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"cb2c0527-ccfd-467a-ba5e-0207ea325cd6",
-      "DIAG_NOMENCLATURE_ID":13261727.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     }
-     ]
-    },
-    {
-     "CODE_VALUE":3889260887.000000,
-     "DISPLAY":"Acuity of Congestive Heart Failure, Syst",
-     "DEFINITION":"Acuity of Congestive Heart Failure, Systolic",
-     "CODING_SECTION":"select all that apply:",
-     "CODE_CNT":4,
-     "CODE_QUAL":[
-     {
-      "CODE_VALUE":3889264659.000000,
-      "DISPLAY":"Chronic I50.22",
-      "DESCRIPTION":"Chronic",
-      "ICD10CODE":"I50.22",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"9c418472-fce9-4c0a-a10b-4f9aef046e2b",
-      "DIAG_NOMENCLATURE_ID":13254507.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3889264573.000000,
-      "DISPLAY":"Acute I50.21",
-      "DESCRIPTION":"Acute",
-      "ICD10CODE":"I50.21",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"fb022c0b-3124-46b9-a29c-df221b834cb0",
-      "DIAG_NOMENCLATURE_ID":13254506.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3889264715.000000,
-      "DISPLAY":"Acute on Chronic I50.23",
-      "DESCRIPTION":"Acute on Chronic",
-      "ICD10CODE":"I50.23",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"94b03dbd-b2ca-4fe6-9195-8f99ec28aea7",
-      "DIAG_NOMENCLATURE_ID":13254508.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3889264895.000000,
-      "DISPLAY":"Unable to determine I50.20",
-      "DESCRIPTION":"Unable to determine",
-      "ICD10CODE":"I50.20",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"caae30e7-e115-4a8c-bc2a-82c79e95cf81",
-      "DIAG_NOMENCLATURE_ID":13254505.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     }
-     ]
-    },
-    {
-     "CODE_VALUE":3889270001.000000,
-     "DISPLAY":"Acuity of Congestive Heart Failure, Dias",
-     "DEFINITION":"Acuity of Congestive Heart Failure, Diastolic",
-     "CODING_SECTION":"select all that apply:",
-     "CODE_CNT":4,
-     "CODE_QUAL":[
-     {
-      "CODE_VALUE":3889270239.000000,
-      "DISPLAY":"Acute I50.31",
-      "DESCRIPTION":"Acute",
-      "ICD10CODE":"I50.31",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"9241f9a2-1bd1-4e1e-ad8d-270af9481a82",
-      "DIAG_NOMENCLATURE_ID":13254511.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3889274353.000000,
-      "DISPLAY":"Chronic I50.32",
-      "DESCRIPTION":"Chronic",
-      "ICD10CODE":"I50.32",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"5704eeb4-ed91-4f6e-b725-c2ab7d7e0d5d",
-      "DIAG_NOMENCLATURE_ID":13254512.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3889275209.000000,
-      "DISPLAY":"Unable to determine I50.30",
-      "DESCRIPTION":"Unable to determine",
-      "ICD10CODE":"I50.30",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"a6897c8c-f177-4815-8898-f53364535678",
-      "DIAG_NOMENCLATURE_ID":13254510.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3889274855.000000,
-      "DISPLAY":"Acute on Chronic I50.33",
-      "DESCRIPTION":"Acute on Chronic",
-      "ICD10CODE":"I50.33",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"f0972f01-0a51-4c68-81fb-ef6abb25724f",
-      "DIAG_NOMENCLATURE_ID":13254513.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     }
-     ]
-    },
-    {
-     "CODE_VALUE":3889502455.000000,
-     "DISPLAY":"Acuity of Congestive Heart Failure, Comb",
-     "DEFINITION":"Acuity of Congestive Heart Failure, Combined Diastolic\/Systolic",
-     "CODING_SECTION":"select all that apply:",
-     "CODE_CNT":4,
-     "CODE_QUAL":[
-     {
-      "CODE_VALUE":3889498055.000000,
-      "DISPLAY":"Unable to determine I50.40",
-      "DESCRIPTION":"Unable to determine",
-      "ICD10CODE":"I50.40",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"6e86e750-1238-424c-8c46-26da055c40a1",
-      "DIAG_NOMENCLATURE_ID":13254515.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3889503251.000000,
-      "DISPLAY":"Acute on Chronic I50.43",
-      "DESCRIPTION":"Acute on Chronic",
-      "ICD10CODE":"I50.43",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"6f3b320c-9f0e-4945-8a4a-72f7334d9b30",
-      "DIAG_NOMENCLATURE_ID":13254518.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3889502755.000000,
-      "DISPLAY":"Acute I50.41",
-      "DESCRIPTION":"Acute",
-      "ICD10CODE":"I50.41",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"7b64296b-9b03-4ef0-8225-e346163f1270",
-      "DIAG_NOMENCLATURE_ID":13254516.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3889503145.000000,
-      "DISPLAY":"Chronic I50.42",
-      "DESCRIPTION":"Chronic",
-      "ICD10CODE":"I50.42",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"c60d2003-33f8-4572-9e2a-cf5d70480132",
-      "DIAG_NOMENCLATURE_ID":13254517.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     }
-     ]
-    },
-    {
-     "CODE_VALUE":3889512591.000000,
-     "DISPLAY":"Type of Congestive Heart Failure, Chroni",
-     "DEFINITION":"Type of Congestive Heart Failure, Chronic",
-     "CODING_SECTION":"select all&#xa0;that apply:",
-     "CODE_CNT":4,
-     "CODE_QUAL":[
-     {
-      "CODE_VALUE":3889513309.000000,
-      "DISPLAY":"Combined Systolic\/Diastolic CHF I50.43",
-      "DESCRIPTION":"Combined Systolic\/Diastolic CHF",
-      "ICD10CODE":"I50.43",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"fdfe6173-801c-44af-b79f-23743b387d11",
-      "DIAG_NOMENCLATURE_ID":13254518.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3889516875.000000,
-      "DISPLAY":"Unable to determine I50.9",
-      "DESCRIPTION":"Unable to determine",
-      "ICD10CODE":"I50.9",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"f5a0629c-b480-44a2-bd04-c1e3b68d05c5",
-      "DIAG_NOMENCLATURE_ID":13254519.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3889511295.000000,
-      "DISPLAY":"Systolic CHF I50.22",
-      "DESCRIPTION":"Systolic CHF",
-      "ICD10CODE":"I50.22",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"0692b4c0-1b81-4af4-889f-83354daae5ed",
-      "DIAG_NOMENCLATURE_ID":13254507.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3889513125.000000,
-      "DISPLAY":"Diastolic CHF I50.32",
-      "DESCRIPTION":"Diastolic CHF",
-      "ICD10CODE":"I50.32",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"a52d00d4-0444-4b70-9b28-8a85b320667d",
-      "DIAG_NOMENCLATURE_ID":13254512.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     }
-     ]
-    },
-    {
-     "CODE_VALUE":3889863945.000000,
-     "DISPLAY":"Congestive Heart Failure",
-     "DEFINITION":"Congestive Heart Failure",
-     "CODING_SECTION":"Please select all&#xa0;that apply:",
-     "CODE_CNT":12,
-     "CODE_QUAL":[
-     {
-      "CODE_VALUE":3889926375.000000,
-      "DISPLAY":"Diastolic CHF Chronic I50.32",
-      "DESCRIPTION":"Diastolic CHF Chronic",
-      "ICD10CODE":"I50.32",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"d84265a7-4286-4659-8c94-1c9edd911ce1",
-      "DIAG_NOMENCLATURE_ID":13254512.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3889928005.000000,
-      "DISPLAY":"Combined Systolic\/Diastolic CHF Acute on",
-      "DESCRIPTION":"Combined Systolic\/Diastolic CHF Acute on Chronic",
-      "ICD10CODE":"I50.43",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"de5e5ccf-fe08-4772-9b03-e0191125b5ce",
-      "DIAG_NOMENCLATURE_ID":13254518.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3889926449.000000,
-      "DISPLAY":"End Stage I50.84",
-      "DESCRIPTION":"End Stage",
-      "ICD10CODE":"I50.84",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"423ae9b6-3374-4b1a-ad2a-e2082235c1f4",
-      "DIAG_NOMENCLATURE_ID":283293934.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3889927865.000000,
-      "DISPLAY":"Diastolic CHF Acute I50.31",
-      "DESCRIPTION":"Diastolic CHF Acute",
-      "ICD10CODE":"I50.31",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"e0043e02-7bc4-4f80-8594-62aeb6d5262c",
-      "DIAG_NOMENCLATURE_ID":13254511.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3889928023.000000,
-      "DISPLAY":"Right Heart Failure due to Left Heart Fa",
-      "DESCRIPTION":"Right Heart Failure due to Left Heart Failure",
-      "ICD10CODE":"I50.814",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"dfd3c829-73ce-4081-a11a-7f710cf7eed1",
-      "DIAG_NOMENCLATURE_ID":283293931.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3889864395.000000,
-      "DISPLAY":"Systolic CHF Chronic I50.22",
-      "DESCRIPTION":"Systolic CHF Chronic",
-      "ICD10CODE":"I50.22",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"84868e6f-eaaa-42a2-ab66-f4cc62686a75",
-      "DIAG_NOMENCLATURE_ID":13254507.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3889860775.000000,
-      "DISPLAY":"Systolic CHF Acute I50.21",
-      "DESCRIPTION":"Systolic CHF Acute",
-      "ICD10CODE":"I50.21",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"4bff084d-b046-4a69-a5d1-74c01a718cb3",
-      "DIAG_NOMENCLATURE_ID":13254506.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3889861119.000000,
-      "DISPLAY":"Systolic CHF Acute on Chronic I50.23",
-      "DESCRIPTION":"Systolic CHF Acute on Chronic",
-      "ICD10CODE":"I50.23",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"beca911a-7d5d-4526-beaf-bd16225985e3",
-      "DIAG_NOMENCLATURE_ID":13254508.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3889926459.000000,
-      "DISPLAY":"Unable to determine I50.9",
-      "DESCRIPTION":"Unable to determine",
-      "ICD10CODE":"I50.9",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"2f426d85-9d3a-4f53-a55e-c9c363537703",
-      "DIAG_NOMENCLATURE_ID":13254519.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3889926431.000000,
-      "DISPLAY":"Combined Systolic\/Diastolic CHF Chronic",
-      "DESCRIPTION":"Combined Systolic\/Diastolic CHF Chronic",
-      "ICD10CODE":"I50.42",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"5a43e231-dfe3-4fe2-a9a3-824ffe352454",
-      "DIAG_NOMENCLATURE_ID":13254517.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3889927905.000000,
-      "DISPLAY":"Diastolic CHF Acute on Chronic I50.33",
-      "DESCRIPTION":"Diastolic CHF Acute on Chronic",
-      "ICD10CODE":"I50.33",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"b944dcef-8fd0-40c7-ade3-86273f56f75b",
-      "DIAG_NOMENCLATURE_ID":13254513.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3889926419.000000,
-      "DISPLAY":"Combined Systolic\/Diastolic CHF Acute I5",
-      "DESCRIPTION":"Combined Systolic\/Diastolic CHF Acute",
-      "ICD10CODE":"I50.41",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"e9a33a8d-46cc-48c9-afd2-5300b8380258",
-      "DIAG_NOMENCLATURE_ID":13254516.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     }
-     ]
-    },
-    {
-     "CODE_VALUE":3889926565.000000,
-     "DISPLAY":"Type of Congestive Heart Failure, Acute",
-     "DEFINITION":"Type of Congestive Heart Failure, Acute on Chronic",
-     "CODING_SECTION":"Please&#xa0;select all&#xa0;that apply:",
-     "CODE_CNT":4,
-     "CODE_QUAL":[
-     {
-      "CODE_VALUE":3889926577.000000,
-      "DISPLAY":"Unable to determine I50.9",
-      "DESCRIPTION":"Unable to determine",
-      "ICD10CODE":"I50.9",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"3c527b6f-8ed0-4aeb-b1ed-0d232796fdce",
-      "DIAG_NOMENCLATURE_ID":13254519.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3889929253.000000,
-      "DISPLAY":"Diastolic CHF I50.33",
-      "DESCRIPTION":"Diastolic CHF",
-      "ICD10CODE":"I50.33",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"8eafd8f7-2881-4e8a-a620-de20dec27271",
-      "DIAG_NOMENCLATURE_ID":13254513.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3889929269.000000,
-      "DISPLAY":"Combined Systolic\/Diastolic CHF I50.43",
-      "DESCRIPTION":"Combined Systolic\/Diastolic CHF",
-      "ICD10CODE":"I50.43",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"270e2893-dece-4b3f-9381-515ae0f9a0b2",
-      "DIAG_NOMENCLATURE_ID":13254518.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3889929205.000000,
-      "DISPLAY":"Systolic CHF I50.23",
-      "DESCRIPTION":"Systolic CHF",
-      "ICD10CODE":"I50.23",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"960871d0-2861-405c-b04c-c79f0cfc5c67",
-      "DIAG_NOMENCLATURE_ID":13254508.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     }
-     ]
-    },
-    {
-     "CODE_VALUE":3889953901.000000,
-     "DISPLAY":"Type of Congestive Heart Failure, Acute",
-     "DEFINITION":"Type of Congestive Heart Failure, Acute",
-     "CODING_SECTION":"Please&#xa0;select all&#xa0;that apply:",
-     "CODE_CNT":4,
-     "CODE_QUAL":[
-     {
-      "CODE_VALUE":3889954135.000000,
-      "DISPLAY":"Combined Systolic\/Diastolic CHF I50.41",
-      "DESCRIPTION":"Combined Systolic\/Diastolic CHF",
-      "ICD10CODE":"I50.41",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"cbab98fe-1714-4f9b-9c37-6280883e7c45",
-      "DIAG_NOMENCLATURE_ID":13254516.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3889954111.000000,
-      "DISPLAY":"Diastolic CHF I50.31",
-      "DESCRIPTION":"Diastolic CHF",
-      "ICD10CODE":"I50.31",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"e1433f57-109d-4f30-8f14-e8de43f48d2e",
-      "DIAG_NOMENCLATURE_ID":13254511.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3889954017.000000,
-      "DISPLAY":"Systolic CHF I50.21",
-      "DESCRIPTION":"Systolic CHF",
-      "ICD10CODE":"I50.21",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"b709d6da-d5eb-49b9-9f62-d286066830ea",
-      "DIAG_NOMENCLATURE_ID":13254506.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3889956825.000000,
-      "DISPLAY":"Unable to determine  I50.9",
-      "DESCRIPTION":"Unable to determine",
-      "ICD10CODE":"I50.9",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"c3d87150-ddb9-4be7-b2a3-1efd6395fd2c",
-      "DIAG_NOMENCLATURE_ID":13254519.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     }
-     ]
-    },
-    {
-     "CODE_VALUE":3889958519.000000,
-     "DISPLAY":"CKD Stage",
-     "DEFINITION":"CKD Stage",
-     "CODING_SECTION":"Please select all that apply:",
-     "CODE_CNT":8,
-     "CODE_QUAL":[
-     {
-      "CODE_VALUE":3889958773.000000,
-      "DISPLAY":"CKD, Stage 1 (GFR >90 with evidence of k",
-      "DESCRIPTION":"CKD, Stage 1 (GFR >90 with evidence of kidney damage)",
-      "ICD10CODE":"N18.1",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"e9dc6bd5-0867-47b6-b61c-cc09e6a755e9",
-      "DIAG_NOMENCLATURE_ID":13266230.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3889959269.000000,
-      "DISPLAY":"End Stage Renal Disease (GFR <15 and on",
-      "DESCRIPTION":"End Stage Renal Disease (GFR <15 and on dialysis)",
-      "ICD10CODE":"N18.6",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"4237aa17-14bc-44ad-8f30-4e02f3de7ca9",
-      "DIAG_NOMENCLATURE_ID":13266235.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3889959197.000000,
-      "DISPLAY":"CKD, Stage 5 (GFR <15) N18.5",
-      "DESCRIPTION":"CKD, Stage 5 (GFR <15)",
-      "ICD10CODE":"N18.5",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"bab04e5e-aed8-4286-af1d-407eeb40c94d",
-      "DIAG_NOMENCLATURE_ID":13266234.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3889959037.000000,
-      "DISPLAY":"CKD, Stage 2 (GFR 60-89 with evidence of",
-      "DESCRIPTION":"CKD, Stage 2 (GFR 60-89 with evidence of kidney damage)",
-      "ICD10CODE":"N18.2",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"c207d0f5-34ff-4751-9b42-de0b271902b0",
-      "DIAG_NOMENCLATURE_ID":13266231.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3889961173.000000,
-      "DISPLAY":"CKD, Stage 4 (GFR 12-29) N18.4",
-      "DESCRIPTION":"CKD, Stage 4 (GFR 12-29)",
-      "ICD10CODE":"N18.4",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"7b4c9109-63b4-40b3-8332-d6902b3ded14",
-      "DIAG_NOMENCLATURE_ID":13266233.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3889959307.000000,
-      "DISPLAY":"Unable to determine N18.9",
-      "DESCRIPTION":"Unable to determine",
-      "ICD10CODE":"N18.9",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"217bb4aa-25ec-41a1-8642-2b49d9c8e19e",
-      "DIAG_NOMENCLATURE_ID":13266236.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3889959145.000000,
-      "DISPLAY":"CKD, Stage 3B (GFR 30-44) N18.32",
-      "DESCRIPTION":"CKD, Stage 3B (GFR 30-44)",
-      "ICD10CODE":"N18.32",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"28aeed3c-e791-4c78-8eea-ea3de06b2ad2",
-      "DIAG_NOMENCLATURE_ID":291198577.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3889959115.000000,
-      "DISPLAY":"CKD, Stage 3A (GFR 45-59) N18.31",
-      "DESCRIPTION":"CKD, Stage 3A (GFR 45-59)",
-      "ICD10CODE":"N18.31",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"ec4b3702-0163-47f4-8e32-b1d7a9eab113",
-      "DIAG_NOMENCLATURE_ID":291198404.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     }
-     ]
-    },
-    {
-     "CODE_VALUE":3891703863.000000,
-     "DISPLAY":"Atrial Fibrillation",
-     "DEFINITION":"Atrial Fibrillation",
-     "CODING_SECTION":"Please&#xa0;select all&#xa0;that apply:",
-     "CODE_CNT":4,
-     "CODE_QUAL":[
-     {
-      "CODE_VALUE":3891709533.000000,
-      "DISPLAY":"Long-standing Persistent (I48.11)",
-      "DESCRIPTION":"Long-standing Persistent",
-      "ICD10CODE":"I48.11",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"521c123b-dfa7-4c89-b487-028666377105",
-      "DIAG_NOMENCLATURE_ID":286963712.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3891709331.000000,
-      "DISPLAY":"Chronic Persistent (I48.19)",
-      "DESCRIPTION":"Chronic Persistent",
-      "ICD10CODE":"I48.19",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"47942b29-837e-4245-ba21-6d009a269acb",
-      "DIAG_NOMENCLATURE_ID":286963713.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3891712375.000000,
-      "DISPLAY":"Chronic Permanent (I48.21)",
-      "DESCRIPTION":"Chronic Permanent",
-      "ICD10CODE":"I48.21",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"f1c1e4ae-ca59-4d56-82a6-26a7ee912f62",
-      "DIAG_NOMENCLATURE_ID":286963589.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3891703949.000000,
-      "DISPLAY":"Paroxysmal (I48.0)",
-      "DESCRIPTION":"Paroxysmal",
-      "ICD10CODE":"I48.0",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"2bdc66c0-88be-4181-992d-f484e82d6c17",
-      "DIAG_NOMENCLATURE_ID":13254370.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     }
-     ]
-    },
-    {
-     "CODE_VALUE":3891723347.000000,
-     "DISPLAY":"Anemia",
-     "DEFINITION":"Anemia",
-     "CODING_SECTION":"Please select all that Apply:",
-     "CODE_CNT":4,
-     "CODE_QUAL":[
-     {
-      "CODE_VALUE":3891723779.000000,
-      "DISPLAY":"Iron deficiency D50.9",
-      "DESCRIPTION":"Iron deficiency",
-      "ICD10CODE":"D50.9",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"47aeec75-c697-478c-8bad-1deff5fa1e61",
-      "DIAG_NOMENCLATURE_ID":13250888.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3891723677.000000,
-      "DISPLAY":"Due to blood loss, Chronic D50.0",
-      "DESCRIPTION":"Due to blood loss, Chronic",
-      "ICD10CODE":"D50.0",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"35b7ed19-dc14-45f4-801d-a1fc199acd45",
-      "DIAG_NOMENCLATURE_ID":13250885.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3891723549.000000,
-      "DISPLAY":"Due to blood loss, Acute D62",
-      "DESCRIPTION":"Due to blood loss, Acute",
-      "ICD10CODE":"D62",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"3893c11b-094d-4623-aa97-8ef24983f2c1",
-      "DIAG_NOMENCLATURE_ID":13251576.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3891726347.000000,
-      "DISPLAY":"Unable to determine D64.9",
-      "DESCRIPTION":"Unable to determine",
-      "ICD10CODE":"D64.9",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"33db149e-1ba5-4462-84d3-e4b871214c8d",
-      "DIAG_NOMENCLATURE_ID":13251590.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     }
-     ]
-    },
-    {
-     "CODE_VALUE":3891732179.000000,
-     "DISPLAY":"AMS",
-     "DEFINITION":"AMS",
-     "CODING_SECTION":"Please select all that apply:",
-     "CODE_CNT":4,
-     "CODE_QUAL":[
-     {
-      "CODE_VALUE":3891728195.000000,
-      "DISPLAY":"Metabolic Encephalopathy (G93.41)",
-      "DESCRIPTION":"Metabolic Encephalopathy",
-      "ICD10CODE":"G93.41",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"e4864333-6d85-461c-87ad-260f01a74379",
-      "DIAG_NOMENCLATURE_ID":13255594.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3891736579.000000,
-      "DISPLAY":"Delirium (R41.0)",
-      "DESCRIPTION":"Delirium",
-      "ICD10CODE":"R41.0",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"093c4476-8699-48e9-b24e-0acdf2731d50",
-      "DIAG_NOMENCLATURE_ID":13272648.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3891736489.000000,
-      "DISPLAY":"Toxic Encephalopathy (G92)",
-      "DESCRIPTION":"Toxic Encephalopathy",
-      "ICD10CODE":"G92",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"62c58d37-7ad9-4df6-817b-b62f87f5cd7b",
-      "DIAG_NOMENCLATURE_ID":13255586.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     },
-     {
-      "CODE_VALUE":3891732715.000000,
-      "DISPLAY":"Dementia (F03.90)",
-      "DESCRIPTION":"Dementia",
-      "ICD10CODE":"F03.90",
-      "SNOMEDCODE":"<notfound>",
-      "UUID":"31cdb637-036c-480c-a917-d283f7aa8c44",
-      "DIAG_NOMENCLATURE_ID":13249060.000000,
-      "SNOMED_NOMENCLATURE_ID":0.000000,
-      "START_POS":0,
-      "END_POS":0,
-      "CHECKED_VALUE":""
-     }
-     ]
+{
+    "CDI_DEFINITION":{
+       "QUERY_CNT":16,
+       "QUERY_QUAL":[
+          {
+             "CODE_VALUE":3886338215.000000,
+             "DISPLAY":"Sepsis Diagnosis Review3",
+             "DEFINITION":"Sepsis Diagnosis Review",
+             "CODING_SECTION":"updated by subs",
+             "CODE_CNT":3,
+             "CODE_QUAL":[
+                {
+                   "CODE_VALUE":3886338993.000000,
+                   "DISPLAY":"Still to be confirmed A41.9",
+                   "DESCRIPTION":"Still to be confirmed",
+                   "DEFINITION":"A41.9;151281010",
+                   "ICD10CODE":"A41.9",
+                   "SNOMEDCODE":"151281010",
+                   "UUID":"6961564d-6a6a-4e22-9125-496f5696ad3d",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":2,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13246904.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"A41.9",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      },
+                      {
+                         "DIAG_NOMENCLATURE_ID":0.000000,
+                         "SNOMED_NOMENCLATURE_ID":7214990.000000,
+                         "ICD10CODE":"",
+                         "SNOMEDCODE":"151281010",
+                         "ICD10_IND":0,
+                         "SNOMED_IND":1
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3886334305.000000,
+                   "DISPLAY":"cmc Ruled In A41.9",
+                   "DESCRIPTION":"Ruled In",
+                   "DEFINITION":"A41.9%J15.5;151281010%1234234",
+                   "ICD10CODE":"A41.9%J15.5",
+                   "SNOMEDCODE":"151281010%1234234",
+                   "UUID":"c3d78483-8651-46a4-84fe-893bf20314fb",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":4,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13246904.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"A41.9",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      },
+                      {
+                         "DIAG_NOMENCLATURE_ID":13260531.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"J15.5",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      },
+                      {
+                         "DIAG_NOMENCLATURE_ID":0.000000,
+                         "SNOMED_NOMENCLATURE_ID":7214990.000000,
+                         "ICD10CODE":"",
+                         "SNOMEDCODE":"151281010",
+                         "ICD10_IND":0,
+                         "SNOMED_IND":1
+                      },
+                      {
+                         "DIAG_NOMENCLATURE_ID":0.000000,
+                         "SNOMED_NOMENCLATURE_ID":0.000000,
+                         "ICD10CODE":"",
+                         "SNOMEDCODE":"1234234",
+                         "ICD10_IND":0,
+                         "SNOMED_IND":1
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3886338757.000000,
+                   "DISPLAY":"Resolved A41.9",
+                   "DESCRIPTION":"Resolved",
+                   "DEFINITION":"A41.9;151281010",
+                   "ICD10CODE":"A41.9",
+                   "SNOMEDCODE":"151281010",
+                   "UUID":"9bf798a2-b221-4c25-894c-1e466e58e3e1",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":2,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13246904.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"A41.9",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      },
+                      {
+                         "DIAG_NOMENCLATURE_ID":0.000000,
+                         "SNOMED_NOMENCLATURE_ID":7214990.000000,
+                         "ICD10CODE":"",
+                         "SNOMEDCODE":"151281010",
+                         "ICD10_IND":0,
+                         "SNOMED_IND":1
+                      }
+                   ]
+                }
+             ]
+          },
+          {
+             "CODE_VALUE":3888323189.000000,
+             "DISPLAY":"Pneumonia",
+             "DEFINITION":"Pneumonia",
+             "CODING_SECTION":"select the organism being treated:",
+             "CODE_CNT":11,
+             "CODE_QUAL":[
+                {
+                   "CODE_VALUE":3888323265.000000,
+                   "DISPLAY":"E. Coli J15.5",
+                   "DESCRIPTION":"E. Coli",
+                   "DEFINITION":"J15.5",
+                   "ICD10CODE":"J15.5",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"6735fe51-1fa9-478d-8221-29b02fffc186",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13260531.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"J15.5",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3888321805.000000,
+                   "DISPLAY":"Other streptococci J15.4",
+                   "DESCRIPTION":"Other streptococci",
+                   "DEFINITION":"J15.4",
+                   "ICD10CODE":"J15.4",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"7202e5d5-3137-408c-9ecf-8dc6b2e311cf",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13260530.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"J15.4",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3888321783.000000,
+                   "DISPLAY":"Streptococcus pneumoniae J13",
+                   "DESCRIPTION":"Streptococcus pneumoniae",
+                   "DEFINITION":"J13",
+                   "ICD10CODE":"J13",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"482e6cd2-207b-4ff1-beb2-90f68b4ee981",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13260518.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"J13",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3888323317.000000,
+                   "DISPLAY":"Unknown gram negative pneumonia J15.6",
+                   "DESCRIPTION":"Unknown gram negative pneumonia",
+                   "DEFINITION":"J15.6",
+                   "ICD10CODE":"J15.6",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"e5261af5-80bb-4aaa-bf71-720f234f6641",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":283294349.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"J15.6",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3888321815.000000,
+                   "DISPLAY":"Unknown gram positive pneumonia J15.9",
+                   "DESCRIPTION":"Unknown gram positive pneumonia",
+                   "DEFINITION":"J15.9",
+                   "ICD10CODE":"J15.9",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"42db4ad9-b81a-459d-a666-30355657b31c",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13260637.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"J15.9",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3888321865.000000,
+                   "DISPLAY":"Aspiration pneumonia J69.0",
+                   "DESCRIPTION":"Aspiration pneumonia",
+                   "DEFINITION":"J69.0",
+                   "ICD10CODE":"J69.0",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"526ffff2-defb-4618-8316-7b5f12482225",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13261215.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"J69.0",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3888323327.000000,
+                   "DISPLAY":"Unable to determine J18.9",
+                   "DESCRIPTION":"Unable to determine",
+                   "DEFINITION":"J18.9",
+                   "ICD10CODE":"J18.9",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"8feedf63-aa21-437a-ad69-217d49e620e9",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13260647.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"J18.9",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3888321851.000000,
+                   "DISPLAY":"Pseudomonas J15.1",
+                   "DESCRIPTION":"Pseudomonas",
+                   "DEFINITION":"J15.1",
+                   "ICD10CODE":"J15.1",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"17bd7d0e-0840-4a81-b483-322c75959de4",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13260522.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"J15.1",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3888323307.000000,
+                   "DISPLAY":"Klebsiella pneumoniae J15.0",
+                   "DESCRIPTION":"Klebsiella pneumoniae",
+                   "DEFINITION":"J15.0",
+                   "ICD10CODE":"J15.0",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"9c026c3c-b0f7-44b3-b942-dc52c385183b",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13260521.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"J15.0",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3888321729.000000,
+                   "DISPLAY":"MRSA J152.12",
+                   "DESCRIPTION":"MRSA",
+                   "DEFINITION":"J152.12",
+                   "ICD10CODE":"J152.12",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"5ec06823-3174-4650-b9a0-dee470dd05d0",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":0.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"J152.12",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3888321835.000000,
+                   "DISPLAY":"Hemophilus influenzae J14",
+                   "DESCRIPTION":"Hemophilus influenzae",
+                   "DEFINITION":"J14",
+                   "ICD10CODE":"J14",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"d25bd481-20f9-47b0-bc36-34be911d17ae",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13260519.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"J14",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                }
+             ]
+          },
+          {
+             "CODE_VALUE":3888327185.000000,
+             "DISPLAY":"Organ Dysfunction and Sepsis",
+             "DEFINITION":"Organ Dysfunction&#xa0;and Sepsis",
+             "CODING_SECTION":"select all that apply:",
+             "CODE_CNT":6,
+             "CODE_QUAL":[
+                {
+                   "CODE_VALUE":3888324711.000000,
+                   "DISPLAY":"No,the organ dysfunction is due to A41.9",
+                   "DESCRIPTION":"No, the organ dysfunction is due to (specify):",
+                   "DEFINITION":"A41.9",
+                   "ICD10CODE":"A41.9",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"59c869b7-067a-4a0b-a773-56b0abe5e245",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13246904.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"A41.9",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3888327287.000000,
+                   "DISPLAY":"Unable to determine A41.9",
+                   "DESCRIPTION":"Unable to determine",
+                   "DEFINITION":"A41.9",
+                   "ICD10CODE":"A41.9",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"88ef61a3-8516-4789-9632-197205899e59",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13246904.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"A41.9",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3888327241.000000,
+                   "DISPLAY":"Yes; sepsis with severe sepsis R65.20",
+                   "DESCRIPTION":"Yes; sepsis with severe sepsis",
+                   "DEFINITION":"R65.20",
+                   "ICD10CODE":"R65.20",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"e22414a9-c344-4cdc-b78f-8eb2afb0c39d",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13270975.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"R65.20",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3888327269.000000,
+                   "DISPLAY":"Yes; sepsis with septic shock A41.9",
+                   "DESCRIPTION":"Yes; sepsis with septic shock",
+                   "DEFINITION":"A41.9",
+                   "ICD10CODE":"A41.9",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"e991dd89-e4b0-427c-9820-34aeda12683c",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13246904.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"A41.9",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3888324699.000000,
+                   "DISPLAY":"Yes; sepsis with septic shock R65.21",
+                   "DESCRIPTION":"Yes; sepsis with septic shock",
+                   "DEFINITION":"R65.21",
+                   "ICD10CODE":"R65.21",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"e991dd89-e4b0-427c-9820-34aeda12683c",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13270976.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"R65.21",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3888327223.000000,
+                   "DISPLAY":"Yes; sepsis with severe sepsis A41.9",
+                   "DESCRIPTION":"Yes; sepsis with severe sepsis",
+                   "DEFINITION":"A41.9",
+                   "ICD10CODE":"A41.9",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"e22414a9-c344-4cdc-b78f-8eb2afb0c39d",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13246904.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"A41.9",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                }
+             ]
+          },
+          {
+             "CODE_VALUE":3888329561.000000,
+             "DISPLAY":"Encephalopathy",
+             "DEFINITION":"Encephalopathy",
+             "CODING_SECTION":"select all that apply",
+             "CODE_CNT":7,
+             "CODE_QUAL":[
+                {
+                   "CODE_VALUE":3888329571.000000,
+                   "DISPLAY":"Toxic Encephalopathy G92",
+                   "DESCRIPTION":"Toxic Encephalopathy",
+                   "DEFINITION":"G92",
+                   "ICD10CODE":"G92",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"03d0c5b3-41d4-4062-b19b-c688a83170e7",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13255586.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"G92",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3888329599.000000,
+                   "DISPLAY":"Chronic K72.10",
+                   "DESCRIPTION":"Chronic",
+                   "DEFINITION":"K72.10",
+                   "ICD10CODE":"K72.10",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"c2a94d29-a73d-4fda-90f2-5c58f2c76b39",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13257870.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"K72.10",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3888325953.000000,
+                   "DISPLAY":"Acute K72.00",
+                   "DESCRIPTION":"Acute",
+                   "DEFINITION":"K72.00",
+                   "ICD10CODE":"K72.00",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"c15cb2df-181c-46f5-b9c6-cea89fdb449d",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13257867.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"K72.00",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3888329623.000000,
+                   "DISPLAY":"Hypertensive Encephalopathy I67.4",
+                   "DESCRIPTION":"Hypertensive Encephalopathy",
+                   "DEFINITION":"I67.4",
+                   "ICD10CODE":"I67.4",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"34ce8bb3-d8c6-481f-94f5-dc09ecceecf2",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13259894.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"I67.4",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3888329653.000000,
+                   "DISPLAY":"Hypoxic\/Anoxic encephalopathy G93.1",
+                   "DESCRIPTION":"Hypoxic\/Anoxic encephalopathy (Permanent)",
+                   "DEFINITION":"G93.1",
+                   "ICD10CODE":"G93.1",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"63832499-4134-427e-ad3d-4393368a9afd",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13255589.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"G93.1",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3888325849.000000,
+                   "DISPLAY":"Metabolic Encephalopathy G93.41",
+                   "DESCRIPTION":"Metabolic Encephalopathy",
+                   "DEFINITION":"G93.41",
+                   "ICD10CODE":"G93.41",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"b2b5d6f7-7c85-444a-8304-1dbcac690802",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13255594.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"G93.41",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3888329587.000000,
+                   "DISPLAY":"Septic Encephalopathy G93.41",
+                   "DESCRIPTION":"Septic Encephalopathy",
+                   "DEFINITION":"G93.41",
+                   "ICD10CODE":"G93.41",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"fae497c8-6f89-42fc-9965-65657f2fabf9",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13255594.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"G93.41",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                }
+             ]
+          },
+          {
+             "CODE_VALUE":3888992849.000000,
+             "DISPLAY":"Impaired Gas Exchange",
+             "DEFINITION":"Impaired Gas Exchange",
+             "CODING_SECTION":"select all that apply:",
+             "CODE_CNT":7,
+             "CODE_QUAL":[
+                {
+                   "CODE_VALUE":3888999597.000000,
+                   "DISPLAY":"Hypercapnic Chronic J96.12",
+                   "DESCRIPTION":"Hypercapnic Chronic",
+                   "DEFINITION":"J96.12",
+                   "ICD10CODE":"J96.12",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"483c5243-fd92-4d03-a905-d7f165884982",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13261728.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"J96.12",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3888995117.000000,
+                   "DISPLAY":"Hypercapnic Acute J96.02",
+                   "DESCRIPTION":"Hypercapnic Acute",
+                   "DEFINITION":"J96.02",
+                   "ICD10CODE":"J96.02",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"52606ceb-aabd-427f-9f94-a6999e1e21ee",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13261627.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"J96.02",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3888996373.000000,
+                   "DISPLAY":"Hypercapnic Hypoxia R09.02",
+                   "DESCRIPTION":"Hypercapnic Hypoxia",
+                   "DEFINITION":"R09.02",
+                   "ICD10CODE":"R09.02",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"9457c6bc-aa7a-4b01-bc01-71c8dad84f1a",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13271510.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"R09.02",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3888994831.000000,
+                   "DISPLAY":"Hypoxemic Acute on Chronic J96.21",
+                   "DESCRIPTION":"Hypoxemic Acute on Chronic",
+                   "DEFINITION":"J96.21",
+                   "ICD10CODE":"J96.21",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"422069e9-cb2f-4e69-9336-f8a9532b7010",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13261731.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"J96.21",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3888993535.000000,
+                   "DISPLAY":"Hypoxemic Acute J96.01",
+                   "DESCRIPTION":"Hypoxemic Acute",
+                   "DEFINITION":"J96.01",
+                   "ICD10CODE":"J96.01",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"13465792-b3c3-4ae5-974f-cc52c5871f0b",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13261626.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"J96.01",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3888996179.000000,
+                   "DISPLAY":"Hypercapnic Acute on Chronic J96.22",
+                   "DESCRIPTION":"Hypercapnic Acute on Chronic",
+                   "DEFINITION":"J96.22",
+                   "ICD10CODE":"J96.22",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"e7834703-3357-4ed5-8f61-59903d1832a3",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13261732.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"J96.22",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3888994447.000000,
+                   "DISPLAY":"Hypoxemic Chronic J96.11",
+                   "DESCRIPTION":"Hypoxemic Chronic",
+                   "DEFINITION":"J96.11",
+                   "ICD10CODE":"J96.11",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"cb2c0527-ccfd-467a-ba5e-0207ea325cd6",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13261727.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"J96.11",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                }
+             ]
+          },
+          {
+             "CODE_VALUE":3889260887.000000,
+             "DISPLAY":"Acuity of Congestive Heart Failure, Syst",
+             "DEFINITION":"Acuity of Congestive Heart Failure, Systolic",
+             "CODING_SECTION":"select all that apply:",
+             "CODE_CNT":4,
+             "CODE_QUAL":[
+                {
+                   "CODE_VALUE":3889264659.000000,
+                   "DISPLAY":"Chronic I50.22",
+                   "DESCRIPTION":"Chronic",
+                   "DEFINITION":"I50.22",
+                   "ICD10CODE":"I50.22",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"9c418472-fce9-4c0a-a10b-4f9aef046e2b",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13254507.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"I50.22",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3889264573.000000,
+                   "DISPLAY":"Acute I50.21",
+                   "DESCRIPTION":"Acute",
+                   "DEFINITION":"I50.21",
+                   "ICD10CODE":"I50.21",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"fb022c0b-3124-46b9-a29c-df221b834cb0",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13254506.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"I50.21",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3889264715.000000,
+                   "DISPLAY":"Acute on Chronic I50.23",
+                   "DESCRIPTION":"Acute on Chronic",
+                   "DEFINITION":"I50.23",
+                   "ICD10CODE":"I50.23",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"94b03dbd-b2ca-4fe6-9195-8f99ec28aea7",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13254508.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"I50.23",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3889264895.000000,
+                   "DISPLAY":"Unable to determine I50.20",
+                   "DESCRIPTION":"Unable to determine",
+                   "DEFINITION":"I50.20",
+                   "ICD10CODE":"I50.20",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"caae30e7-e115-4a8c-bc2a-82c79e95cf81",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13254505.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"I50.20",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                }
+             ]
+          },
+          {
+             "CODE_VALUE":3889270001.000000,
+             "DISPLAY":"Acuity of Congestive Heart Failure, Dias",
+             "DEFINITION":"Acuity of Congestive Heart Failure, Diastolic",
+             "CODING_SECTION":"select all that apply:",
+             "CODE_CNT":4,
+             "CODE_QUAL":[
+                {
+                   "CODE_VALUE":3889270239.000000,
+                   "DISPLAY":"Acute I50.31",
+                   "DESCRIPTION":"Acute",
+                   "DEFINITION":"I50.31",
+                   "ICD10CODE":"I50.31",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"9241f9a2-1bd1-4e1e-ad8d-270af9481a82",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13254511.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"I50.31",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3889274353.000000,
+                   "DISPLAY":"Chronic I50.32",
+                   "DESCRIPTION":"Chronic",
+                   "DEFINITION":"I50.32",
+                   "ICD10CODE":"I50.32",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"5704eeb4-ed91-4f6e-b725-c2ab7d7e0d5d",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13254512.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"I50.32",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3889275209.000000,
+                   "DISPLAY":"Unable to determine I50.30",
+                   "DESCRIPTION":"Unable to determine",
+                   "DEFINITION":"I50.30",
+                   "ICD10CODE":"I50.30",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"a6897c8c-f177-4815-8898-f53364535678",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13254510.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"I50.30",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3889274855.000000,
+                   "DISPLAY":"Acute on Chronic I50.33",
+                   "DESCRIPTION":"Acute on Chronic",
+                   "DEFINITION":"I50.33",
+                   "ICD10CODE":"I50.33",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"f0972f01-0a51-4c68-81fb-ef6abb25724f",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13254513.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"I50.33",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                }
+             ]
+          },
+          {
+             "CODE_VALUE":3889502455.000000,
+             "DISPLAY":"Acuity of Congestive Heart Failure, Comb",
+             "DEFINITION":"Acuity of Congestive Heart Failure, Combined Diastolic\/Systolic",
+             "CODING_SECTION":"select all that apply:",
+             "CODE_CNT":4,
+             "CODE_QUAL":[
+                {
+                   "CODE_VALUE":3889498055.000000,
+                   "DISPLAY":"Unable to determine I50.40",
+                   "DESCRIPTION":"Unable to determine",
+                   "DEFINITION":"I50.40",
+                   "ICD10CODE":"I50.40",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"6e86e750-1238-424c-8c46-26da055c40a1",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13254515.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"I50.40",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3889503251.000000,
+                   "DISPLAY":"Acute on Chronic I50.43",
+                   "DESCRIPTION":"Acute on Chronic",
+                   "DEFINITION":"I50.43",
+                   "ICD10CODE":"I50.43",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"6f3b320c-9f0e-4945-8a4a-72f7334d9b30",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13254518.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"I50.43",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3889502755.000000,
+                   "DISPLAY":"Acute I50.41",
+                   "DESCRIPTION":"Acute",
+                   "DEFINITION":"I50.41",
+                   "ICD10CODE":"I50.41",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"7b64296b-9b03-4ef0-8225-e346163f1270",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13254516.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"I50.41",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3889503145.000000,
+                   "DISPLAY":"Chronic I50.42",
+                   "DESCRIPTION":"Chronic",
+                   "DEFINITION":"I50.42",
+                   "ICD10CODE":"I50.42",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"c60d2003-33f8-4572-9e2a-cf5d70480132",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13254517.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"I50.42",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                }
+             ]
+          },
+          {
+             "CODE_VALUE":3889512591.000000,
+             "DISPLAY":"Type of Congestive Heart Failure, Chroni",
+             "DEFINITION":"Type of Congestive Heart Failure, Chronic",
+             "CODING_SECTION":"select all&#xa0;that apply:",
+             "CODE_CNT":4,
+             "CODE_QUAL":[
+                {
+                   "CODE_VALUE":3889513309.000000,
+                   "DISPLAY":"Combined Systolic\/Diastolic CHF I50.43",
+                   "DESCRIPTION":"Combined Systolic\/Diastolic CHF",
+                   "DEFINITION":"I50.43",
+                   "ICD10CODE":"I50.43",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"fdfe6173-801c-44af-b79f-23743b387d11",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13254518.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"I50.43",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3889516875.000000,
+                   "DISPLAY":"Unable to determine I50.9",
+                   "DESCRIPTION":"Unable to determine",
+                   "DEFINITION":"I50.9",
+                   "ICD10CODE":"I50.9",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"f5a0629c-b480-44a2-bd04-c1e3b68d05c5",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13254519.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"I50.9",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3889511295.000000,
+                   "DISPLAY":"Systolic CHF I50.22",
+                   "DESCRIPTION":"Systolic CHF",
+                   "DEFINITION":"I50.22",
+                   "ICD10CODE":"I50.22",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"0692b4c0-1b81-4af4-889f-83354daae5ed",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13254507.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"I50.22",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3889513125.000000,
+                   "DISPLAY":"Diastolic CHF I50.32",
+                   "DESCRIPTION":"Diastolic CHF",
+                   "DEFINITION":"I50.32",
+                   "ICD10CODE":"I50.32",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"a52d00d4-0444-4b70-9b28-8a85b320667d",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13254512.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"I50.32",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                }
+             ]
+          },
+          {
+             "CODE_VALUE":3889863945.000000,
+             "DISPLAY":"Congestive Heart Failure",
+             "DEFINITION":"Congestive Heart Failure",
+             "CODING_SECTION":"Please select all&#xa0;that apply:",
+             "CODE_CNT":12,
+             "CODE_QUAL":[
+                {
+                   "CODE_VALUE":3889926375.000000,
+                   "DISPLAY":"Diastolic CHF Chronic I50.32",
+                   "DESCRIPTION":"Diastolic CHF Chronic",
+                   "DEFINITION":"I50.32",
+                   "ICD10CODE":"I50.32",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"d84265a7-4286-4659-8c94-1c9edd911ce1",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13254512.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"I50.32",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3889928005.000000,
+                   "DISPLAY":"Combined Systolic\/Diastolic CHF Acute on",
+                   "DESCRIPTION":"Combined Systolic\/Diastolic CHF Acute on Chronic",
+                   "DEFINITION":"I50.43",
+                   "ICD10CODE":"I50.43",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"de5e5ccf-fe08-4772-9b03-e0191125b5ce",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13254518.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"I50.43",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3889926449.000000,
+                   "DISPLAY":"End Stage I50.84",
+                   "DESCRIPTION":"End Stage",
+                   "DEFINITION":"I50.84",
+                   "ICD10CODE":"I50.84",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"423ae9b6-3374-4b1a-ad2a-e2082235c1f4",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":283293934.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"I50.84",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3889927865.000000,
+                   "DISPLAY":"Diastolic CHF Acute I50.31",
+                   "DESCRIPTION":"Diastolic CHF Acute",
+                   "DEFINITION":"I50.31",
+                   "ICD10CODE":"I50.31",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"e0043e02-7bc4-4f80-8594-62aeb6d5262c",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13254511.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"I50.31",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3889928023.000000,
+                   "DISPLAY":"Right Heart Failure due to Left Heart Fa",
+                   "DESCRIPTION":"Right Heart Failure due to Left Heart Failure",
+                   "DEFINITION":"I50.814",
+                   "ICD10CODE":"I50.814",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"dfd3c829-73ce-4081-a11a-7f710cf7eed1",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":283293931.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"I50.814",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3889864395.000000,
+                   "DISPLAY":"Systolic CHF Chronic I50.22",
+                   "DESCRIPTION":"Systolic CHF Chronic",
+                   "DEFINITION":"I50.22",
+                   "ICD10CODE":"I50.22",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"84868e6f-eaaa-42a2-ab66-f4cc62686a75",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13254507.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"I50.22",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3889860775.000000,
+                   "DISPLAY":"Systolic CHF Acute I50.21",
+                   "DESCRIPTION":"Systolic CHF Acute",
+                   "DEFINITION":"I50.21",
+                   "ICD10CODE":"I50.21",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"4bff084d-b046-4a69-a5d1-74c01a718cb3",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13254506.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"I50.21",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3889861119.000000,
+                   "DISPLAY":"Systolic CHF Acute on Chronic I50.23",
+                   "DESCRIPTION":"Systolic CHF Acute on Chronic",
+                   "DEFINITION":"I50.23",
+                   "ICD10CODE":"I50.23",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"beca911a-7d5d-4526-beaf-bd16225985e3",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13254508.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"I50.23",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3889926459.000000,
+                   "DISPLAY":"Unable to determine I50.9",
+                   "DESCRIPTION":"Unable to determine",
+                   "DEFINITION":"I50.9",
+                   "ICD10CODE":"I50.9",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"2f426d85-9d3a-4f53-a55e-c9c363537703",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13254519.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"I50.9",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3889926431.000000,
+                   "DISPLAY":"Combined Systolic\/Diastolic CHF Chronic",
+                   "DESCRIPTION":"Combined Systolic\/Diastolic CHF Chronic",
+                   "DEFINITION":"I50.42",
+                   "ICD10CODE":"I50.42",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"5a43e231-dfe3-4fe2-a9a3-824ffe352454",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13254517.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"I50.42",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3889927905.000000,
+                   "DISPLAY":"Diastolic CHF Acute on Chronic I50.33",
+                   "DESCRIPTION":"Diastolic CHF Acute on Chronic",
+                   "DEFINITION":"I50.33",
+                   "ICD10CODE":"I50.33",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"b944dcef-8fd0-40c7-ade3-86273f56f75b",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13254513.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"I50.33",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3889926419.000000,
+                   "DISPLAY":"Combined Systolic\/Diastolic CHF Acute I5",
+                   "DESCRIPTION":"Combined Systolic\/Diastolic CHF Acute",
+                   "DEFINITION":"I50.41",
+                   "ICD10CODE":"I50.41",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"e9a33a8d-46cc-48c9-afd2-5300b8380258",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13254516.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"I50.41",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                }
+             ]
+          },
+          {
+             "CODE_VALUE":3889926565.000000,
+             "DISPLAY":"Type of Congestive Heart Failure, Acute",
+             "DEFINITION":"Type of Congestive Heart Failure, Acute on Chronic",
+             "CODING_SECTION":"Please&#xa0;select all&#xa0;that apply:",
+             "CODE_CNT":4,
+             "CODE_QUAL":[
+                {
+                   "CODE_VALUE":3889926577.000000,
+                   "DISPLAY":"Unable to determine I50.9",
+                   "DESCRIPTION":"Unable to determine",
+                   "DEFINITION":"I50.9",
+                   "ICD10CODE":"I50.9",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"3c527b6f-8ed0-4aeb-b1ed-0d232796fdce",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13254519.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"I50.9",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3889929253.000000,
+                   "DISPLAY":"Diastolic CHF I50.33",
+                   "DESCRIPTION":"Diastolic CHF",
+                   "DEFINITION":"I50.33",
+                   "ICD10CODE":"I50.33",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"8eafd8f7-2881-4e8a-a620-de20dec27271",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13254513.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"I50.33",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3889929269.000000,
+                   "DISPLAY":"Combined Systolic\/Diastolic CHF I50.43",
+                   "DESCRIPTION":"Combined Systolic\/Diastolic CHF",
+                   "DEFINITION":"I50.43",
+                   "ICD10CODE":"I50.43",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"270e2893-dece-4b3f-9381-515ae0f9a0b2",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13254518.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"I50.43",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3889929205.000000,
+                   "DISPLAY":"Systolic CHF I50.23",
+                   "DESCRIPTION":"Systolic CHF",
+                   "DEFINITION":"I50.23",
+                   "ICD10CODE":"I50.23",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"960871d0-2861-405c-b04c-c79f0cfc5c67",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13254508.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"I50.23",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                }
+             ]
+          },
+          {
+             "CODE_VALUE":3889953901.000000,
+             "DISPLAY":"Type of Congestive Heart Failure, Acute",
+             "DEFINITION":"Type of Congestive Heart Failure, Acute",
+             "CODING_SECTION":"Please&#xa0;select all&#xa0;that apply:",
+             "CODE_CNT":4,
+             "CODE_QUAL":[
+                {
+                   "CODE_VALUE":3889954135.000000,
+                   "DISPLAY":"Combined Systolic\/Diastolic CHF I50.41",
+                   "DESCRIPTION":"Combined Systolic\/Diastolic CHF",
+                   "DEFINITION":"I50.41",
+                   "ICD10CODE":"I50.41",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"cbab98fe-1714-4f9b-9c37-6280883e7c45",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13254516.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"I50.41",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3889954111.000000,
+                   "DISPLAY":"Diastolic CHF I50.31",
+                   "DESCRIPTION":"Diastolic CHF",
+                   "DEFINITION":"I50.31",
+                   "ICD10CODE":"I50.31",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"e1433f57-109d-4f30-8f14-e8de43f48d2e",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13254511.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"I50.31",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3889954017.000000,
+                   "DISPLAY":"Systolic CHF I50.21",
+                   "DESCRIPTION":"Systolic CHF",
+                   "DEFINITION":"I50.21",
+                   "ICD10CODE":"I50.21",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"b709d6da-d5eb-49b9-9f62-d286066830ea",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13254506.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"I50.21",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3889956825.000000,
+                   "DISPLAY":"Unable to determine  I50.9",
+                   "DESCRIPTION":"Unable to determine",
+                   "DEFINITION":"I50.9",
+                   "ICD10CODE":"I50.9",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"c3d87150-ddb9-4be7-b2a3-1efd6395fd2c",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13254519.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"I50.9",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                }
+             ]
+          },
+          {
+             "CODE_VALUE":3889958519.000000,
+             "DISPLAY":"CKD Stage",
+             "DEFINITION":"CKD Stage",
+             "CODING_SECTION":"Please select all that apply:",
+             "CODE_CNT":8,
+             "CODE_QUAL":[
+                {
+                   "CODE_VALUE":3889958773.000000,
+                   "DISPLAY":"CKD, Stage 1 (GFR >90 with evidence of k",
+                   "DESCRIPTION":"CKD, Stage 1 (GFR >90 with evidence of kidney damage)",
+                   "DEFINITION":"N18.1",
+                   "ICD10CODE":"N18.1",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"e9dc6bd5-0867-47b6-b61c-cc09e6a755e9",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13266230.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"N18.1",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3889959269.000000,
+                   "DISPLAY":"End Stage Renal Disease (GFR <15 and on",
+                   "DESCRIPTION":"End Stage Renal Disease (GFR <15 and on dialysis)",
+                   "DEFINITION":"N18.6",
+                   "ICD10CODE":"N18.6",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"4237aa17-14bc-44ad-8f30-4e02f3de7ca9",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13266235.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"N18.6",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3889959197.000000,
+                   "DISPLAY":"CKD, Stage 5 (GFR <15) N18.5",
+                   "DESCRIPTION":"CKD, Stage 5 (GFR <15)",
+                   "DEFINITION":"N18.5",
+                   "ICD10CODE":"N18.5",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"bab04e5e-aed8-4286-af1d-407eeb40c94d",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13266234.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"N18.5",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3889959037.000000,
+                   "DISPLAY":"CKD, Stage 2 (GFR 60-89 with evidence of",
+                   "DESCRIPTION":"CKD, Stage 2 (GFR 60-89 with evidence of kidney damage)",
+                   "DEFINITION":"N18.2",
+                   "ICD10CODE":"N18.2",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"c207d0f5-34ff-4751-9b42-de0b271902b0",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13266231.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"N18.2",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3889961173.000000,
+                   "DISPLAY":"CKD, Stage 4 (GFR 12-29) N18.4",
+                   "DESCRIPTION":"CKD, Stage 4 (GFR 12-29)",
+                   "DEFINITION":"N18.4",
+                   "ICD10CODE":"N18.4",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"7b4c9109-63b4-40b3-8332-d6902b3ded14",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13266233.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"N18.4",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3889959307.000000,
+                   "DISPLAY":"Unable to determine N18.9",
+                   "DESCRIPTION":"Unable to determine",
+                   "DEFINITION":"N18.9",
+                   "ICD10CODE":"N18.9",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"217bb4aa-25ec-41a1-8642-2b49d9c8e19e",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13266236.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"N18.9",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3889959145.000000,
+                   "DISPLAY":"CKD, Stage 3B (GFR 30-44) N18.32",
+                   "DESCRIPTION":"CKD, Stage 3B (GFR 30-44)",
+                   "DEFINITION":"N18.32",
+                   "ICD10CODE":"N18.32",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"28aeed3c-e791-4c78-8eea-ea3de06b2ad2",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":291198577.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"N18.32",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3889959115.000000,
+                   "DISPLAY":"CKD, Stage 3A (GFR 45-59) N18.31",
+                   "DESCRIPTION":"CKD, Stage 3A (GFR 45-59)",
+                   "DEFINITION":"N18.31",
+                   "ICD10CODE":"N18.31",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"ec4b3702-0163-47f4-8e32-b1d7a9eab113",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":291198404.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"N18.31",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                }
+             ]
+          },
+          {
+             "CODE_VALUE":3891703863.000000,
+             "DISPLAY":"Atrial Fibrillation",
+             "DEFINITION":"Atrial Fibrillation",
+             "CODING_SECTION":"Please&#xa0;select all&#xa0;that apply:",
+             "CODE_CNT":4,
+             "CODE_QUAL":[
+                {
+                   "CODE_VALUE":3891709533.000000,
+                   "DISPLAY":"Long-standing Persistent (I48.11)",
+                   "DESCRIPTION":"Long-standing Persistent",
+                   "DEFINITION":"I48.11",
+                   "ICD10CODE":"I48.11",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"521c123b-dfa7-4c89-b487-028666377105",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":286963712.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"I48.11",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3891709331.000000,
+                   "DISPLAY":"Chronic Persistent (I48.19)",
+                   "DESCRIPTION":"Chronic Persistent",
+                   "DEFINITION":"I48.19",
+                   "ICD10CODE":"I48.19",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"47942b29-837e-4245-ba21-6d009a269acb",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":286963713.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"I48.19",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3891712375.000000,
+                   "DISPLAY":"Chronic Permanent (I48.21)",
+                   "DESCRIPTION":"Chronic Permanent",
+                   "DEFINITION":"I48.21",
+                   "ICD10CODE":"I48.21",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"f1c1e4ae-ca59-4d56-82a6-26a7ee912f62",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":286963589.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"I48.21",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3891703949.000000,
+                   "DISPLAY":"Paroxysmal (I48.0)",
+                   "DESCRIPTION":"Paroxysmal",
+                   "DEFINITION":"I48.0",
+                   "ICD10CODE":"I48.0",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"2bdc66c0-88be-4181-992d-f484e82d6c17",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13254370.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"I48.0",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                }
+             ]
+          },
+          {
+             "CODE_VALUE":3891723347.000000,
+             "DISPLAY":"Anemia",
+             "DEFINITION":"Anemia",
+             "CODING_SECTION":"Please select all that Apply:",
+             "CODE_CNT":4,
+             "CODE_QUAL":[
+                {
+                   "CODE_VALUE":3891723779.000000,
+                   "DISPLAY":"Iron deficiency D50.9",
+                   "DESCRIPTION":"Iron deficiency",
+                   "DEFINITION":"D50.9",
+                   "ICD10CODE":"D50.9",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"47aeec75-c697-478c-8bad-1deff5fa1e61",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13250888.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"D50.9",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3891723677.000000,
+                   "DISPLAY":"Due to blood loss, Chronic D50.0",
+                   "DESCRIPTION":"Due to blood loss, Chronic",
+                   "DEFINITION":"D50.0",
+                   "ICD10CODE":"D50.0",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"35b7ed19-dc14-45f4-801d-a1fc199acd45",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13250885.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"D50.0",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3891723549.000000,
+                   "DISPLAY":"Due to blood loss, Acute D62",
+                   "DESCRIPTION":"Due to blood loss, Acute",
+                   "DEFINITION":"D62",
+                   "ICD10CODE":"D62",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"3893c11b-094d-4623-aa97-8ef24983f2c1",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13251576.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"D62",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3891726347.000000,
+                   "DISPLAY":"Unable to determine D64.9",
+                   "DESCRIPTION":"Unable to determine",
+                   "DEFINITION":"D64.9",
+                   "ICD10CODE":"D64.9",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"33db149e-1ba5-4462-84d3-e4b871214c8d",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13251590.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"D64.9",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                }
+             ]
+          },
+          {
+             "CODE_VALUE":3891732179.000000,
+             "DISPLAY":"AMS",
+             "DEFINITION":"AMS",
+             "CODING_SECTION":"Please select all that apply:",
+             "CODE_CNT":4,
+             "CODE_QUAL":[
+                {
+                   "CODE_VALUE":3891728195.000000,
+                   "DISPLAY":"Metabolic Encephalopathy (G93.41)",
+                   "DESCRIPTION":"Metabolic Encephalopathy",
+                   "DEFINITION":"G93.41",
+                   "ICD10CODE":"G93.41",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"e4864333-6d85-461c-87ad-260f01a74379",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13255594.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"G93.41",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3891736579.000000,
+                   "DISPLAY":"Delirium (R41.0)",
+                   "DESCRIPTION":"Delirium",
+                   "DEFINITION":"R41.0",
+                   "ICD10CODE":"R41.0",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"093c4476-8699-48e9-b24e-0acdf2731d50",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13272648.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"R41.0",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3891736489.000000,
+                   "DISPLAY":"Toxic Encephalopathy (G92)",
+                   "DESCRIPTION":"Toxic Encephalopathy",
+                   "DEFINITION":"G92",
+                   "ICD10CODE":"G92",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"62c58d37-7ad9-4df6-817b-b62f87f5cd7b",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13255586.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"G92",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                },
+                {
+                   "CODE_VALUE":3891732715.000000,
+                   "DISPLAY":"Dementia (F03.90)",
+                   "DESCRIPTION":"Dementia",
+                   "DEFINITION":"F03.90",
+                   "ICD10CODE":"F03.90",
+                   "SNOMEDCODE":"<not_found>",
+                   "UUID":"31cdb637-036c-480c-a917-d283f7aa8c44",
+                   "DIAG_NOMENCLATURE_ID":0.000000,
+                   "SNOMED_NOMENCLATURE_ID":0.000000,
+                   "START_POS":0,
+                   "END_POS":0,
+                   "CHECKED_VALUE":"",
+                   "CODES_CNT":1,
+                   "CODES":[
+                      {
+                         "DIAG_NOMENCLATURE_ID":13249060.000000,
+                         "SNOMED_NOMENCLATURE_ID":52311278.000000,
+                         "ICD10CODE":"F03.90",
+                         "SNOMEDCODE":"",
+                         "ICD10_IND":1,
+                         "SNOMED_IND":0
+                      }
+                   ]
+                }
+             ]
+          }
+       ]
     }
-    ]
-   }}
+ }
