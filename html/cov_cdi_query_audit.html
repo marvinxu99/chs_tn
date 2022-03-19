@@ -33,7 +33,16 @@
                 param_set.push("~"+uuid+"~")
  
                 console.log("------- param_set="+param_set.join(','))
- 
+ 				
+ 				var CDIUpdateParams = window.external.XMLCclRequest();
+                CDIUpdateParams.open("GET","cov_cdi_query_audit",false);
+                CDIUpdateParams.send(param_set.join(','));
+                if (CDIUpdateParams.readyState == 4 && CDIUpdateParams.status == 200) {
+                    console.log("-------- request processed")
+                    } else {
+                    	console.log("-------- request failed readyState="+CDIUpdateParams.readyState+" CDIUpdateParams.status="+CDIUpdateParams.status)
+                }
+                    
                 window.location.reload();
  
         });
@@ -101,7 +110,7 @@
             CDIAuditTable.push("</td>")
  
             CDIAuditTable.push("<td>")
-                CDIAuditTable.push("<button class=cdi_update>Update</button>")
+                CDIAuditTable.push("<button class=cdi_update>Update CDI</button>")
             CDIAuditTable.push("</td>")
  
             CDIAuditTable.push("</tr>")
@@ -126,9 +135,9 @@
                         CDIAuditTable.push("<input id=uuid type=textbox value='"+obj.QUERY_QUAL[i].CODE_QUAL[j].UUID+"'></input>")
                     CDIAuditTable.push("</td>")
                     CDIAuditTable.push("<td>")
-                        CDIAuditTable.push("<button class=cdi_code_update>Update</button>")
+                        CDIAuditTable.push("<button class=cdi_code_update>Update Code</button>")
                     CDIAuditTable.push("</td>")
-                
+ 
                 CDIAuditTable.push("</tr>")
                     for (k=0;k<obj.QUERY_QUAL[i].CODE_QUAL[j].CODES_CNT;k++)  {
                         CDIAuditTable.push("<tr>")
@@ -246,6 +255,9 @@
  
     </script>
  
- 
+ <pre>
+ %%PROMPTS%%
+ </pre>
 </body>
 </html>
+ 
