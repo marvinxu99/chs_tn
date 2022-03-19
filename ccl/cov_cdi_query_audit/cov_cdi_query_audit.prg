@@ -69,12 +69,12 @@ if (prompts->request = "DEFINITIONS")
 	go to exit_script
 elseif (prompts->request = "UPDATE_CDI_CODE")
 	if (validate_cdi_code_value(prompts->param1))
-		set stat = 1
+		set stat = update_cdi_code_value(prompts->param1,prompts->param2,prompts->param3,prompts->param4) 
 	endif
 	go to exit_script
 elseif (prompts->request = "UPDATE_CDI")
 	if (validate_cdi_value(prompts->param1))
-		set stat = 1
+		set stat = update_cdi_value(prompts->param1,prompts->param2,prompts->param3)               
 	endif
 	go to exit_script
 endif
@@ -83,7 +83,7 @@ endif
 set html_output = get_html_template("cov_cdi_query_audit.html")
 
 set html_output = replace(html_output,"%%MPAGE_CONTENT_URL%%",get_static_content_base(null))
-	
+set html_output = replace(html_output,"%%PROMPTS%%",cnvtrectojson(prompts))
 call put_html_output(prompts->outdev,html_output)
 
 #exit_script

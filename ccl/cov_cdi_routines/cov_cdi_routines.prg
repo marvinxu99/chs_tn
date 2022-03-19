@@ -30,6 +30,7 @@ create program cov_cdi_routines:dba
 call echo(build2("starting ",trim(cnvtlower(curprog))))
 
 execute cov_std_log_routines
+execute cov_std_cv_routines
  
 declare i=i4 with noconstant(0), protect
 declare j=i4 with noconstant(0), protect
@@ -40,6 +41,65 @@ declare pos= i4 with noconstant(0), protect
 
 call SubroutineLog(build2("notfnd=",notfnd))
 call SubroutineLog(build2("str=",str))
+
+/**********************************************************************************************************************
+** Function UPDATE_CDI_CODE_VALUE(code_value)
+** ---------------------------------------------------------------------------------------
+** Return TRUE or FALSE after updating a CDI coding definition
+**
+**********************************************************************************************************************/
+declare update_cdi_code_value(vCDICodeValue=f8,vICDCode=vc,vSNOMEDCode=vc,vUUID=vc) = i2 with persist, copy
+subroutine update_cdi_code_value(vCDICodeValue,vICDCode,vSNOMEDCode,vUUID)
+                                
+	declare vReturnResponse = i2 with protect, noconstant(FALSE)
+	declare vNewDefinition = vc with protect
+	
+	set vNewDefinition = build2(trim(vICDCode),^;^,trim(vSNOMEDCode))
+	
+	set vReturnResponse = ensure_code_value(
+												 vCDICodeValue
+												,0.0
+												,~CDI_CODE~
+												,uar_get_code_description(vCDICodeValue)
+												,vNewDefinition
+												,uar_get_code_display(vCDICodeValue)
+											)
+	
+	set vReturnResponse = ensure_code_value_ext(
+												vCDICodeValue
+												,~CODING_UUID~
+												,vUUID
+												,1)
+	return (vReturnResponse)
+end
+
+/**********************************************************************************************************************
+** Function UPDATE_CDI_VALUE(code_value)
+** ---------------------------------------------------------------------------------------
+** Return TRUE or FALSE after updating a CDI coding definition
+**
+**********************************************************************************************************************/
+declare update_cdi_value(vCDICodeValue=f8,vCDITitle=vc,vCodingTitle=vc) = i2 with persist, copy
+subroutine update_cdi_value(vCDICodeValue,vCDITitle,vCodingTitle)
+                                
+	declare vReturnResponse = i2 with protect, noconstant(FALSE)
+	
+	set vReturnResponse = ensure_code_value(
+												 vCDICodeValue
+												,0.0
+												,~CDI_QUERY~
+												,uar_get_code_display(vCDICodeValue)
+												,vCDITitle
+												,uar_get_code_display(vCDICodeValue)
+											)
+	
+	set vReturnResponse = ensure_code_value_ext(
+												vCDICodeValue
+												,~CODING_TITLE~
+												,vCodingTitle
+												,1)
+	return (vReturnResponse)
+end
 
 /**********************************************************************************************************************
 ** Function VALIDATE_CDI_CODE_VALUE(code_value)
