@@ -8,7 +8,7 @@ call echo(ensure_code_value_ext(3886338215,~CODING_TITLE~,~updated by subs~,1)) 
 ; 3886338215.00	     100496	CDI_QUERY	Sepsis Diagnosis Review	SEPSISDIAGNOSISREVIEW	Sepsis Diagnosis Review
 ;ensure_code_value(pCodeValue,pCodeSet,pCVCDFMeaning,pCVDisplay,pCVDefinition,pCVDescription)
 call echo(
-	ensure_code_value(3886338215,0.0,~CDI_QUERY~,~Sepsis Diagnosis Review3~,~Sepsis Diagnosis Review~,~Sepsis Diagnosis Review~)
+	ensure_code_value(3886338215,0.0,~CDI_QUERY~,~Sepsis Diagnosis Review~,~future~,~before~)
 ) go
 
 	

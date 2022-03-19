@@ -141,7 +141,7 @@ subroutine ensure_code_value(pCodeValue,pCodeSet,pCVCDFMeaning,pCVDisplay,pCVDef
 		set 4171655_request->cd_value_list[1].action_type_flag = 0
 	endif
        
-       
+    call SubroutineLog("4171655_request","record")
     set stat = tdbexecute(4170105,4170151,4171655,"REC",4171655_request,"REC",4171655_reply)
     call SubroutineLog("4171655_reply","record")
 		
