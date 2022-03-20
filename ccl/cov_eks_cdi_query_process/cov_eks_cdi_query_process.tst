@@ -5,8 +5,9 @@ set debug_ind = 1 go
 /*
 ;TRUE:person_id=15556719|encntr_id=111688463|clinical_event_id=4453601848|event_id=4453601849| (0.31s)
 ;TRUE:person_id=16799260|encntr_id=110765501|clinical_event_id=4453870681|event_id=4453870682| (0.57s)
+The result of 'set log_misc1 = build2(3654205312.0) go' is  3654205312.00
 */
-set link_clinicaleventid =    4453870681 go
+set link_clinicaleventid =       3654205312.00 go
 
 
 select into "nl:"
@@ -18,7 +19,8 @@ detail
 	link_personid	= ce.person_id
 with nocounter go
 
-
+call echo(build2("link_encntrid=",link_encntrid)) go
+call echo(build2("link_personid=",link_personid)) go
 
 execute cov_eks_cdi_query_process ~MINE~,link_clinicaleventid go
 /*

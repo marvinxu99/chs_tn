@@ -28,8 +28,8 @@ drop program cov_eks_cdi_query_process:dba go
 create program cov_eks_cdi_query_process:dba
 
 prompt 
-	"Output to File/Printer/MINE" = "MINE"   ;* Enter or select the printer or file name to send this report to.
-	, "EVENTID" = "0" 
+	"Output to File/Printer/MINE" = "MINE"
+	, "EVENTID" = 0 
 
 with OUTDEV, EVENTID
 
@@ -37,6 +37,9 @@ call echo(build("loading script:",curprog))
 set nologvar = 0	;do not create log = 1		, create log = 0
 set noaudvar = 1	;do not create audit = 1	, create audit = 0
 %i ccluserdir:cov_custom_ccl_common.inc
+
+execute cov_std_log_routines
+execute cov_cdi_routines
 
 call writeLog(build2("************************************************************"))
 call writeLog(build2("* START Custom Section  ************************************"))
@@ -134,6 +137,16 @@ set t_rec->patient.person_id				= link_personid
 set t_rec->event.clinical_event_id			= $EVENTID
 set t_rec->constants.prsnl_id				= reqinfo->updt_id
 
+call writeLog(build2("t_rec->patient.encntr_id=",t_rec->patient.encntr_id))
+call writeLog(build2("t_rec->patient.person_id=",t_rec->patient.person_id))
+call writeLog(build2("t_rec->event.clinical_event_id=",t_rec->event.clinical_event_id))
+call writeLog(build2("link_encntrid=",link_encntrid))
+call writeLog(build2("link_personid=",link_personid))
+call writeLog(build2("link_clinicaleventid=",link_clinicaleventid))
+
+call writeLog(build2("$OUTDEV=",$OUTDEV))
+call writeLog(build2("$EVENTID=",$EVENTID))
+
 declare pos = i4 with noconstant(0)
 declare not_found = vc with constant("<not found>")
 declare h = i4 with noconstant(0)
@@ -157,6 +170,16 @@ set t_rec->constants.classification_cd = uar_get_code_by("MEANING",12033,"MEDICA
 set t_rec->constants.confirmed_cd = uar_get_code_by("MEANING",12031,"CONFIRMED")
 set t_rec->constants.final_type_cd = uar_get_code_by("MEANING",17,"FINAL")
 
+if (t_rec->patient.encntr_id <= 0.0)
+	set t_rec->log_message = concat("link_encntrid not found")
+	go to exit_script
+endif
+
+if (t_rec->patient.person_id <= 0.0)
+	set t_rec->log_message = concat("link_personid not found")
+	go to exit_script
+endif
+
 if (t_rec->constants.classification_cd <= 0.0)
 	set t_rec->log_message = concat("medical classification code value not found")
 	go to exit_script
@@ -167,153 +190,9 @@ if (t_rec->constants.confirmed_cd <= 0.0)
 	go to exit_script
 endif
 
-select into "nl:"
-from
-	 code_value_set cvs
-	,code_value cv
-	,code_value_group cvg
-	,code_value c
-	,code_value_extension cve
-	,code_value_extension ce
-plan cvs
-	where cvs.definition = "COVCUSTOM"
-join cv
-	where cv.code_set = cvs.code_set
-	and   cv.cdf_meaning = "CDI_QUERY"
-	and   cv.active_ind = 1
-	and   cv.begin_effective_dt_tm <= cnvtdatetime(curdate,curtime3)
-	and   cv.end_effective_dt_tm >= cnvtdatetime(curdate,curtime3)
-join cvg
-	where cvg.parent_code_value = cv.code_value
-	and   cvg.code_set = cv.code_set
-join c
-	where c.code_value = cvg.child_code_value
-	and   c.cdf_meaning = "CDI_CODE"
-	and   c.active_ind = 1
-join cve
-	where cve.code_value = cv.code_value
-	and   cve.field_name = "CODING_TITLE"
-join ce
-	where ce.code_value = c.code_value
-	and   ce.field_name = "CODING_UUID"
-order by
-	cv.code_value
-head report
-	i = 0
-	j = 0
-	pos = 0
-	cnt = 0
-head cv.code_value
-	j = 0
-	pos = 0
-	cnt = 0
-	i = (i + 1)
-	stat = alterlist(t_rec->query_qual,i)
-	t_rec->query_qual[i].code_value		= cv.code_value
-	t_rec->query_qual[i].definition		= cv.definition
-	t_rec->query_qual[i].display		= cv.display
-	t_rec->query_qual[i].coding_section	= cve.field_value
-detail
-	j = (j + 1)
-	stat = alterlist(t_rec->query_qual[i].code_qual,j)
-	t_rec->query_qual[i].code_qual[j].code_value	= c.code_value
-	t_rec->query_qual[i].code_qual[j].display		= c.display
-	t_rec->query_qual[i].code_qual[j].icd10code		= piece(c.definition,";",1,"<notfound>")
-	t_rec->query_qual[i].code_qual[j].snomedcode	= piece(c.definition,";",2,"<notfound>")
-	t_rec->query_qual[i].code_qual[j].definition	= c.definition
-	t_rec->query_qual[i].code_qual[j].description	= c.description
-	t_rec->query_qual[i].code_qual[j].uuid			= ce.field_value
-	
-	pos = 0
-	cnt = 0
-	if (piece(t_rec->query_qual[i].code_qual[j].icd10code,"%",1,notfnd) != notfnd)
-		pos = 1
-		str = ""
-		while (str != notfnd)
-			str = piece(t_rec->query_qual[i].code_qual[j].icd10code,'%',pos,notfnd)
-			if (str != notfnd)
-				cnt = (cnt + 1)
-				stat = alterlist(t_rec->query_qual[i].code_qual[j].codes,cnt)
-				t_rec->query_qual[i].code_qual[j].codes[cnt].icd10code = str
-			endif
-			pos = pos+1
-		endwhile
-	endif
+set stat = cnvtjsontorec(get_cdi_code_query_def(null))
 
-	if (piece(t_rec->query_qual[i].code_qual[j].snomedcode,"%",1,notfnd) != notfnd)
-		pos = 1
-		str = ""
-		while (str != notfnd)
-			str = piece(t_rec->query_qual[i].code_qual[j].snomedcode,'%',pos,notfnd)
-			if (str != notfnd)
-				cnt = (cnt + 1)
-				stat = alterlist(t_rec->query_qual[i].code_qual[j].codes,cnt)
-				t_rec->query_qual[i].code_qual[j].codes[cnt].snomedcode = str
-			endif
-			pos = pos+1
-		endwhile
-	endif
-	
-foot cv.code_value	
-	t_rec->query_qual[i].code_cnt = j
-foot report
-	t_rec->query_cnt = i
-with nocounter
-
-
-select into "nl:"
-from
-	 (dummyt d1 with seq=t_rec->query_cnt)
-	,(dummyt d2)
-	,(dummyt d3)
-	,nomenclature n
-plan d1
-	where maxrec(d2,t_rec->query_qual[d1.seq].code_cnt)
-join d2
-	where maxrec(d3,t_rec->query_qual[d1.seq].code_qual[d2.seq].codes_cnt)
-join d3
-join n
-	where n.source_identifier = t_rec->query_qual[d1.seq].code_qual[d2.seq].codes[d3.seq].icd10code
-	and   n.source_vocabulary_cd = value(uar_get_code_by("DISPLAY",400,"ICD-10-CM")) 
-	and   n.active_ind = 1
-	and   cnvtdatetime(curdate,curtime3) between n.beg_effective_dt_tm and n.end_effective_dt_tm
-order by
-	n.beg_effective_dt_tm
-detail
-	t_rec->query_qual[d1.seq].code_qual[d2.seq].diag_nomenclature_id = n.nomenclature_id
-with nocounter
-
-select into "nl:"
-from
-	 (dummyt d1 with seq=t_rec->query_cnt)
-	,(dummyt d2)
-	,(dummyt d3)
-	,nomenclature n
-plan d1
-	where maxrec(d2,t_rec->query_qual[d1.seq].code_cnt)
-join d2
-	where maxrec(d3,t_rec->query_qual[d1.seq].code_qual[d2.seq].codes_cnt)
-join d3
-join n
-	where n.source_identifier = t_rec->query_qual[d1.seq].code_qual[d2.seq].codes[d3.seq].snomedcode
-	and   n.source_vocabulary_cd = value(uar_get_code_by("DISPLAY",400,"SNOMED CT")) 
-	and   n.active_ind = 1
-	and   cnvtdatetime(curdate,curtime3) between n.beg_effective_dt_tm and n.end_effective_dt_tm
-order by
-	n.beg_effective_dt_tm
-detail
-	t_rec->query_qual[d1.seq].code_qual[d2.seq].snomed_nomenclature_id = n.nomenclature_id
-with nocounter
-
-if (t_rec->patient.encntr_id <= 0.0)
-	set t_rec->log_message = concat("link_encntrid not found")
-	go to exit_script
-endif
-
-if (t_rec->patient.person_id <= 0.0)
-	set t_rec->log_message = concat("link_personid not found")
-	go to exit_script
-endif
+call echo(validate_cdi_document(t_rec->event.clinical_event_id))
 
 select into "nl:"
 from 
@@ -579,7 +458,7 @@ else
 	set t_rec->retval = 0
 endif
 
-set t_rec->log_message = concat(
+set t_rec->log_message = build2(
 										trim(t_rec->log_message),";",
 										trim(cnvtupper(t_rec->return_value)),":",
 										"person_id=",trim(cnvtstring(t_rec->patient.person_id)),"|",
@@ -598,6 +477,7 @@ call writeLog(build2("retval=",retval))
 call writeLog(build2("log_message=",log_message))
 call writeLog(build2("log_misc1=",log_misc1))
 call writeLog(build2("_Memory_Reply_String=",_Memory_Reply_String))
+call writeLog(build2(cnvtrectojson(t_rec)))
 
 call exitScript(null)
 call echorecord(t_rec)

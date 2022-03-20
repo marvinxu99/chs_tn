@@ -41,7 +41,6 @@ declare pos= i4 with noconstant(0), protect
 
 call SubroutineLog(build2("notfnd=",notfnd))
 call SubroutineLog(build2("str=",str))
-
 /**********************************************************************************************************************
 ** Function UPDATE_CDI_CODE_VALUE(code_value)
 ** ---------------------------------------------------------------------------------------
@@ -164,6 +163,68 @@ subroutine validate_cdi_value(vCDIValue)
 end
 
 /**********************************************************************************************************************
+** Function VALIDATE_CDI_DOCUMENT(event_id or clinical_event_id)
+** ---------------------------------------------------------------------------------------
+** Return TRUE or FALSE if the code value supplied is a valid clinical event document
+**
+**********************************************************************************************************************/
+declare validate_cdi_document(vCEID=f8) = i2 with persist, copy
+subroutine validate_cdi_document(vCEID)
+
+	call SubroutineLog(build2("starting validate_cdi_document(",vCEID,")"))
+	
+	declare vReturnResponse = i2 with protect, noconstant(FALSE)
+	declare vClinical_Event_ID = f8 with protect, noconstant(0.0)
+	
+	call SubroutineLog(build2("->validing provided clinical_event_id"))
+	select into "nl:"
+	from
+		clinical_event ce
+	plan ce
+		where ce.clinical_event_id = vCEID
+	detail
+		vClinical_Event_ID = ce.clinical_event_id
+	with nocounter
+	
+	if (vClinical_Event_ID = 0.0)
+		call SubroutineLog(build2("->validing provided event_id"))
+		select into "nl:"
+		from
+			clinical_event ce
+		plan ce
+			where ce.event_id = vCEID
+			and   cnvtdatetime(sysdate) between ce.valid_from_dt_tm and ce.valid_until_dt_tm
+			and   ce.view_level = 1
+		order by
+			ce.event_id
+			,ce.valid_from_dt_tm desc
+		head ce.event_id
+			vClinical_Event_ID = ce.clinical_event_id
+		with nocounter
+	endif
+	
+	call SubroutineLog(build2("->vClinical_Event_ID=",vClinical_Event_ID))
+	
+	select into "nl:"
+	from 
+		clinical_event ce
+		,code_value cv
+	plan ce
+		where ce.clinical_event_id = vClinical_Event_ID
+	join cv
+		where cv.code_set = 72
+		and   cv.display = "CDI Coding Query"
+		and   cv.active_ind = 1
+		and   cv.code_value = ce.event_cd
+	detail
+		vReturnResponse = TRUE
+	with nocounter
+	
+	call SubroutineLog(build2("finishing validate_cdi_document(",vReturnResponse,")"))
+	return (vReturnResponse)
+end
+
+/**********************************************************************************************************************
 ** Function GET_CDI_CODE_QUERY_DEF(null)
 ** ---------------------------------------------------------------------------------------
 ** Return a JSON string with the cd_definition record structure that contains all the defined cdi queries
@@ -171,8 +232,11 @@ end
 **********************************************************************************************************************/
 declare get_cdi_code_query_def(null) = vc with persist, copy
 subroutine get_cdi_code_query_def(null)
- 
+ 	
+ 	call SubroutineLog(build2("starting get_cdi_code_query_def()"))
+ 	
 	declare vReturnJSON = vc with protect
+	
 
 	free record cdi_definition
 	record cdi_definition
@@ -206,6 +270,8 @@ subroutine get_cdi_code_query_def(null)
 	   		4 icd10_ind = i4
 	   		4 snomed_ind = i4
  	)
+ 	
+ 	call SubroutineLog(build2("->starting code value query"))
  	
  	select into "nl:"
 	from
@@ -242,7 +308,7 @@ subroutine get_cdi_code_query_def(null)
 		i = 0
 		j = 0
 		pos = 0
-		notfnd = "<not_found>"
+		vnotfnd = "<not_found>"
 		str=fillstring(100," ")
 	head cv.code_value
 		j = 0
@@ -258,24 +324,24 @@ subroutine get_cdi_code_query_def(null)
 		cdi_definition->query_qual[i].code_qual[j].code_value	= c.code_value
 		cdi_definition->query_qual[i].code_qual[j].display		= c.display
 		cdi_definition->query_qual[i].code_qual[j].definition	= c.definition
-		cdi_definition->query_qual[i].code_qual[j].icd10code	= piece(c.definition,";",1,notfnd)
-		cdi_definition->query_qual[i].code_qual[j].snomedcode	= piece(c.definition,";",2,notfnd)
+		cdi_definition->query_qual[i].code_qual[j].icd10code	= piece(c.definition,";",1,vnotfnd)
+		cdi_definition->query_qual[i].code_qual[j].snomedcode	= piece(c.definition,";",2,vnotfnd)
 		cdi_definition->query_qual[i].code_qual[j].description	= c.description
 		cdi_definition->query_qual[i].code_qual[j].uuid			= ce.field_value
 		
-		call SubroutineLog(build2("notfnd=",notfnd))
+		call SubroutineLog(build2("vnotfnd=",vnotfnd))
 		call SubroutineLog(build2("str=",str))
 		
 		pos = 0
 		cnt = 0
-		if (piece(cdi_definition->query_qual[i].code_qual[j].icd10code,"%",1,notfnd) != notfnd)
+		if (piece(cdi_definition->query_qual[i].code_qual[j].icd10code,"%",1,vnotfnd) != vnotfnd)
 			pos = 1
 			str = " "
-			while (str != notfnd)
-				str = piece(cdi_definition->query_qual[i].code_qual[j].icd10code,'%',pos,notfnd)
+			while (str != vnotfnd)
+				str = piece(cdi_definition->query_qual[i].code_qual[j].icd10code,'%',pos,vnotfnd)
 				call SubroutineLog(build2("->pos=",pos))
 				call SubroutineLog(build2("->str=",str))
-				if (str != notfnd)
+				if (str != vnotfnd)
 					cnt = (cnt + 1)
 					stat = alterlist(cdi_definition->query_qual[i].code_qual[j].codes,cnt)
 					cdi_definition->query_qual[i].code_qual[j].codes[cnt].icd10_ind = 1
@@ -285,12 +351,12 @@ subroutine get_cdi_code_query_def(null)
 			endwhile
 		endif
 	
-		if (piece(cdi_definition->query_qual[i].code_qual[j].snomedcode,"%",1,notfnd) != notfnd)
+		if (piece(cdi_definition->query_qual[i].code_qual[j].snomedcode,"%",1,vnotfnd) != vnotfnd)
 			pos = 1
 			str = ""
-			while (str != notfnd)
-				str = piece(cdi_definition->query_qual[i].code_qual[j].snomedcode,'%',pos,notfnd)
-				if (str != notfnd)
+			while (str != vnotfnd)
+				str = piece(cdi_definition->query_qual[i].code_qual[j].snomedcode,'%',pos,vnotfnd)
+				if (str != vnotfnd)
 					cnt = (cnt + 1)
 					stat = alterlist(cdi_definition->query_qual[i].code_qual[j].codes,cnt)
 					cdi_definition->query_qual[i].code_qual[j].codes[cnt].snomed_ind = 1
@@ -306,7 +372,7 @@ subroutine get_cdi_code_query_def(null)
 		cdi_definition->query_cnt = i
 	with nocounter
 
-
+	call SubroutineLog(build2("->getting icd-10 nomenclature ids"))
 	select into "nl:"
 	from
 		 (dummyt d1 with seq=cdi_definition->query_cnt)
@@ -329,6 +395,7 @@ subroutine get_cdi_code_query_def(null)
 		cdi_definition->query_qual[d1.seq].code_qual[d2.seq].codes[d3.seq].diag_nomenclature_id = n.nomenclature_id
 	with nocounter
 	
+	call SubroutineLog(build2("->getting snomed nomenclature ids"))
 	select into "nl:"
 	from
 		 (dummyt d1 with seq=cdi_definition->query_cnt)
