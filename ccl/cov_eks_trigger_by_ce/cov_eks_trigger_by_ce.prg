@@ -28,11 +28,11 @@ Mod 	Mod Date	  Developer				      Comment
 drop program cov_eks_trigger_by_ce:dba go
 create program cov_eks_trigger_by_ce:dba
  
-prompt
+prompt 
 	"Output to File/Printer/MINE" = "MINE"
 	, "Trigger" = ""
-	, "CE_ID" = 0
- 
+	, "CE_ID" = 0 
+
 with OUTDEV, TRIGGER, CE_ID
  
  
