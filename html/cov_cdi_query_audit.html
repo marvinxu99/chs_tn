@@ -106,7 +106,8 @@
                 CDIAuditTable.push("<input id=section type=textbox value='"+obj.QUERY_QUAL[i].CODING_SECTION+"'></input>")
             CDIAuditTable.push("</td>")
             CDIAuditTable.push("<td><span class=hidden id=cdivaluecd>"+obj.QUERY_QUAL[i].CODE_VALUE+"</span>")
-                CDIAuditTable.push(obj.QUERY_QUAL[i].CODE_CNT)
+                CDIAuditTable.push("<pre>")
+                CDIAuditTable.push("</pre>")
             CDIAuditTable.push("</td>")
  
             CDIAuditTable.push("<td>")
@@ -230,7 +231,11 @@
 		 </pre>
 	</div>
     <div id="CDIAuditTableHTML"></div>
- 
+	 <pre>
+	 %%PROMPTS%%
+	 </pre>
+	 <pre id=cdi_definitions class=hidden>
+	 </pre>
 <!--COPY END HERE-->
     <script>
         /* Non-CCL Development *
@@ -255,6 +260,8 @@
         if (CDIConfigData.readyState == 4 && CDIConfigData.status == 200) {
             console.log("-------- request processed")
             DisplayCDIAudit(CDIConfigJSON)
+            $('#cdi_definitions').removeClass("hidden");
+			$('#cdi_definitions').text(JSON.stringify(CDIConfigJSON,undefined, 2));
         } else {
  
             console.log("-------- request failed readyState="+CDIConfigData.readyState+" CDIConfigData.status="+CDIConfigData.status)
@@ -285,10 +292,6 @@
         });
  
     </script>
- 
- <pre>
- %%PROMPTS%%
- </pre>
 </body>
 </html>
  
