@@ -28,10 +28,11 @@ drop program cov_eks_cdi_query_process:dba go
 create program cov_eks_cdi_query_process:dba
 
 prompt 
-	"Output to File/Printer/MINE" = "MINE"
-	, "EVENTID" = 0 
+	"Output to File/Printer/MINE" = "MINE"   ;* Enter or select the printer or file name to send this report to.
+	, "EVENTID" = "0"
+	, "COMMIT_MODE" = 0 
 
-with OUTDEV, EVENTID
+with OUTDEV, EVENTID, COMMIT_MODE
 
 call echo(build("loading script:",curprog))
 set nologvar = 0	;do not create log = 1		, create log = 0
@@ -60,6 +61,7 @@ record t_rec
 	1 event
 	 2 clinical_event_id = f8
 	 2 event_id = f8
+	1 commit_mode = i4
 	1 retval = i2
 	1 log_message =  vc
 	1 log_misc1 = vc
@@ -135,6 +137,7 @@ set t_rec->return_value						= "FAILED"
 set t_rec->patient.encntr_id 				= link_encntrid
 set t_rec->patient.person_id				= link_personid
 set t_rec->event.clinical_event_id			= $EVENTID
+set t_rec->commit_mode						= $COMMIT_MODE
 set t_rec->constants.prsnl_id				= reqinfo->updt_id
 
 call writeLog(build2("t_rec->patient.encntr_id=",t_rec->patient.encntr_id))
@@ -379,7 +382,8 @@ endfor
 for (i=1 to t_rec->select_cnt)
 	
 	if (t_rec->select_qual[i].diag_nomenclature_id > 0.0)
-		execute mp_add_diagnosis 
+		if (t_rec->commit_mode = 1)
+			execute mp_add_diagnosis 
 								^MINE^, 										;"Output to File/Printer/MINE" = "MINE"
 								t_rec->patient.person_id, 						;"person_id" = 0.0
 								t_rec->constants.prsnl_id, 						;"user_id" = 0.0
@@ -400,12 +404,14 @@ for (i=1 to t_rec->select_cnt)
 	 	 						 						
 	 	 						
 	 	 						
-	 	 set t_rec->select_qual[i].add_ind = 1
+	 	 	set t_rec->select_qual[i].add_ind = 1
+	 	 endif
 	 endif
 	 
 	 
 	 if (t_rec->select_qual[i].snomed_nomenclature_id > 0.0)
-		execute mp_add_problem 
+	 	if (t_rec->commit_mode = 1)
+			execute mp_add_problem 
 								^MINE^, 										;"Output to File/Printer/MINE" = "MINE"
 								t_rec->patient.person_id, 						;"personId:" = 0.0
 								t_rec->patient.encntr_id, 						;"encntrId:" = 0.0
@@ -422,7 +428,8 @@ for (i=1 to t_rec->select_cnt)
 																				;"problem_display:" =""
 	 	 						
 	 	 						
-	 	 set t_rec->select_qual[i].add_ind = 1
+	 		set t_rec->select_qual[i].add_ind = 1
+	 	endif
 	 endif
 	 
 	 /*
