@@ -7,7 +7,7 @@ set debug_ind = 1 go
 ;TRUE:person_id=16799260|encntr_id=110765501|clinical_event_id=4453870681|event_id=4453870682| (0.57s)
 The result of 'set log_misc1 = build2(3654205312.0) go' is  3654205312.00
 */
-set link_clinicaleventid =       3654205312.00 go
+set link_clinicaleventid =     4469868088 go
 
 
 select into "nl:"
