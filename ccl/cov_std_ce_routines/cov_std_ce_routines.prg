@@ -38,6 +38,28 @@ declare k=i4 with noconstant(0), protect
  
 /* Subroutines */
 
+/**********************************************************************************************************************
+** Function GetEventIDbyCEventID(Clinical_Event_ID)
+** ---------------------------------------------------------------------------------------
+** Return an event_id for a given clinical_event_id
+**********************************************************************************************************************/
+declare GetEventIDbyCEventID(vCEventID=f8) = f8 with copy, persist
+subroutine GetEventIDbyCEventID(vCEventID)
+ 
+	declare rEventID = f8 with noconstant(0.0), protect
+ 
+	select into "nl:"
+	from
+		clinical_event ce
+	plan ce
+		where ce.clinical_event_id = vCEventID
+		and   ce.clinical_event_id > 0.0
+	detail
+		rEventID = ce.event_id
+	with nocounter
+ 
+	return(rEventID)
+end ;GetEventIDbyCEventID
 
 /**********************************************************************************************************************
 ** Function sGetPowerFormRefbyDesc(vPowerFormDesc)

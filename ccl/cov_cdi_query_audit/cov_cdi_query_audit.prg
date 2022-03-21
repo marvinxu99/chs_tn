@@ -77,6 +77,19 @@ elseif (prompts->request = "UPDATE_CDI")
 		set stat = update_cdi_value(prompts->param1,prompts->param2,prompts->param3)               
 	endif
 	go to exit_script
+elseif (prompts->request = "GET_SAVED_DOCUMENT")
+	free record document
+	record document
+		(
+			1 clinical_event_id = f8
+			1 event_id = f8
+			1 html = gvc
+		)
+	set document->clinical_event_id = prompts->param1
+	set document->event_id = GetEventIDbyCEventID(prompts->param1)
+	set document->html = get_saved_document(document->event_id)       
+	set _memory_reply_string = cnvtrectojson(document) 
+	go to exit_script
 endif
 
 

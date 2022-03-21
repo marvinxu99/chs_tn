@@ -33,7 +33,7 @@
                 param_set.push("~"+uuid+"~")
  
                 console.log("------- param_set="+param_set.join(','))
- 				
+ 
  				var CDIUpdateParams = window.external.XMLCclRequest();
                 CDIUpdateParams.open("GET","cov_cdi_query_audit",false);
                 CDIUpdateParams.send(param_set.join(','));
@@ -42,7 +42,7 @@
                     } else {
                     	console.log("-------- request failed readyState="+CDIUpdateParams.readyState+" CDIUpdateParams.status="+CDIUpdateParams.status)
                 }
-                    
+ 
                 window.location.reload();
  
         });
@@ -222,6 +222,13 @@
 </head>
  
 <body>
+	<div id="CDIDocumentViewer"></div>
+		 Clinical Event ID:
+		 <input type=textbox id=ce_event_id value=3654205312></input><button id=get_saved_document>Get Document</button>
+		 <pre id=saved_document class=hidden>
+		 %%SAVED_DOCUMENT%%
+		 </pre>
+	</div>
     <div id="CDIAuditTableHTML"></div>
  
 <!--COPY END HERE-->
@@ -252,6 +259,30 @@
  
             console.log("-------- request failed readyState="+CDIConfigData.readyState+" CDIConfigData.status="+CDIConfigData.status)
         }
+ 
+		$('#get_saved_document').click(function () {
+				var ce_event_id = $('#ce_event_id').val();
+				var param_set = []
+				param_set.push("~MINE~")
+				param_set.push("~GET_SAVED_DOCUMENT~")
+				param_set.push(ce_event_id)
+ 
+				console.log("------- param_set="+param_set.join(','))
+ 
+ 				var GetSaveDocument = window.external.XMLCclRequest();
+				GetSaveDocument.open("GET","cov_cdi_query_audit",false);
+				GetSaveDocument.send(param_set.join(','));
+				if (GetSaveDocument.readyState == 4 && GetSaveDocument.status == 200) {
+					console.log("-------- request processed")
+					var GetSaveDocumentJSON = JSON.parse(GetSaveDocument.responseText)
+ 
+					$('#saved_document').removeClass("hidden");
+					$('#saved_document').text(GetSaveDocumentJSON.DOCUMENT.HTML);
+					} else {
+						console.log("-------- request failed readyState="+GetSaveDocument.readyState+" CDIUpdateParams.status="+GetSaveDocument.status)
+				}
+ 
+        });
  
     </script>
  

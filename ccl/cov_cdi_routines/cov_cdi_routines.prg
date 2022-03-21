@@ -31,6 +31,7 @@ call echo(build2("starting ",trim(cnvtlower(curprog))))
 
 execute cov_std_log_routines
 execute cov_std_cv_routines
+execute cov_std_ce_routines
  
 declare i=i4 with noconstant(0), protect
 declare j=i4 with noconstant(0), protect
@@ -41,6 +42,53 @@ declare pos= i4 with noconstant(0), protect
 
 call SubroutineLog(build2("notfnd=",notfnd))
 call SubroutineLog(build2("str=",str))
+
+
+
+
+/**********************************************************************************************************************
+** Function GET_SAVED_DOCUMENT(event_id)
+** ---------------------------------------------------------------------------------------
+** Return TRUE or FALSE after updating a CDI coding definition
+**
+**********************************************************************************************************************/
+declare get_saved_document(vCEEventID=f8) = gvc with persist, copy
+subroutine get_saved_document(vCEEventID)
+
+	declare returnHTML = gvc with protect
+	
+	free record 969503_request
+	record 969503_request (
+	  1 mdoc_event_id = f8   
+	  1 sessions [*]   
+	    2 dd_session_id = f8   
+	  1 read_only_flag = i4   
+	  1 revise_flag = i2   
+	)
+	
+	set 969503_request->mdoc_event_id = vCEEventID
+	set 969503_request->read_only_flag = 1
+	
+	free record 969503_reply
+	set stat = tdbexecute(
+	            600005              /*appid - HNA: Powerchart*/
+	            , 3202004           /*taskid*/
+	            , 969503            /*reqid*/
+	            , "REC"             /*request_from_type*/
+	            , 969503_request    /*request_from*/
+	            , "REC"             /*reply_to_type*/
+	            , 969503_reply      /*reply_to*/
+	            , 0                 /*mode*/
+	        ) 
+	
+	for (i=1 to size(969503_reply->document->contributions,5))
+		set returnHTML = 969503_reply->document->contributions[i].html_text
+	endfor
+	
+	return (returnHTML)
+end
+
+
 /**********************************************************************************************************************
 ** Function UPDATE_CDI_CODE_VALUE(code_value)
 ** ---------------------------------------------------------------------------------------
@@ -140,6 +188,8 @@ end
 declare validate_cdi_value(vCDIValue=f8) = i2 with persist, copy
 subroutine validate_cdi_value(vCDIValue)
 
+	call SubroutineLog(build2("starting validate_cdi_value(",vCDIValue,")"))
+	
 	declare vReturnResponse = i2 with protect, noconstant(FALSE)
 	
 	select into "nl:"
