@@ -48,6 +48,7 @@ declare AddMPEventReply(null) = i2 with copy, persist
 declare GethsTropAlgEC(null) = f8 with copy, persist
 declare GethsTropInterpEC(null) = f8 with copy, persist
 declare GethsTropAlgOrderMargin(null) = i4 with copy, persist
+declare GethsTropAlgOrderMarginMax(null) = i4 with copy, persist
  
 declare EnsurehsTropAlgData(vPersonID=f8,vEncntrID=f8,vEventID=f8,vJSON=vc) = f8 with copy, persist
 declare RemovehsTropAlgData(vPersonID=f8,vEncntrID=f8,vEventID=f8) = f8 with copy, persist
@@ -333,6 +334,14 @@ subroutine GethsTropAlgOrderMargin(null)
 	return (vReturnNumberofMinues)
 end ;GethsTropAlgOrderMargin
 
+subroutine GethsTropAlgOrderMarginMax(null)
+	declare vReturnNumberofMinues = i4 with noconstant(0), protect
+ 
+	set vReturnNumberofMinues = 360 ;(6 hours)
+ 
+	return (vReturnNumberofMinues)
+end ;GethsTropAlgOrderMargin
+
 subroutine GetPatientLocationbyEncntrID(vEncntrID)
 
 	declare vReturnUnit = vc with noconstant(""), protect
@@ -460,8 +469,8 @@ subroutine UpdateCurrentPhase(vCurrentPhase)
 	else
 		if (hsTroponin_data->algorithm_info.type = "ED")
 			case (vCurrentPhase)
-				of "INITIAL":	set vReturnPhase = "ONEHOUR"
-				of "ONEHOUR":	set vReturnPhase = "THREEHOUR"
+				of "INITIAL":	set vReturnPhase = "THREEHOUR"
+				;of "ONEHOUR":	set vReturnPhase = "THREEHOUR"
 				of "THREEHOUR": set vReturnPhase = "END"
 			endcase
 		elseif (hsTroponin_data->algorithm_info.type = "INPATIENT")
@@ -1003,20 +1012,20 @@ subroutine SetNormalcybyMilestone(vMilestone)
 						set hsTroponin_data->one_hour.needed_ind = 0
 						set hsTroponin_data->three_hour.needed_ind = 0
 					else
-						if (hsTroponin_data->initial.result_val < 6)
+						if (hsTroponin_data->initial.result_val <= 6)
 							set vReturnNormalcy = "RULED OUT"
 							set hsTroponin_data->one_hour.needed_ind = 0
 							set hsTroponin_data->three_hour.needed_ind = 0
 							;0A
-						elseif ((hsTroponin_data->initial.result_val >= 6) and (hsTroponin_data->initial.result_val <= 51))
+						elseif ((hsTroponin_data->initial.result_val > 6) and (hsTroponin_data->initial.result_val <= 51))
 							set vReturnNormalcy = "INDETERMINATE"
-							set hsTroponin_data->one_hour.needed_ind = 1
-							set hsTroponin_data->three_hour.needed_ind = 0
+							set hsTroponin_data->one_hour.needed_ind = 0
+							set hsTroponin_data->three_hour.needed_ind = 1
 							;0B and 0C
 						elseif (hsTroponin_data->initial.result_val >= 52)
-							set vReturnNormalcy = "ABNORMAL"
-							set hsTroponin_data->one_hour.needed_ind = 1
-							set hsTroponin_data->three_hour.needed_ind = 0
+							set vReturnNormalcy = "INDETERMINATE"
+							set hsTroponin_data->one_hour.needed_ind = 0
+							set hsTroponin_data->three_hour.needed_ind = 1
 							;0D
 	 				 	endif
 	 				 endif
@@ -1025,20 +1034,20 @@ subroutine SetNormalcybyMilestone(vMilestone)
 					set hsTroponin_data->one_hour.needed_ind = 0
 					set hsTroponin_data->three_hour.needed_ind = 0
  				 else
-					if (hsTroponin_data->initial.result_val < 6)
+					if (hsTroponin_data->initial.result_val <= 6)
 						set vReturnNormalcy = "RULED OUT"
 						set hsTroponin_data->one_hour.needed_ind = 0
 						set hsTroponin_data->three_hour.needed_ind = 0
 						;0A
-					elseif ((hsTroponin_data->initial.result_val >= 6) and (hsTroponin_data->initial.result_val <= 51))
+					elseif ((hsTroponin_data->initial.result_val > 6) and (hsTroponin_data->initial.result_val <= 51))
 						set vReturnNormalcy = "INDETERMINATE"
-						set hsTroponin_data->one_hour.needed_ind = 1
-						set hsTroponin_data->three_hour.needed_ind = 0
+						set hsTroponin_data->one_hour.needed_ind = 0
+						set hsTroponin_data->three_hour.needed_ind = 1
 						;0B and 0C
 					elseif (hsTroponin_data->initial.result_val >= 52)
-						set vReturnNormalcy = "ABNORMAL"
-						set hsTroponin_data->one_hour.needed_ind = 1
-						set hsTroponin_data->three_hour.needed_ind = 0
+						set vReturnNormalcy = "INDETERMINATE"
+						set hsTroponin_data->one_hour.needed_ind = 0
+						set hsTroponin_data->three_hour.needed_ind = 1
 						;0D
 					endif
  				 endif
@@ -1094,7 +1103,7 @@ subroutine SetNormalcybyMilestone(vMilestone)
 							;1F
 						endif
 						if (hsTroponin_data->one_hour.result_val >= 52)
-							set vReturnNormalcy = "ABNORMAL"
+							set vReturnNormalcy = "INDETERMINATE"
 							set hsTroponin_data->three_hour.needed_ind = 0
 							;1G
 						endif
@@ -1109,7 +1118,7 @@ subroutine SetNormalcybyMilestone(vMilestone)
 						;3B and 3E and 3H
 					elseif (hsTroponin_data->three_hour.delta < 7)
 						if (hsTroponin_data->initial.result_val >= 52)
-							set vReturnNormalcy = "NO INJURY"
+							set vReturnNormalcy = "RULED OUT"
 							;3G
 						else
 							set vReturnNormalcy = "RULED OUT"
@@ -1117,12 +1126,12 @@ subroutine SetNormalcybyMilestone(vMilestone)
 						endif
 					endif
  
-					if (hsTroponin_data->three_hour.result_val >= 52)
-						if (hsTroponin_data->initial.result_val < 52)
-							set vReturnNormalcy = "ABNORMAL"
-							;3C and 3F
-						endif
-					endif
+					;if (hsTroponin_data->three_hour.result_val >= 52)
+					;	if (hsTroponin_data->initial.result_val < 52)
+					;		set vReturnNormalcy = "ABNORMAL"
+					;		;3C and 3F
+					;	endif
+					;endif
  
 				endif
  
@@ -1131,13 +1140,13 @@ subroutine SetNormalcybyMilestone(vMilestone)
 				if (cnvtupper(vMilestone) = "INITIAL")
 					if ((hsTroponin_data->initial.result_val >= 0) and (hsTroponin_data->initial.result_val <= 51))
 						set vReturnNormalcy = "INDETERMINATE"
-						set hsTroponin_data->one_hour.needed_ind = 1
-						set hsTroponin_data->three_hour.needed_ind = 0
+						set hsTroponin_data->one_hour.needed_ind = 0
+						set hsTroponin_data->three_hour.needed_ind = 1
 						;0A
 					elseif (hsTroponin_data->initial.result_val >= 52)
-						set vReturnNormalcy = "ABNORMAL"
-						set hsTroponin_data->one_hour.needed_ind = 1
-						set hsTroponin_data->three_hour.needed_ind = 0
+						set vReturnNormalcy = "INDETERMINATE"
+						set hsTroponin_data->one_hour.needed_ind = 0
+						set hsTroponin_data->three_hour.needed_ind = 1
 						;0B
 					endif
 				elseif (cnvtupper(vMilestone) = "ONEHOUR")
@@ -1170,7 +1179,7 @@ subroutine SetNormalcybyMilestone(vMilestone)
 						endif
  
 						if (hsTroponin_data->one_hour.result_val >= 52)
-							set vReturnNormalcy = "ABNORMAL"
+							set vReturnNormalcy = "INDETERMINATE"
 							set hsTroponin_data->three_hour.needed_ind = 0
 							;1C
 						endif
@@ -1184,7 +1193,7 @@ subroutine SetNormalcybyMilestone(vMilestone)
 						;3B and 3E
 					elseif (hsTroponin_data->three_hour.delta < 7)
 						if (hsTroponin_data->initial.result_val >= 52)
-							set vReturnNormalcy = "NO INJURY"
+							set vReturnNormalcy = "RULED OUT"
 							;3D
 						else
 							set vReturnNormalcy = "RULED OUT"
@@ -1192,12 +1201,12 @@ subroutine SetNormalcybyMilestone(vMilestone)
 						endif
 					endif
  
-					if (hsTroponin_data->three_hour.result_val >= 52)
-						if (hsTroponin_data->initial.result_val < 52)
-							set vReturnNormalcy = "ABNORMAL"
-							;3C
-						endif
-					endif
+					;if (hsTroponin_data->three_hour.result_val >= 52)
+					;	if (hsTroponin_data->initial.result_val < 52)
+					;		set vReturnNormalcy = "ABNORMAL"
+					;		;3C
+					;	endif
+					;endif
  
 				endif
 			endif
@@ -1207,7 +1216,7 @@ subroutine SetNormalcybyMilestone(vMilestone)
 					set vReturnNormalcy = "INDETERMINATE"
 					;0A
 				elseif (hsTroponin_data->initial.result_val >= 52)
-					set vReturnNormalcy = "ABNORMAL"
+					set vReturnNormalcy = "INDETERMINATE"
 					;0B
 				endif
 			elseif (cnvtupper(vMilestone) = "THREEHOUR")
@@ -1218,7 +1227,7 @@ subroutine SetNormalcybyMilestone(vMilestone)
 					;3B and 3E
 				elseif (hsTroponin_data->three_hour.delta < 7)
 					if (hsTroponin_data->initial.result_val >= 52)
-						set vReturnNormalcy = "NO INJURY"
+						set vReturnNormalcy = "RULED OUT"
 						;3D
 					else
 						set vReturnNormalcy = "RULED OUT"
@@ -1226,11 +1235,11 @@ subroutine SetNormalcybyMilestone(vMilestone)
 					endif
 				endif
  
-				if (hsTroponin_data->three_hour.result_val >= 52)
-					if (hsTroponin_data->initial.result_val < 52)
-						set vReturnNormalcy = "ABNORMAL"
-						;3C
-					endif
+				;if (hsTroponin_data->three_hour.result_val >= 52)
+				;	if (hsTroponin_data->initial.result_val < 52)
+				;		set vReturnNormalcy = "ABNORMAL"
+				;		;3C
+				;	endif
 				endif
 			endif
 		endif
