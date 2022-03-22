@@ -1240,7 +1240,7 @@ subroutine SetNormalcybyMilestone(vMilestone)
 				;		set vReturnNormalcy = "ABNORMAL"
 				;		;3C
 				;	endif
-				endif
+				;endif
 			endif
 		endif
 	endif
