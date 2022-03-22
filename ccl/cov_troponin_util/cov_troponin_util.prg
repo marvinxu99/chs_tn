@@ -117,6 +117,8 @@ declare CallNewECGOrderServer(null) = f8 with copy, persist
  
 declare AddAlgorithmResult(vCEventID=f8) = i2 with copy, persist
 declare AddAlgorithmCEResult(vCEventID=f8) = f8 with copy, persist
+declare AddAlgorithmCEDeltaResult(vCEventID=f8) = f8 with copy, persist
+declare AddAlgorithmCETimeResult(vCEventID=f8) = f8 with copy, persist
  
  
 subroutine GethsTropOpsDate(vScript)
@@ -304,7 +306,199 @@ subroutine AddAlgorithmCEResult(vCEventID)
 	return (vReturnSuccess)
  
 end
+
+subroutine AddAlgorithmCEDeltaResult(vCEventID)
+	declare vReturnSuccess = f8 with noconstant(FALSE)
+	declare vInterpEC = f8 with constant(GethsTropInterpEC(null))
  
+	if (validate(hsTroponin_data) = FALSE)
+		return (vReturnSuccess)
+	else
+		free record cerequest
+		free record cereply
+%i cclsource:eks_rprq1000012.inc
+		select into "nl:"
+		from
+			clinical_event ce
+		plan ce
+			where ce.clinical_event_id = vCEventID
+		detail
+			cerequest->ensure_type = 2
+			cerequest->clin_event.view_level = 1
+			cerequest->clin_event.person_id = ce.person_id
+			cerequest->clin_event.encntr_id = ce.encntr_id
+			cerequest->clin_event.contributor_system_cd = ce.contributor_system_cd
+			cerequest->clin_event.event_class_cd = uar_get_code_by("MEANING",53,"TXT")
+			cerequest->clin_event.event_cd = vInterpEC
+			cerequest->clin_event.event_tag = hsTroponin_data->algorithm_info.current_full_normalcy
+			cerequest->clin_event.event_start_dt_tm = ce.event_start_dt_tm
+			cerequest->clin_event.event_end_dt_tm = ce.event_end_dt_tm
+			cerequest->clin_event.event_end_dt_tm_os_ind = 1
+			cerequest->clin_event.record_status_cd = uar_get_code_by("MEANING",48,"ACTIVE")
+			cerequest->clin_event.result_status_cd = uar_get_code_by("MEANING",8,"AUTH")
+			cerequest->clin_event.authentic_flag_ind = 1
+			cerequest->clin_event.publish_flag = 1
+			case (hsTroponin_data->algorithm_info.current_normalcy)
+				of "RULED OUT": 		cerequest->clin_event.normalcy_cd = uar_get_code_by_cki("CKI.CODEVALUE!2690")	;Normal
+				of "NO INJURY":			cerequest->clin_event.normalcy_cd = uar_get_code_by_cki("CKI.CODEVALUE!2690")	;Normal
+				of "INDETERMINATE":		cerequest->clin_event.normalcy_cd = uar_get_code_by_cki("CKI.CODEVALUE!2680")	;Abnormal
+				of "ABNORMAL":			cerequest->clin_event.normalcy_cd = uar_get_code_by_cki("CKI.CODEVALUE!3707")	;Extreme High
+			else
+				cerequest->clin_event.normalcy_cd = uar_get_code_by_cki("CKI.CODEVALUE!3707")	;>Extreme High
+			endcase
+ 
+			cerequest->clin_event.subtable_bit_map = 8193
+			cerequest->clin_event.expiration_dt_tm_ind = 1
+			cerequest->clin_event.valid_from_dt_tm = ce.valid_from_dt_tm
+			cerequest->clin_event.valid_until_dt_tm = ce.valid_until_dt_tm
+			cerequest->clin_event.valid_from_dt_tm_ind = 1
+			cerequest->clin_event.valid_until_dt_tm_ind = 1
+			cerequest->clin_event.verified_dt_tm_ind = 1
+			cerequest->clin_event.performed_dt_tm = cnvtdatetime(curdate,curtime3)
+			cerequest->clin_event.performed_prsnl_id = 1
+			cerequest->clin_event.updt_id = 1
+			cerequest->clin_event.updt_dt_tm = cnvtdatetime(curdate,curtime)
+			cerequest->ensure_type2 = 1
+ 
+			stat = alterlist(cerequest->clin_event.string_result,1)
+			cerequest->clin_event.string_result.string_result_text = hsTroponin_data->algorithm_info.current_full_normalcy
+			cerequest->clin_event.string_result.string_result_format_cd = uar_get_code_by("MEANING",14113,"ALPHA")
+			cerequest->clin_event.string_result.last_norm_dt_tm_ind = 1
+			cerequest->clin_event.string_result.feasible_ind_ind = 1
+			cerequest->clin_event.string_result.inaccurate_ind_ind = 1
+ 
+			stat = alterlist(cerequest->clin_event.event_prsnl_list,2)
+			cerequest->clin_event.event_prsnl_list[1].person_id = ce.person_id
+			cerequest->clin_event.event_prsnl_list[1].action_type_cd = 112
+			cerequest->clin_event.event_prsnl_list[1].request_dt_tm_ind = 1
+			cerequest->clin_event.event_prsnl_list[1].action_dt_tm = cnvtdatetime(curdate,curtime3)
+			cerequest->clin_event.event_prsnl_list[1].action_prsnl_id = 1.0
+			cerequest->clin_event.event_prsnl_list[1].action_status_cd = 653
+			cerequest->clin_event.event_prsnl_list[1].valid_until_dt_tm = cnvtdatetime("31-DEC-2100 00:00:00")
+ 
+			cerequest->clin_event.event_prsnl_list[2].person_id = ce.person_id
+			cerequest->clin_event.event_prsnl_list[2].action_type_cd = 104
+			cerequest->clin_event.event_prsnl_list[2].request_dt_tm_ind = 1
+			cerequest->clin_event.event_prsnl_list[2].action_dt_tm = cnvtdatetime(curdate,curtime3)
+			cerequest->clin_event.event_prsnl_list[2].action_prsnl_id = 1.0
+			cerequest->clin_event.event_prsnl_list[2].action_status_cd = 653
+			cerequest->clin_event.event_prsnl_list[2].valid_until_dt_tm = cnvtdatetime("31-DEC-2100 00:00:00")
+		with nocounter
+ 
+		set stat = tdbexecute(0,3055000,1000012,"REC",CERequest,"REC",CEReply,1)
+ 
+		;call echojson(CEReply,"cmc2.json")
+		call echorecord(CERequest)
+		call echorecord(CEReply)
+		call echo(build2("CEReply->rb_list[1].event_id=",CEReply->rb_list[1].event_id))
+		if (validate(CEReply->rb_list[1].event_id))
+			set vReturnSuccess = CEReply->rb_list[1].event_id
+		else
+			call echo("CEReply->rb_list[1].event_id not valid")
+			set vReturnSuccess = FALSE
+		endif
+	endif
+ 
+	return (vReturnSuccess)
+ 
+end
+
+
+subroutine AddAlgorithmCETimeResult(vCEventID)
+	declare vReturnSuccess = f8 with noconstant(FALSE)
+	declare vInterpEC = f8 with constant(GethsTropInterpEC(null))
+ 
+	if (validate(hsTroponin_data) = FALSE)
+		return (vReturnSuccess)
+	else
+		free record cerequest
+		free record cereply
+%i cclsource:eks_rprq1000012.inc
+		select into "nl:"
+		from
+			clinical_event ce
+		plan ce
+			where ce.clinical_event_id = vCEventID
+		detail
+			cerequest->ensure_type = 2
+			cerequest->clin_event.view_level = 1
+			cerequest->clin_event.person_id = ce.person_id
+			cerequest->clin_event.encntr_id = ce.encntr_id
+			cerequest->clin_event.contributor_system_cd = ce.contributor_system_cd
+			cerequest->clin_event.event_class_cd = uar_get_code_by("MEANING",53,"TXT")
+			cerequest->clin_event.event_cd = vInterpEC
+			cerequest->clin_event.event_tag = hsTroponin_data->algorithm_info.current_full_normalcy
+			cerequest->clin_event.event_start_dt_tm = ce.event_start_dt_tm
+			cerequest->clin_event.event_end_dt_tm = ce.event_end_dt_tm
+			cerequest->clin_event.event_end_dt_tm_os_ind = 1
+			cerequest->clin_event.record_status_cd = uar_get_code_by("MEANING",48,"ACTIVE")
+			cerequest->clin_event.result_status_cd = uar_get_code_by("MEANING",8,"AUTH")
+			cerequest->clin_event.authentic_flag_ind = 1
+			cerequest->clin_event.publish_flag = 1
+			case (hsTroponin_data->algorithm_info.current_normalcy)
+				of "RULED OUT": 		cerequest->clin_event.normalcy_cd = uar_get_code_by_cki("CKI.CODEVALUE!2690")	;Normal
+				of "NO INJURY":			cerequest->clin_event.normalcy_cd = uar_get_code_by_cki("CKI.CODEVALUE!2690")	;Normal
+				of "INDETERMINATE":		cerequest->clin_event.normalcy_cd = uar_get_code_by_cki("CKI.CODEVALUE!2680")	;Abnormal
+				of "ABNORMAL":			cerequest->clin_event.normalcy_cd = uar_get_code_by_cki("CKI.CODEVALUE!3707")	;Extreme High
+			else
+				cerequest->clin_event.normalcy_cd = uar_get_code_by_cki("CKI.CODEVALUE!3707")	;>Extreme High
+			endcase
+ 
+			cerequest->clin_event.subtable_bit_map = 8193
+			cerequest->clin_event.expiration_dt_tm_ind = 1
+			cerequest->clin_event.valid_from_dt_tm = ce.valid_from_dt_tm
+			cerequest->clin_event.valid_until_dt_tm = ce.valid_until_dt_tm
+			cerequest->clin_event.valid_from_dt_tm_ind = 1
+			cerequest->clin_event.valid_until_dt_tm_ind = 1
+			cerequest->clin_event.verified_dt_tm_ind = 1
+			cerequest->clin_event.performed_dt_tm = cnvtdatetime(curdate,curtime3)
+			cerequest->clin_event.performed_prsnl_id = 1
+			cerequest->clin_event.updt_id = 1
+			cerequest->clin_event.updt_dt_tm = cnvtdatetime(curdate,curtime)
+			cerequest->ensure_type2 = 1
+ 
+			stat = alterlist(cerequest->clin_event.string_result,1)
+			cerequest->clin_event.string_result.string_result_text = hsTroponin_data->algorithm_info.current_full_normalcy
+			cerequest->clin_event.string_result.string_result_format_cd = uar_get_code_by("MEANING",14113,"ALPHA")
+			cerequest->clin_event.string_result.last_norm_dt_tm_ind = 1
+			cerequest->clin_event.string_result.feasible_ind_ind = 1
+			cerequest->clin_event.string_result.inaccurate_ind_ind = 1
+ 
+			stat = alterlist(cerequest->clin_event.event_prsnl_list,2)
+			cerequest->clin_event.event_prsnl_list[1].person_id = ce.person_id
+			cerequest->clin_event.event_prsnl_list[1].action_type_cd = 112
+			cerequest->clin_event.event_prsnl_list[1].request_dt_tm_ind = 1
+			cerequest->clin_event.event_prsnl_list[1].action_dt_tm = cnvtdatetime(curdate,curtime3)
+			cerequest->clin_event.event_prsnl_list[1].action_prsnl_id = 1.0
+			cerequest->clin_event.event_prsnl_list[1].action_status_cd = 653
+			cerequest->clin_event.event_prsnl_list[1].valid_until_dt_tm = cnvtdatetime("31-DEC-2100 00:00:00")
+ 
+			cerequest->clin_event.event_prsnl_list[2].person_id = ce.person_id
+			cerequest->clin_event.event_prsnl_list[2].action_type_cd = 104
+			cerequest->clin_event.event_prsnl_list[2].request_dt_tm_ind = 1
+			cerequest->clin_event.event_prsnl_list[2].action_dt_tm = cnvtdatetime(curdate,curtime3)
+			cerequest->clin_event.event_prsnl_list[2].action_prsnl_id = 1.0
+			cerequest->clin_event.event_prsnl_list[2].action_status_cd = 653
+			cerequest->clin_event.event_prsnl_list[2].valid_until_dt_tm = cnvtdatetime("31-DEC-2100 00:00:00")
+		with nocounter
+ 
+		set stat = tdbexecute(0,3055000,1000012,"REC",CERequest,"REC",CEReply,1)
+ 
+		;call echojson(CEReply,"cmc2.json")
+		call echorecord(CERequest)
+		call echorecord(CEReply)
+		call echo(build2("CEReply->rb_list[1].event_id=",CEReply->rb_list[1].event_id))
+		if (validate(CEReply->rb_list[1].event_id))
+			set vReturnSuccess = CEReply->rb_list[1].event_id
+		else
+			call echo("CEReply->rb_list[1].event_id not valid")
+			set vReturnSuccess = FALSE
+		endif
+	endif
+ 
+	return (vReturnSuccess)
+ 
+end
  
  
 subroutine AddAlgorithmResult(vCEventID)
