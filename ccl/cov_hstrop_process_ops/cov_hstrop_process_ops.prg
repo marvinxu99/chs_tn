@@ -246,11 +246,12 @@ for (i=1 to t_rec->event_cnt)
 	elseif ((t_rec->event_list[i].three_hour.needed_ind = 1) and (t_rec->event_list[i].three_hour.order_id > 0.0))
 		call writeLog(build2("-three_hour order still needed and active=",t_rec->event_list[i].three_hour.order_id))
 		set t_rec->event_list[i].three_hour.run_dt_tm_diff
-			= datetimediff(t_rec->event_list[i].three_hour.target_dt_tm,t_rec->cons.run_dt_tm,4)
+			= datetimediff(t_rec->cons.run_dt_tm,t_rec->event_list[i].initial.collect_dt_tm,4)
 		call writeLog(build2("-three_hour.run_dt_tm_diff=",t_rec->event_list[i].three_hour.run_dt_tm_diff))
 
 		if (t_rec->event_list[i].three_hour.run_dt_tm_diff > t_rec->cons.order_dt_tm_margin_max)
 			set t_rec->event_list[i].three_hour.cancel_ind = 1
+			set t_rec->event_list[i].three_hour.needed_ind = 0
 		endif
 
 	endif
@@ -271,7 +272,8 @@ for (ii=1 to t_rec->event_cnt)
  /* for testing only, restricts to a single patient */
  
 	call writeLog(build2("t_rec->event_list ii=",ii))
-	if ((t_rec->event_list[ii].one_hour.order_now_ind = 1) or (t_rec->event_list[ii].three_hour.order_now_ind = 1))
+	if ((t_rec->event_list[ii].one_hour.order_now_ind = 1) or (t_rec->event_list[ii].three_hour.order_now_ind = 1)
+		or (t_rec->event_list[ii].one_hour.cancel_ind = 1) or (t_rec->event_list[ii].three_hour.cancel_ind = 1))
  
 		call addhsTropDataRec(1)
 		call writeLog(build2("->getting event_id=",t_rec->event_list[ii].event_id))
@@ -415,7 +417,28 @@ for (ii=1 to t_rec->event_cnt)
 			endif
  		 endif
 		endif ;three_hour order now
+
+		if (t_rec->event_list[ii].three_hour.cancel_ind = 1)
+
+			execute cov_eks_trigger_by_o ^nl:^,^COV_EE_DISCONTINUE_ORD^,value(hsTroponin_data->three_hour.order_id)
+			;set hsTroponin_data->three_hour.order_id = 0.0
+			
+			execute cov_eks_trigger_by_o ^nl:^,^COV_EE_DISCONTINUE_ORD^,value(hsTroponin_data->three_hour.ecg_order_id)
+			;set hsTroponin_data->three_hour.ecg_order_id = 0.0
+			
+	 		;start algorithm over again
+			if (SetupNewhsTropOrder(t_rec->event_list[ii].person_id,t_rec->event_list[ii].encntr_id) = FALSE)
+				call writeLog("unable to setup request for new order")
+				go to exit_script
+			endif
  
+		 	set stat = UpdateOrderDetailDtTm("REQSTARTDTTM",cnvtdatetime(sysdate))
+		 	set stat = UpdateOrderDetailValueCd("COLLPRI",value(uar_get_code_by("MEANING",2054,"STAT")))
+			set order_comment = build2(	 "Restarted hs Troponin algorithm due to >6 hour collection time")
+			set stat = AddhsTropOrderComment(order_comment)
+			set new_order_id = CallNewhsTropOrderServer(null)			
+		
+		endif
 		;add hsTroponin_data record structure to chart for tracking
 		set t_rec->event_list[ii].new_event_id = EnsurehsTropAlgData(
 																	 hsTroponin_data->person_id
