@@ -250,8 +250,10 @@ for (i=1 to t_rec->event_cnt)
 		call writeLog(build2("-three_hour.run_dt_tm_diff=",t_rec->event_list[i].three_hour.run_dt_tm_diff))
 
 		if (t_rec->event_list[i].three_hour.run_dt_tm_diff > t_rec->cons.order_dt_tm_margin_max)
-			set t_rec->event_list[i].three_hour.cancel_ind = 1
-			set t_rec->event_list[i].three_hour.needed_ind = 0
+			if (hsTroponin_data->algorithm_info.current_phase != "END")
+				set t_rec->event_list[i].three_hour.cancel_ind = 1
+				set t_rec->event_list[i].three_hour.needed_ind = 0
+			endif
 		endif
 
 	endif
@@ -419,7 +421,6 @@ for (ii=1 to t_rec->event_cnt)
 		endif ;three_hour order now
 
 		if (t_rec->event_list[ii].three_hour.cancel_ind = 1)
-
 			execute cov_eks_trigger_by_o ^nl:^,^COV_EE_DISCONTINUE_ORD^,value(hsTroponin_data->three_hour.order_id)
 			;set hsTroponin_data->three_hour.order_id = 0.0
 			
@@ -437,9 +438,12 @@ for (ii=1 to t_rec->event_cnt)
 			set order_comment = build2(	 "Restarted hs Troponin algorithm due to >6 hour collection time")
 			set stat = AddhsTropOrderComment(order_comment)
 			set new_order_id = CallNewhsTropOrderServer(null)			
-		
+			
+			set hsTroponin_data->algorithm_info.current_phase = UpdateCurrentPhase(value(hsTroponin_data->algorithm_info.current_phase))
+			
 		endif
 		;add hsTroponin_data record structure to chart for tracking
+		set hsTroponin_data->algorithm_info.process_dt_tm = cnvtdatetime(curdate,curtime3)
 		set t_rec->event_list[ii].new_event_id = EnsurehsTropAlgData(
 																	 hsTroponin_data->person_id
 																	,hsTroponin_data->encntr_id
