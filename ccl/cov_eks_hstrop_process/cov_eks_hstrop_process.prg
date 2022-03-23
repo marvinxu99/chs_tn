@@ -170,7 +170,6 @@ if (t_rec->algorithm_data.linked_eventid = 0.0)
 	endif
  
 	;add the result that shows the algorith result to the chart under the lab result
- 
 	set hsTroponin_data->algorithm_info.current_interp_id = AddAlgorithmCEResult(t_rec->patient.clinical_event_id)
  
 	if (hsTroponin_data->algorithm_info.current_interp_id = FALSE)
@@ -449,7 +448,9 @@ else
 	endif
  
  	set hsTroponin_data->algorithm_info.current_interp_id = AddAlgorithmCEResult(t_rec->patient.clinical_event_id)
- 
+ 	call add_log_message(build2("AddAlgorithmCEDeltaResult=",AddAlgorithmCEDeltaResult(t_rec->patient.clinical_event_id)))
+ 	call add_log_message(build2("AddAlgorithmCETimeResult=",AddAlgorithmCETimeResult(t_rec->patient.clinical_event_id)))
+ 	
 	if (hsTroponin_data->algorithm_info.current_interp_id = FALSE)
 		call add_log_message("unable to add alorithm result to chart")
 		go to exit_script

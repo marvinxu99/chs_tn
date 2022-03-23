@@ -47,6 +47,8 @@ declare AddMPEventReply(null) = i2 with copy, persist
  
 declare GethsTropAlgEC(null) = f8 with copy, persist
 declare GethsTropInterpEC(null) = f8 with copy, persist
+declare GethsTropDeltaEC(null) = f8 with copy, persist
+declare GethsTropTimeEC(null) = f8 with copy, persist
 declare GethsTropAlgOrderMargin(null) = i4 with copy, persist
 declare GethsTropAlgOrderMarginMax(null) = i4 with copy, persist
  
@@ -305,11 +307,11 @@ subroutine AddAlgorithmCEResult(vCEventID)
  
 	return (vReturnSuccess)
  
-end
+end ;AddAlgorithmCEResult
 
 subroutine AddAlgorithmCEDeltaResult(vCEventID)
 	declare vReturnSuccess = f8 with noconstant(FALSE)
-	declare vInterpEC = f8 with constant(GethsTropInterpEC(null))
+	declare vInterpEC = f8 with constant(GethsTropDeltaEC(null))
  
 	if (validate(hsTroponin_data) = FALSE)
 		return (vReturnSuccess)
@@ -330,7 +332,7 @@ subroutine AddAlgorithmCEDeltaResult(vCEventID)
 			cerequest->clin_event.contributor_system_cd = ce.contributor_system_cd
 			cerequest->clin_event.event_class_cd = uar_get_code_by("MEANING",53,"TXT")
 			cerequest->clin_event.event_cd = vInterpEC
-			cerequest->clin_event.event_tag = hsTroponin_data->algorithm_info.current_full_normalcy
+			cerequest->clin_event.event_tag = cnvtstring(hsTroponin_data->algorithm_info.current_delta)
 			cerequest->clin_event.event_start_dt_tm = ce.event_start_dt_tm
 			cerequest->clin_event.event_end_dt_tm = ce.event_end_dt_tm
 			cerequest->clin_event.event_end_dt_tm_os_ind = 1
@@ -361,7 +363,7 @@ subroutine AddAlgorithmCEDeltaResult(vCEventID)
 			cerequest->ensure_type2 = 1
  
 			stat = alterlist(cerequest->clin_event.string_result,1)
-			cerequest->clin_event.string_result.string_result_text = hsTroponin_data->algorithm_info.current_full_normalcy
+			cerequest->clin_event.string_result.string_result_text = cnvtstring(hsTroponin_data->algorithm_info.current_delta)
 			cerequest->clin_event.string_result.string_result_format_cd = uar_get_code_by("MEANING",14113,"ALPHA")
 			cerequest->clin_event.string_result.last_norm_dt_tm_ind = 1
 			cerequest->clin_event.string_result.feasible_ind_ind = 1
@@ -406,8 +408,9 @@ end
 
 subroutine AddAlgorithmCETimeResult(vCEventID)
 	declare vReturnSuccess = f8 with noconstant(FALSE)
-	declare vInterpEC = f8 with constant(GethsTropInterpEC(null))
- 
+	declare vInterpEC = f8 with constant(GethsTropTimeEC(null))
+ 	declare vTimeValue = vc with noconstant("ERROR")
+ 	
 	if (validate(hsTroponin_data) = FALSE)
 		return (vReturnSuccess)
 	else
@@ -427,7 +430,19 @@ subroutine AddAlgorithmCETimeResult(vCEventID)
 			cerequest->clin_event.contributor_system_cd = ce.contributor_system_cd
 			cerequest->clin_event.event_class_cd = uar_get_code_by("MEANING",53,"TXT")
 			cerequest->clin_event.event_cd = vInterpEC
-			cerequest->clin_event.event_tag = hsTroponin_data->algorithm_info.current_full_normalcy
+			
+			if (hsTroponin_data->algorithm_info.current_phase = "ONEHOUR")
+				vTimeValue = concat(
+											trim(cnvtstring(datetimediff(hsTroponin_data->one_hour.collect_dt_tm,
+																	hsTroponin_data->initial.collect_dt_tm,4)))
+										 ," min")
+			elseif (hsTroponin_data->algorithm_info.current_phase = "THREEHOUR")
+				vTimeValue = concat(
+											trim(cnvtstring(datetimediff(hsTroponin_data->three_hour.collect_dt_tm,
+																	hsTroponin_data->initial.collect_dt_tm,4)))
+										 ," min")
+			endif
+			cerequest->clin_event.event_tag = vTimeValue
 			cerequest->clin_event.event_start_dt_tm = ce.event_start_dt_tm
 			cerequest->clin_event.event_end_dt_tm = ce.event_end_dt_tm
 			cerequest->clin_event.event_end_dt_tm_os_ind = 1
@@ -458,7 +473,7 @@ subroutine AddAlgorithmCETimeResult(vCEventID)
 			cerequest->ensure_type2 = 1
  
 			stat = alterlist(cerequest->clin_event.string_result,1)
-			cerequest->clin_event.string_result.string_result_text = hsTroponin_data->algorithm_info.current_full_normalcy
+			cerequest->clin_event.string_result.string_result_text = vTimeValue
 			cerequest->clin_event.string_result.string_result_format_cd = uar_get_code_by("MEANING",14113,"ALPHA")
 			cerequest->clin_event.string_result.last_norm_dt_tm_ind = 1
 			cerequest->clin_event.string_result.feasible_ind_ind = 1
@@ -523,8 +538,8 @@ end
 subroutine GethsTropAlgOrderMargin(null)
 	declare vReturnNumberofMinues = i4 with noconstant(0), protect
  
-	set vReturnNumberofMinues = 180 ;150 ;(2.5 hours)
- 
+	set vReturnNumberofMinues = 30 ;(2.5 hours)
+ 	
 	return (vReturnNumberofMinues)
 end ;GethsTropAlgOrderMargin
 
@@ -996,11 +1011,11 @@ subroutine DeterminehsTropAlg(vOrderID)
 			;ED Troponin HS (Symptoms < 3 hrs)
  
 			;set orderes to drop immediately when first result is recieved
-			set hsTroponin_data->algorithm_info.immediate_orders = 1
+			set hsTroponin_data->algorithm_info.immediate_orders = 0
  
  			;assume one and three hour will be needed
-			set hsTroponin_data->one_hour.needed_ind = 1
-			set hsTroponin_data->three_hour.needed_ind = 0
+			set hsTroponin_data->one_hour.needed_ind = 0
+			set hsTroponin_data->three_hour.needed_ind = 1
  		elseif (hsTroponin_data->algorithm_info.type = "INPATIENT")
  
 			;set orderes to drop immediately when first result is recieved
@@ -1456,8 +1471,10 @@ subroutine SetNormalcybyMilestone(vMilestone)
 						set vCollectDtTm = format(hsTroponin_data->initial.collect_dt_tm,"dd-mmm-yyyy hh:mm:ss zzz;;q")
 		of "ONEHOUR":	set vMilestoneDisplay = "1h"
 						set vCollectDtTm = format(hsTroponin_data->one_hour.collect_dt_tm,"dd-mmm-yyyy hh:mm:ss zzz;;q")
+						set hsTroponin_data->algorithm_info.current_delta = hsTroponin_data->one_hour.delta
 		of "THREEHOUR":	set vMilestoneDisplay = "3h"
 						set vCollectDtTm = format(hsTroponin_data->three_hour.collect_dt_tm,"dd-mmm-yyyy hh:mm:ss zzz;;q")
+						set hsTroponin_data->algorithm_info.current_delta = hsTroponin_data->three_hour.delta
 	endcase
 	
 	select into "nl:"
@@ -1495,7 +1512,7 @@ subroutine SetNormalcybyMilestone(vMilestone)
 	set hsTroponin_data->algorithm_info.current_full_normalcy = concat(
 																		 	 hsTroponin_data->algorithm_info.current_full_normalcy
 																			," ["
-																			,vCollectDtTm
+																			,vMilestoneDisplay
 																			,"]"
 																	   )
 																		
@@ -1847,7 +1864,7 @@ subroutine EnsurehsTropAlgData(vPersonID,vEncntrID,vEventID,vJSON)
 	return (rParentEventID)
  
 end ;EnsurehsTropAlgData
- 
+
 subroutine GethsTropInterpEC(null)
 	declare hsTropInterpEC = f8 with protect
  
@@ -1867,6 +1884,46 @@ subroutine GethsTropInterpEC(null)
  
 	return (hsTropInterpEC)
 end ;GethsTropInterpEC
+
+subroutine GethsTropDeltaEC(null)
+	declare hsTropDeltaEC = f8 with protect
+ 
+	select into "nl:"
+	from
+		code_value cv
+	plan cv
+		where cv.code_set = 72
+		and   cv.active_ind = 1
+		and   cv.display = "hs Troponin Delta"
+	order by
+		cv.begin_effective_dt_tm desc
+		,cv.display
+	head cv.display
+		hsTropDeltaEC = cv.code_value
+	with nocounter
+ 
+	return (hsTropDeltaEC)
+end ;GethsTropDeltaEC
+ 
+subroutine GethsTropTimeEC(null)
+	declare hsTropTimeEC = f8 with protect
+ 
+	select into "nl:"
+	from
+		code_value cv
+	plan cv
+		where cv.code_set = 72
+		and   cv.active_ind = 1
+		and   cv.display = "hs Troponin Timeframe"
+	order by
+		cv.begin_effective_dt_tm desc
+		,cv.display
+	head cv.display
+		hsTropTimeEC = cv.code_value
+	with nocounter
+ 
+	return (hsTropTimeEC)
+end ;GethsTropTimeEC
  
  
 subroutine GethsTropAlgEC(null)
