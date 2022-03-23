@@ -143,12 +143,14 @@ set t_rec->constants.prsnl_id				= reqinfo->updt_id
 call writeLog(build2("t_rec->patient.encntr_id=",t_rec->patient.encntr_id))
 call writeLog(build2("t_rec->patient.person_id=",t_rec->patient.person_id))
 call writeLog(build2("t_rec->event.clinical_event_id=",t_rec->event.clinical_event_id))
+call writeLog(build2("t_rec->commit_mode=",t_rec->commit_mode))
 call writeLog(build2("link_encntrid=",link_encntrid))
 call writeLog(build2("link_personid=",link_personid))
 call writeLog(build2("link_clinicaleventid=",link_clinicaleventid))
 
 call writeLog(build2("$OUTDEV=",$OUTDEV))
 call writeLog(build2("$EVENTID=",$EVENTID))
+call writeLog(build2("$COMMIT_MODE=",$COMMIT_MODE))
 
 declare pos = i4 with noconstant(0)
 declare not_found = vc with constant("<not found>")
@@ -304,22 +306,27 @@ else
 	go to exit_script
 endif
 
-for (i=1 to t_rec->query_cnt)
+call writeLog(build2("->starting t_rec->query_cnt loop"))
+
+for (i=1 to cdi_definition->query_cnt)
  if (t_rec->query_selected = 0) ;skip check if document title has already been found
-	call writeLog(build2("->checking:",t_rec->query_qual[i].definition," against ",t_rec->title_found))
-	if (t_rec->query_qual[i].definition = t_rec->title_found)
-		call writeLog(build2("->matched:",t_rec->query_qual[i].definition))
+	call writeLog(build2("->checking:",cdi_definition->query_qual[i].definition," against ",t_rec->title_found))
+	if (cdi_definition->query_qual[i].definition = t_rec->title_found)
 		set t_rec->query_selected = i
-		set t_rec->coding_start = findstring(t_rec->query_qual[i].coding_section,t_rec->html_text,t_rec->title_end,0)
+		
+		call writeLog(build2("->matched:",cdi_definition->query_qual[i].definition))
+		call writeLog(build2("->t_rec->query_selected:",t_rec->query_selected))
+		
+		set t_rec->coding_start = findstring(cdi_definition->query_qual[i].coding_section,t_rec->html_text,t_rec->title_end,0)
 		call writeLog(build2("->t_rec->coding_start:",t_rec->coding_start))
 		if (t_rec->coding_start = 0)
-			set t_rec->log_message = build2("Coding section of ",t_rec->query_qual[i].coding_section," not found")
+			set t_rec->log_message = build2("Coding section of ",cdi_definition->query_qual[i].coding_section," not found")
 			go to exit_script
 		else
 			set t_rec->coding_end = findstring("______________________________________________",t_rec->html_text,t_rec->coding_start,0)
 			call writeLog(build2("->t_rec->coding_end:",t_rec->coding_end))
 			if (t_rec->coding_end = 0)
-				set t_rec->log_message = build2("End of coding section ",t_rec->query_qual[i].coding_section," not found")
+				set t_rec->log_message = build2("End of coding section ",cdi_definition->query_qual[i].coding_section," not found")
 				go to exit_script
 			else
 				set t_rec->coding_found = substring(t_rec->coding_start,(t_rec->coding_end - t_rec->coding_start),t_rec->html_text)
@@ -330,54 +337,73 @@ for (i=1 to t_rec->query_cnt)
  endif
 endfor
 
+call writeLog(build2("<-finished t_rec->query_cnt loop"))
+
 if (t_rec->query_selected = 0)
 	set t_rec->log_message = concat("Title in document didn't match any defined in code set")
 	go to exit_script
 endif
 
-for (i=1 to t_rec->query_qual[t_rec->query_selected].code_cnt)
-	call writeLog(build2("->searching for uuid:",t_rec->query_qual[t_rec->query_selected].code_qual[i].uuid))
-	set t_rec->query_qual[t_rec->query_selected].code_qual[i].start_pos = findstring(
-																						 t_rec->query_qual[t_rec->query_selected].code_qual[i].uuid
+call writeLog(build2("->start looking for uuids that are checked"))
+
+for (i=1 to cdi_definition->query_qual[t_rec->query_selected].code_cnt)
+	call writeLog(build2("->searching for uuid:",cdi_definition->query_qual[t_rec->query_selected].code_qual[i].uuid))
+	set cdi_definition->query_qual[t_rec->query_selected].code_qual[i].start_pos = findstring(
+																						 cdi_definition->query_qual[t_rec->query_selected].code_qual[i].uuid
 																						,t_rec->coding_found
 																						,0
 																						,0
 																					)
-	if (t_rec->query_qual[t_rec->query_selected].code_qual[i].start_pos > 0)
-		call writeLog(build2("-->start_pos=:",t_rec->query_qual[t_rec->query_selected].code_qual[i].start_pos))
-		set t_rec->query_qual[t_rec->query_selected].code_qual[i].checked_value 
+	if (cdi_definition->query_qual[t_rec->query_selected].code_qual[i].start_pos > 0)
+		call writeLog(build2("-->start_pos=:",cdi_definition->query_qual[t_rec->query_selected].code_qual[i].start_pos))
+		set cdi_definition->query_qual[t_rec->query_selected].code_qual[i].checked_value 
 			= substring(
-				(t_rec->query_qual[t_rec->query_selected].code_qual[i].start_pos 
-					+ coding_uuid_int + size(t_rec->query_qual[t_rec->query_selected].code_qual[i].uuid))
+				(cdi_definition->query_qual[t_rec->query_selected].code_qual[i].start_pos 
+					+ coding_uuid_int + size(cdi_definition->query_qual[t_rec->query_selected].code_qual[i].uuid))
 											,1
 											,t_rec->coding_found
 										)
-		call writeLog(build2("-->checked_value=:",t_rec->query_qual[t_rec->query_selected].code_qual[i].checked_value))
+		call writeLog(build2("-->checked_value=:",cdi_definition->query_qual[t_rec->query_selected].code_qual[i].checked_value))
 	endif
 endfor
 
-for (i=1 to t_rec->query_qual[t_rec->query_selected].code_cnt)
-	if (t_rec->query_qual[t_rec->query_selected].code_qual[i].checked_value = "X")
-		call writeLog(build2("-->checked_value=:",t_rec->query_qual[t_rec->query_selected].code_qual[i].checked_value))
-		if ((t_rec->query_qual[t_rec->query_selected].code_qual[i].diag_nomenclature_id > 0.0)
-		 or (t_rec->query_qual[t_rec->query_selected].code_qual[i].snomed_nomenclature_id > 0.0))
+call writeLog(build2("<-end looking for uuids that are checked"))
+
+
+call writeLog(build2("->start pulling in codes that qualify"))
+for (i=1 to cdi_definition->query_qual[t_rec->query_selected].code_cnt)
+	if (cdi_definition->query_qual[t_rec->query_selected].code_qual[i].checked_value = "X")
+		call writeLog(build2("-->found checked_value=:",cdi_definition->query_qual[t_rec->query_selected].code_qual[i].checked_value))
+		
+		for (j=1 to cdi_definition->query_qual[t_rec->query_selected].code_qual[i].codes_cnt)
+		
+			if ((cdi_definition->query_qual[t_rec->query_selected].code_qual[i].codes[j].diag_nomenclature_id > 0.0)
+			   and (cdi_definition->query_qual[t_rec->query_selected].code_qual[i].codes[j].icd10_ind = 1))
+				call writeLog(build2("-->icd10code=:",cdi_definition->query_qual[t_rec->query_selected].code_qual[i].icd10code))
+				
+				set t_rec->select_cnt = (t_rec->select_cnt + 1)
+				set stat = alterlist(t_rec->select_qual,t_rec->select_cnt)
+				set t_rec->select_qual[t_rec->select_cnt].select_diag_code 
+					= cdi_definition->query_qual[t_rec->query_selected].code_qual[i].codes[j].icd10code
+				set t_rec->select_qual[t_rec->select_cnt].diag_nomenclature_id = 
+					cdi_definition->query_qual[t_rec->query_selected].code_qual[i].codes[j].diag_nomenclature_id				
+			endif
 			
-			call writeLog(build2("-->icd10code=:",t_rec->query_qual[t_rec->query_selected].code_qual[i].icd10code))
-			call writeLog(build2("-->snomedcode=:",t_rec->query_qual[t_rec->query_selected].code_qual[i].snomedcode))
-			
-			set t_rec->select_cnt = (t_rec->select_cnt + 1)
-			set stat = alterlist(t_rec->select_qual,t_rec->select_cnt)
-			set t_rec->select_qual[t_rec->select_cnt].select_diag_code = t_rec->query_qual[t_rec->query_selected].code_qual[i].icd10code
-			set t_rec->select_qual[t_rec->select_cnt].select_diag_text = t_rec->query_qual[t_rec->query_selected].code_qual[i].description
-			set t_rec->select_qual[t_rec->select_cnt].select_snomed_text = t_rec->query_qual[t_rec->query_selected].code_qual[i].description
-			set t_rec->select_qual[t_rec->select_cnt].select_snomed_code = t_rec->query_qual[t_rec->query_selected].code_qual[i].snomedcode
-			set t_rec->select_qual[t_rec->select_cnt].diag_nomenclature_id = 
-				t_rec->query_qual[t_rec->query_selected].code_qual[i].diag_nomenclature_id
-			set t_rec->select_qual[t_rec->select_cnt].snomed_nomenclature_id =
-				t_rec->query_qual[t_rec->query_selected].code_qual[i].snomed_nomenclature_id
-		endif
+			if ((cdi_definition->query_qual[t_rec->query_selected].code_qual[i].codes[j].snomed_nomenclature_id > 0.0)
+			   and (cdi_definition->query_qual[t_rec->query_selected].code_qual[i].codes[j].snomed_ind = 1))
+				call writeLog(build2("-->snomedcode=:",cdi_definition->query_qual[t_rec->query_selected].code_qual[i].snomedcode))
+				set t_rec->select_cnt = (t_rec->select_cnt + 1)
+				set stat = alterlist(t_rec->select_qual,t_rec->select_cnt)
+				set t_rec->select_qual[t_rec->select_cnt].select_snomed_code 
+					= cdi_definition->query_qual[t_rec->query_selected].code_qual[i].codes[j].snomedcode
+				set t_rec->select_qual[t_rec->select_cnt].snomed_nomenclature_id =
+					cdi_definition->query_qual[t_rec->query_selected].code_qual[i].codes[j].snomed_nomenclature_id
+			endif
+		endfor
 	endif
 endfor
+call echorecord(t_rec->select_qual)
+call writeLog(build2("->end pulling in codes that qualify"))
 
 for (i=1 to t_rec->select_cnt)
 	
@@ -406,6 +432,10 @@ for (i=1 to t_rec->select_cnt)
 	 	 						
 	 	 	set t_rec->select_qual[i].add_ind = 1
 	 	 endif
+	 	 set t_rec->log_message = build2(
+										 trim(t_rec->log_message),"|",	
+										t_rec->select_qual[i].select_diag_code,",",
+										t_rec->select_qual[i].diag_nomenclature_id)
 	 endif
 	 
 	 
@@ -430,14 +460,12 @@ for (i=1 to t_rec->select_cnt)
 	 	 						
 	 		set t_rec->select_qual[i].add_ind = 1
 	 	endif
-	 endif
-	 
-	 /*
- 	 set t_rec->log_message = concat(
+	 	set t_rec->log_message = build2(
 										 trim(t_rec->log_message),"|",	
-										t_rec->select_qual[i].select_code,",",
-										t_rec->select_qual[i].select_text)	
-	 */			
+										t_rec->select_qual[i].select_snomed_code,",",
+										t_rec->select_qual[i].snomed_nomenclature_id)
+	 endif	
+	 		
  	 call echo(_memory_reply_string)
 endfor
 
