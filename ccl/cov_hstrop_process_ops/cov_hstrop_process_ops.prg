@@ -388,6 +388,7 @@ for (ii=1 to t_rec->event_cnt)
 				call writeLog(build2("* FAILED TO ADD THREE HOUR ORDER"))
 				set t_rec->ord_process_ind = 1
 			endif
+			
 		if (hsTroponin_data->three_hour.ecg_order_id = 0.0)
 			if (SetupNewECGOrder(t_rec->event_list[ii].person_id,t_rec->event_list[ii].encntr_id) = FALSE)
 				call writeLog("unable to setup request for hour three ECG order")
@@ -421,6 +422,7 @@ for (ii=1 to t_rec->event_cnt)
 		endif ;three_hour order now
 
 		if (t_rec->event_list[ii].three_hour.cancel_ind = 1)
+			set t_rec->ord_process_ind = 1
 			execute cov_eks_trigger_by_o ^nl:^,^COV_EE_DISCONTINUE_ORD^,value(hsTroponin_data->three_hour.order_id)
 			;set hsTroponin_data->three_hour.order_id = 0.0
 			
