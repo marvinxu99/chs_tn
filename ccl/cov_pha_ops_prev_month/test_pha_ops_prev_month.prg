@@ -2818,7 +2818,7 @@ call writeLog(build2("**********************************************************
 call writeLog(build2("* START Executing Each Report Instance *********************"))
 for (k=1 to t_rec->cnt)
 	for (j=1 to t_rec->reports[k].instance_cnt)
-		if (k in(6,7)) ;remove after testing, this will limit the extract to running just one report
+		if (k in(6)) ;remove after testing, this will limit the extract to running just one report
 		set t_rec->reports[k].instances[j].ccl_command = build2(
 																	 "execute "
 																	,t_rec->reports[k].object
