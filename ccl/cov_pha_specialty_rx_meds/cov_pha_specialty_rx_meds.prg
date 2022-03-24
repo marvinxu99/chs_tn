@@ -736,9 +736,9 @@ endfor
  
  
  
-call echorecord( 3202501_request)
-call echorecord( 3202501_reply)
-call echorecord(rx)
+;call echorecord( 3202501_request)
+;call echorecord( 3202501_reply)
+;call echorecord(rx)
  
 ;--------------------------------------------------------------------------------------------------------------
  
@@ -871,9 +871,9 @@ if(iOpsInd = 1) ;Ops
  
 	with time = 30, nocounter, maxcol = 32000, format = stream, formfeed = none
  
-	;Move file to Astream folder
-  	set cmd = build2("mv ", ccl_filepath_var, " ", astream_filepath_var)
-  	;set cmd = build2("cp ", ccl_filepath_var, " ", astream_filepath_var)
+	;Copy file to Astream folder
+  	;set cmd = build2("mv ", ccl_filepath_var, " ", astream_filepath_var)
+  	set cmd = build2("cp ", ccl_filepath_var, " ", astream_filepath_var)
 	set len = size(trim(cmd))
  	;call dcl(cmd, len, stat)
 	;call echo(build2(cmd, " : ", stat))
