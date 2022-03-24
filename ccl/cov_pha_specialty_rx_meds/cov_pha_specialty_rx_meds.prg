@@ -39,7 +39,8 @@ prompt
 with OUTDEV, start_datetime, end_datetime, class_code, code_value,
 	all_cov_facilities, to_file
  
- 
+
+call echo(build2("starting ",curprog)) 
 /**************************************************************
 ; DVDev DECLARED VARIABLES
 *************************************************************/
@@ -209,7 +210,9 @@ record 3202501_request (
 )
 ;--------------------------------------------------------------------------------------------------------------
 ;Order qualification - changes need to be in both section(if statement)
- 
+
+call echo(build2("starting main query")) 
+
 select if($all_cov_facilities = 0)
  
 Facility = uar_get_code_display(e.loc_facility_cd)
@@ -360,6 +363,8 @@ with nocounter
  
 ;-------------------------------------------------------------------------------------------------
 ;Get organization and Federal_tax_id
+
+call echo(build2("Get organization and Federal_tax_id")) 
 select into 'nl:'
 from
 	(dummyt d WITH seq = value(size(rx->olist,5)))
@@ -389,6 +394,8 @@ with nocounter
 ;-------------------------------------------------------------------------------------------------
  
 ;Order Details
+
+call echo(build2("Get order details")) 
  
 select distinct into "NL:"
  ord = max(od.oe_field_display_value) keep (dense_rank last order by od.action_sequence ASC)
@@ -495,7 +502,8 @@ with nocounter
  
 ;----------------------------------------------------------------------------------------------------
 ;Get physicians details
- 
+
+call echo(build2("Get physician details"))  
 select into 'nl:'
  
 orderid = rx->olist[d.seq].orderid
@@ -613,6 +621,7 @@ with nocounter
  */
 ;----------------------------------------------------------------------------------------------------
 ;Drug Class data
+call echo(build2("Get drug class details")) 
 select distinct into 'NL:'
  
   mcdx.drug_identifier ,
@@ -675,7 +684,8 @@ Foot  mcdx.drug_identifier
     null
  
 With nocounter ,expand = 1
- 
+
+call echo(build2("Get routing pharmacy details"))  
 select into 'nl:'
  
 orderid = rx->olist[d.seq].orderid
@@ -705,9 +715,12 @@ for (i=1 to rx->rx_rec_cnt)
 endfor
  
 free record 3202501_reply
+
+call echo(build2("executing 3202501")) 
  
 set stat = tdbexecute(3202004,3202004,3202501,"REC",3202501_request,"REC",3202501_reply)
  
+call echo(build2("starting pharmacy loop"))  
 for (i=1 to rx->rx_rec_cnt)
 	for (j=1 to size(3202501_reply->PHARMACIES,5))
 		if (rx->olist[i].ROUTINGPHARMACYID = 3202501_reply->PHARMACIES[j].ID)
@@ -741,7 +754,7 @@ endfor
 ;call echorecord(rx)
  
 ;--------------------------------------------------------------------------------------------------------------
- 
+call echo(build2("creating file"))  
 if(iOpsInd = 1) ;Ops
   if($to_file = 0)  ;To File
  
@@ -1127,7 +1140,8 @@ endif ;Screen Display
  
 %i cust_script:cov_CommonLibrary.inc
  
- 
+call echo(build2("finishing ",curprog))
+
 end
 go
  
