@@ -117,7 +117,7 @@ record t_rec
 	  3 astream_copy_command	= vc
 )
  
-;call addEmailLog("chad.cummings@covhlth.com")
+call addEmailLog("chad.cummings@covhlth.com")
  
 set t_rec->cons.lookback.year	= build(^"^,^1^,^,Y"^)
 set t_rec->cons.lookback.month	= build(^"^,^1^,^,M"^)
