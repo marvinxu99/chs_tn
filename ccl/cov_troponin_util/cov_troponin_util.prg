@@ -44,6 +44,8 @@ declare	SystemPrsnlID = f8 with noconstant(1.0), protect, persist
 declare AddhsTropRefRec(freeRec=i2) = i2 with copy, persist
 declare AddhsTropDataRec(freeRec=i2) = i2 with copy, persist
 declare AddMPEventReply(null) = i2 with copy, persist
+
+declare GetOrderStatus(vOrderID=f8) = f8 with copy, persist
  
 declare GethsTropAlgEC(null) = f8 with copy, persist
 declare GethsTropInterpEC(null) = f8 with copy, persist
@@ -122,6 +124,24 @@ declare AddAlgorithmCEResult(vCEventID=f8) = f8 with copy, persist
 declare AddAlgorithmCEDeltaResult(vCEventID=f8) = f8 with copy, persist
 declare AddAlgorithmCETimeResult(vCEventID=f8) = f8 with copy, persist
  
+
+subroutine GetOrderStatus(vOrderID)
+
+	declare vOrderStatusCd = f8 with noconstant(0.0)
+	
+	select into "nl:"
+	from
+		orders o
+	plan o
+		where o.order_id = vOrderID
+	detail
+		vOrderStatusCd = o.order_status_cd
+	with nocounter
+	
+	return (vOrderStatusCd)
+
+end ;GetOrderStatus
+
  
 subroutine GethsTropOpsDate(vScript)
  
@@ -538,7 +558,7 @@ end
 subroutine GethsTropAlgOrderMargin(null)
 	declare vReturnNumberofMinues = i4 with noconstant(0), protect
  
-	set vReturnNumberofMinues = 60 ;(1 hours)
+	set vReturnNumberofMinues = 175 ;(1 hours)
  	
 	return (vReturnNumberofMinues)
 end ;GethsTropAlgOrderMargin
@@ -546,7 +566,7 @@ end ;GethsTropAlgOrderMargin
 subroutine GethsTropAlgOrderMarginMax(null)
 	declare vReturnNumberofMinues = i4 with noconstant(0), protect
  
-	set vReturnNumberofMinues = 360 ;(6 hours)
+	set vReturnNumberofMinues = 10 ;(6 hours)
  
 	return (vReturnNumberofMinues)
 end ;GethsTropAlgOrderMargin

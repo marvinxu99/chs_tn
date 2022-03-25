@@ -250,7 +250,7 @@ for (i=1 to t_rec->event_cnt)
 		call writeLog(build2("-three_hour.run_dt_tm_diff=",t_rec->event_list[i].three_hour.run_dt_tm_diff))
 
 		if (t_rec->event_list[i].three_hour.run_dt_tm_diff > t_rec->cons.order_dt_tm_margin_max)
-			if (hsTroponin_data->algorithm_info.current_phase != "END")
+			if (GetOrderStatus(t_rec->event_list[i].three_hour.order_id) in(uar_get_code_by("MEANING",6004,"ORDERED")))
 				set t_rec->event_list[i].three_hour.cancel_ind = 1
 				set t_rec->event_list[i].three_hour.needed_ind = 0
 			endif
@@ -426,9 +426,6 @@ for (ii=1 to t_rec->event_cnt)
 			execute cov_eks_trigger_by_o ^nl:^,^COV_EE_DISCONTINUE_ORD^,value(hsTroponin_data->three_hour.order_id)
 			;set hsTroponin_data->three_hour.order_id = 0.0
 			
-			execute cov_eks_trigger_by_o ^nl:^,^COV_EE_DISCONTINUE_ORD^,value(hsTroponin_data->three_hour.ecg_order_id)
-			;set hsTroponin_data->three_hour.ecg_order_id = 0.0
-			
 	 		;start algorithm over again
 			if (SetupNewhsTropOrder(t_rec->event_list[ii].person_id,t_rec->event_list[ii].encntr_id) = FALSE)
 				call writeLog("unable to setup request for new order")
@@ -440,8 +437,27 @@ for (ii=1 to t_rec->event_cnt)
 			set order_comment = build2(	 "Restarted hs Troponin algorithm due to >6 hour collection time")
 			set stat = AddhsTropOrderComment(order_comment)
 			set new_order_id = CallNewhsTropOrderServer(null)			
-			
-			set hsTroponin_data->algorithm_info.current_phase = UpdateCurrentPhase(value(hsTroponin_data->algorithm_info.current_phase))
+		
+			if (GetOrderStatus(t_rec->event_list[i].three_hour.ecg_order_id) in(uar_get_code_by("MEANING",6004,"ORDERED")))
+				execute cov_eks_trigger_by_o ^nl:^,^COV_EE_DISCONTINUE_ORD^,value(hsTroponin_data->three_hour.ecg_order_id)
+				;set hsTroponin_data->three_hour.ecg_order_id = 0.0
+				
+				if (SetupNewECGOrder(t_rec->event_list[ii].person_id,t_rec->event_list[ii].encntr_id) = FALSE)
+					call writeLog("unable to setup request for hour three ECG order")
+					go to exit_script
+				else
+					call writeLog("setup request for hour three ECG order")
+				endif
+	 
+		 		set stat = UpdateECGOrderDetailDtTm("REQSTARTDTTM",cnvtdatetime(sysdate))
+		 		set stat = UpdateECGOrderDetailValueCd("PRIORITY",value(uar_get_code_by("MEANING",1304,"STAT")))
+				set order_comment = build2(	 "Restarted hs Troponin algorithm due to >6 hour collection time" )
+				set stat = AddECGOrderComment(order_comment)
+				set new_order_id = CallNewECGOrderServer(null)	
+					
+			endif
+				
+			set hsTroponin_data->algorithm_info.current_phase = "END"
 			
 		endif
 		;add hsTroponin_data record structure to chart for tracking
