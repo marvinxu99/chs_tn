@@ -1,14 +1,15 @@
 DROP PROGRAM cov_rx_rpt_drug_utilization :dba GO
 CREATE PROGRAM cov_rx_rpt_drug_utilization :dba
- PROMPT
-  "Output to File/Printer/MINE:" = "MINE" ,
-  "Search by Drug or Therapeutic Class:" = "" ,
-  "Enter the search string (* for all):" = "*" ,
-  "Enter Facility (* for all):" = "" ,
-  "Enter the START date range (mmddyyyy hhmm)  FROM :" = "SYSDATE" ,
-  "(mmddyyyy hhmm)    TO :" = "SYSDATE" ,
-  "Include Pyxis Orders:" = ""
-  WITH outdev ,searchtype ,searchstring ,facility ,startdate ,stopdate ,pyxis
+ prompt 
+	"Output to File/Printer/MINE:" = "MINE"
+	, "Search by Drug or Therapeutic Class:" = "Drug"
+	, "Enter the search string (* for all):" = "*"
+	, "Enter Facility (* for all):" = ""
+	, "Enter the START date range (mmddyyyy hhmm)  FROM :" = "SYSDATE"
+	, "(mmddyyyy hhmm)    TO :" = "SYSDATE"
+	, "Include Pyxis Orders:" = "Yes" 
+
+with OUTDEV, SEARCHTYPE, SEARCHSTRING, FACILITY, STARTDATE, STOPDATE, PYXIS
  SUBROUTINE  (formattolength (drugname =vc ,length =i4 ) =vc )
   SET return_string = drugname
   IF ((size (drugname ,1 ) > length ) )
@@ -139,15 +140,13 @@ CREATE PROGRAM cov_rx_rpt_drug_utilization :dba
  SET i = 0
  SET first_real = 1
  SET total_thers = 0
- EXECUTE rx_get_facs_for_prsnl_rr_incl WITH replace ("REQUEST" ,"PRSNL_FACS_REQ" ) ,
- replace ("REPLY" ,"PRSNL_FACS_REPLY" )
+ EXECUTE rx_get_facs_for_prsnl_rr_incl WITH replace ("REQUEST" ,"PRSNL_FACS_REQ" ) , replace ("REPLY" ,"PRSNL_FACS_REPLY" )
  SET stat = alterlist (prsnl_facs_req->qual ,1 )
  ;CALL echo (build ("Reqinfo->updt_id --" ,reqinfo->updt_id ) )
  ;CALL echo (build ("curuser --" ,curuser ) )
  SET prsnl_facs_req->qual[1 ].username = trim (curuser )
  SET prsnl_facs_req->qual[1 ].person_id = reqinfo->updt_id
- EXECUTE rx_get_facs_for_prsnl WITH replace ("REQUEST" ,"PRSNL_FACS_REQ" ) ,
- replace ("REPLY" ,"PRSNL_FACS_REPLY" )
+ EXECUTE rx_get_facs_for_prsnl WITH replace ("REQUEST" ,"PRSNL_FACS_REQ" ) , replace ("REPLY" ,"PRSNL_FACS_REPLY" )
  ;CALL echo (build ("Size of facility list in prg--" ,size (prsnl_facs_reply->qual[1 ].facility_list ,5 ) ) )
  FREE RECORD facility_list
  RECORD facility_list (
@@ -190,6 +189,30 @@ CREATE PROGRAM cov_rx_rpt_drug_utilization :dba
    1 alt_sel_cat_id = f8
    1 item_id = f8
  )
+ 
+ record output (
+ 
+ 		1 cnt = i4
+ 		1 qual[*] 
+ 		 2 pharmacy_identifier = vc
+ 		 2 date_of_service = vc
+ 		 2 date_of_service_dq8 = dq8
+ 		 2 prescriber_ident = vc
+ 		 2 prescriber_id = f8
+ 		 2 ndc = vc
+ 		 2 encntr_id = f8
+ 		 2 item_id = f8
+ 		 2 quantity_dispensed = f8
+ 		 2 dispenses = f8
+ 		 2 unit_of_dispense = f8
+ 		 2 unit_of_measure = vc
+ 		 2 ingredient_cost = f8
+ 		 2 order_id = f8
+ 		 2 gender = i2
+ 		 2 state = vc
+ 		 2 realationship = i2
+	)
+	
  SET internal->begin_dt_tm = cnvtdatetime (start_dt ,nstart_tm )
  SET internal->end_dt_tm = cnvtdatetime (stop_dt ,nstop_tm )
  SELECT INTO "nl:"
@@ -239,13 +262,17 @@ CREATE PROGRAM cov_rx_rpt_drug_utilization :dba
      2 ingredient [* ]
        3 generic_name = c100
        3 cost = f8
+       3 unit_cost = f8
        3 price = f8
        3 dispenses = f8
        3 ingredient_type_flag = i2
        3 compound_parent = c50
        3 compound_ingred_add = i2
        3 item_id = f8
+       3 ndc = vc
        3 class_description = c35
+       3 volume_unit_cd = f8
+       3 strength_unit_cd = f8
      2 skip_dup_dot_order_ind = i2
  )
  SET ccost = 2004.00
@@ -303,41 +330,6 @@ CREATE PROGRAM cov_rx_rpt_drug_utilization :dba
  SET cordertype = 2070.00
  SET ctitrate = 2078.00
  ;CALL echo (build ("Search string ===" ,ssearch_string ) )
- IF ((cnvtupper (trim ( $SEARCHTYPE ) ) = "DRUG" ) )
-  IF ((new_model_check = 0 ) )
-   SELECT INTO "NL:"
-    oii2.object_id
-    FROM (object_identifier_index oii ),
-     (object_identifier_index oii2 )
-    PLAN (oii
-     WHERE (oii.value_key = patstring (value (cnvtupper (trim (ssearch_string ,4 ) ) ) ) )
-     AND (oii.identifier_type_cd IN (clabel ,
-     cgeneric ) )
-     AND (oii.object_type_cd IN (cmeddef ,
-     citemgroup ) )
-     AND (oii.generic_object = 0 ) )
-     JOIN (oii2
-     WHERE (oii2.object_id = oii.object_id )
-     AND ((oii2.identifier_type_cd + 0 ) = clabel )
-     AND (oii2.primary_ind = 1 )
-     AND ((oii2.generic_object + 0 ) = 0 )
-     AND ((oii2.object_type_cd + 0 ) IN (cmeddef ,
-     citemgroup ) ) )
-    ORDER BY oii2.object_id
-    HEAD REPORT
-     medcnt = 0
-    DETAIL
-     medcnt +=1 ,
-     IF ((medcnt > size (orderrec->qual ,5 ) ) ) stat = alterlist (orderrec->qual ,(medcnt + 10 ) )
-     ENDIF
-     ,orderrec->qual[medcnt ].item_id = oii2.object_id ,
-     orderrec->qual[medcnt ].identifier_id = oii2.identifier_id ,
-     orderrec->qual[medcnt ].generic_name = oii2.value 
-     ;CALL echo (build ("Gen name --" ,orderrec->qual[medcnt ].generic_name ) ) ,
-     ;CALL echo (build ("item id ---" ,orderrec->qual[medcnt ].item_id ) )
-    WITH nocounter
-   ;end select
-  ELSE
    SELECT DISTINCT INTO "NL:"
     mi2.item_id
     FROM (med_identifier mi ),
@@ -368,215 +360,8 @@ CREATE PROGRAM cov_rx_rpt_drug_utilization :dba
      ;CALL echo (build ("item id ---" ,orderrec->qual[medcnt ].item_id ) )
     WITH nocounter
    ;end select
-  ENDIF
   SET stat = alterlist (orderrec->qual ,medcnt )
- ELSEIF ((cnvtupper (trim ( $SEARCHTYPE ) ) = "THERAPEUTIC CLASS" ) )
-  RECORD ther (
-    1 qual [* ]
-      2 alt_sel_cat_id = f8
-      2 long_description = c35
-  )
-  SELECT DISTINCT INTO "NL:"
-   FROM (alt_sel_cat a )
-   WHERE (a.long_description_key_cap = patstring (value (cnvtupper (trim (ssearch_string ) ) ) ) )
-   ORDER BY a.long_description
-   DETAIL
-    IF ((first_real = 1 )
-    AND (a.alt_sel_category_id > 0 ) ) first_real = 0 ,internal->alt_sel_cat_id = a
-     .alt_sel_category_id
-    ENDIF
-    ,
-    IF ((first_real = 0 )
-    AND (count > 0 )
-    AND (a.alt_sel_category_id != ther->qual[count ].alt_sel_cat_id ) ) total_thers = 2
-    ENDIF
-    ,count +=1 ,
-    IF ((count > size (ther->qual ,5 ) ) ) stat = alterlist (ther->qual ,(count + 10 ) )
-    ENDIF
-    ,ther->qual[count ].alt_sel_cat_id = a.alt_sel_category_id ,
-    ther->qual[count ].long_description = a.long_description
-   WITH nocounter
-  ;end select
-  SET stat = alterlist (ther->qual ,count )
- ENDIF
- IF ((cnvtupper (trim ( $SEARCHTYPE ) ) = "THERAPEUTIC CLASS" )
- AND (internal->alt_sel_cat_id > 0 ) )
-  SET nactual_size = size (ther->qual ,5 )
-  SET nexpand_total = (nactual_size + (nexpand_size - mod (nactual_size ,nexpand_size ) ) )
-  SET nexpand_start = 1
-  SET nexpand_stop = 50
-  SET stat = alterlist (ther->qual ,nexpand_total )
-  FOR (x = (nactual_size + 1 ) TO nexpand_total )
-   SET ther->qual[x ].alt_sel_cat_id = ther->qual[nactual_size ].alt_sel_cat_id
-  ENDFOR
-  SET tclass = 0.0
-  SET rec_cnt = 0
-  RECORD class (
-    1 qual [* ]
-      2 code = f8
-      2 long_description = c35
-  )
-  SELECT INTO "NL:"
-   a2_hit = decode (a2.seq ,1 ,0 ) ,
-   a3_hit = decode (a3.seq ,1 ,0 ) ,
-   a4_hit = decode (a4.seq ,1 ,0 ) ,
-   a5_hit = decode (a5.seq ,1 ,0 )
-   FROM (dummyt d WITH seq = value ((nexpand_total / nexpand_size ) ) ),
-    (alt_sel_cat a1 ),
-    (dummyt d1 ),
-    (alt_sel_list a2 ),
-    (alt_sel_cat a3 ),
-    (dummyt d2 ),
-    (alt_sel_list a4 ),
-    (alt_sel_cat a5 )
-   PLAN (d
-    WHERE assign (nexpand_start ,evaluate (d.seq ,1 ,1 ,(nexpand_start + nexpand_size ) ) )
-    AND assign (nexpand_stop ,(nexpand_start + (nexpand_size - 1 ) ) ) )
-    JOIN (a1
-    WHERE expand (nexpand ,nexpand_start ,nexpand_stop ,a1.alt_sel_category_id ,ther->qual[nexpand ].
-     alt_sel_cat_id )
-    AND ((a1.alt_sel_category_id + 0 ) > 0 ) )
-    JOIN (d1 )
-    JOIN (a2
-    WHERE (a1.alt_sel_category_id = a2.alt_sel_category_id )
-    AND (a2.list_type != 2 ) )
-    JOIN (a3
-    WHERE (a2.child_alt_sel_cat_id = a3.alt_sel_category_id ) )
-    JOIN (d2 )
-    JOIN (a4
-    WHERE (a3.alt_sel_category_id = a4.alt_sel_category_id )
-    AND ((a4.alt_sel_category_id + 0 ) > 0 ) )
-    JOIN (a5
-    WHERE (a4.child_alt_sel_cat_id = a5.alt_sel_category_id )
-    AND ((a5.alt_sel_category_id + 0 ) > 0 ) )
-   HEAD REPORT
-    rec_cnt = 0
-   HEAD a1.alt_sel_category_id
-    nindex = locateval (x ,1 ,nactual_size ,a1.alt_sel_category_id ,ther->qual[x ].alt_sel_cat_id ) ,
-    IF ((nindex > 0 ) ) rec_cnt +=1 ,
-     IF ((rec_cnt > size (class->qual ,5 ) ) ) stat = alterlist (class->qual ,rec_cnt )
-     ENDIF
-     ,class->qual[rec_cnt ].code = a1.alt_sel_category_id ,class->qual[rec_cnt ].long_description =
-     ther->qual[nindex ].long_description
-    ENDIF
-   HEAD a3.alt_sel_category_id
-    IF ((a2_hit = 1 ) ) nindex = locateval (x ,1 ,nactual_size ,a3.alt_sel_category_id ,ther->qual[x
-      ].alt_sel_cat_id ) ,
-     IF ((nindex > 0 ) ) rec_cnt +=1 ,
-      IF ((rec_cnt > size (class->qual ,5 ) ) ) stat = alterlist (class->qual ,rec_cnt )
-      ENDIF
-      ,class->qual[rec_cnt ].code = a3.alt_sel_category_id ,class->qual[rec_cnt ].long_description =
-      ther->qual[nindex ].long_description
-     ENDIF
-    ENDIF
-   DETAIL
-    IF ((a4_hit = 1 ) ) nindex = locateval (x ,1 ,nactual_size ,a5.alt_sel_category_id ,ther->qual[x
-      ].alt_sel_cat_id ) ,
-     IF ((nindex > 0 ) ) rec_cnt +=1 ,
-      IF ((rec_cnt > size (class->qual ,5 ) ) ) stat = alterlist (class->qual ,(rec_cnt + 10 ) )
-      ENDIF
-      ,class->qual[rec_cnt ].code = a5.alt_sel_category_id ,class->qual[rec_cnt ].long_description =
-      ther->qual[nindex ].long_description
-     ENDIF
-    ENDIF
-   WITH outerjoin = d1 ,outerjoin = d2, expand=1
-  ;end select
-  SET stat = alterlist (class->qual ,rec_cnt )
-  SET rec_cnt = size (class->qual ,5 )
-  SET nactual_size = size (class->qual ,5 )
-  SET nexpand_total = (nactual_size + (nexpand_size - mod (nactual_size ,nexpand_size ) ) )
-  SET nexpand_start = 1
-  SET nexpand_stop = 50
-  SET stat = alterlist (class->qual ,nexpand_total )
-  FOR (x = (nactual_size + 1 ) TO nexpand_total )
-   SET class->qual[x ].code = class->qual[nactual_size ].code
-  ENDFOR
-  IF ((new_model_check = 0 ) )
-   ;CALL echo ("Old Model" )
-   SELECT INTO "NL:"
-    oci.synonym_id
-    FROM (alt_sel_list a ),
-     (order_catalog_item_r oci ),
-     (object_identifier_index oii ),
-     (dummyt d WITH seq = value ((nexpand_total / nexpand_size ) ) )
-    PLAN (d
-     WHERE assign (nexpand_start ,evaluate (d.seq ,1 ,1 ,(nexpand_start + nexpand_size ) ) )
-     AND assign (nexpand_stop ,(nexpand_start + (nexpand_size - 1 ) ) ) )
-     JOIN (a
-     WHERE expand (nexpand ,nexpand_start ,nexpand_stop ,a.alt_sel_category_id ,class->qual[nexpand ]
-      .code )
-     AND ((a.alt_sel_category_id + 0 ) > 0 ) )
-     JOIN (oci
-     WHERE (a.synonym_id = oci.synonym_id )
-     AND ((oci.catalog_cd + 0 ) > 0 )
-     AND ((oci.synonym_id + 0 ) > 0 ) )
-     JOIN (oii
-     WHERE (oci.item_id = oii.object_id )
-     AND ((oii.identifier_type_cd + 0 ) = clabel )
-     AND ((oii.object_type_cd + 0 ) IN (cmeddef ,
-     citemgroup ) )
-     AND ((oii.generic_object + 0 ) = 0 )
-     AND (oii.primary_ind = 1 ) )
-    ORDER BY oci.synonym_id
-    HEAD REPORT
-     itemcnt = 0
-    DETAIL
-     IF ((oci.item_id > 0 ) ) itemcnt +=1 ,
-      IF ((itemcnt > size (orderrec->qual ,5 ) ) ) stat = alterlist (orderrec->qual ,(itemcnt + 10 )
-        )
-      ENDIF
-      ,orderrec->qual[itemcnt ].item_id = oci.item_id ,orderrec->qual[itemcnt ].synonym_id = oci
-      .synonym_id ,nindex = locateval (x ,1 ,nactual_size ,a.alt_sel_category_id ,class->qual[x ].
-       code ) ,orderrec->qual[itemcnt ].class_description = class->qual[nindex ].long_description ,
-      orderrec->qual[itemcnt ].generic_name = oii.value
-     ENDIF
-    WITH nocounter ,outerjoin = d1 ,outerjoin = d2, expand = 1
-   ;end select
-  ELSE
-   SELECT INTO "NL:"
-    oci.synonym_id
-    FROM (alt_sel_list a ),
-     (order_catalog_item_r oci ),
-     (med_identifier mi ),
-     (dummyt d WITH seq = value ((nexpand_total / nexpand_size ) ) )
-    PLAN (d
-     WHERE assign (nexpand_start ,evaluate (d.seq ,1 ,1 ,(nexpand_start + nexpand_size ) ) )
-     AND assign (nexpand_stop ,(nexpand_start + (nexpand_size - 1 ) ) ) )
-     JOIN (a
-     WHERE expand (nexpand ,nexpand_start ,nexpand_stop ,a.alt_sel_category_id ,class->qual[nexpand ]
-      .code )
-     AND ((a.alt_sel_category_id + 0 ) > 0 ) )
-     JOIN (oci
-     WHERE (a.synonym_id = oci.synonym_id )
-     AND ((oci.catalog_cd + 0 ) > 0 )
-     AND ((oci.synonym_id + 0 ) > 0 ) )
-     JOIN (mi
-     WHERE (mi.item_id = oci.item_id )
-     AND (mi.med_identifier_type_cd = clabel )
-     AND (mi.flex_type_cd = csystem )
-     AND (mi.pharmacy_type_cd = cinpatient )
-     AND (mi.med_product_id = 0 )
-     AND (mi.primary_ind = 1 ) )
-    ORDER BY oci.synonym_id
-    HEAD REPORT
-     itemcnt = 0
-    DETAIL
-     IF ((oci.item_id > 0 ) ) nindex = locateval (x ,1 ,nactual_size ,a.alt_sel_category_id ,class->
-       qual[x ].code ) ,
-      IF ((nindex > 0 ) ) itemcnt +=1 ,
-       IF ((itemcnt > size (orderrec->qual ,5 ) ) ) stat = alterlist (orderrec->qual ,(itemcnt + 10
-         ) )
-       ENDIF
-       ,orderrec->qual[itemcnt ].item_id = oci.item_id ,orderrec->qual[itemcnt ].synonym_id = oci
-       .synonym_id ,orderrec->qual[itemcnt ].class_description = class->qual[nindex ].
-       long_description ,orderrec->qual[itemcnt ].generic_name = mi.value
-      ENDIF
-     ENDIF
-    WITH nocounter ,outerjoin = d1 ,outerjoin = d2, expand = 1
-   ;end select
-  ENDIF
-  SET stat = alterlist (orderrec->qual ,itemcnt )
- ENDIF
+  
  RECORD orderlist (
    1 data [* ]
      2 order_id = f8
@@ -650,54 +435,55 @@ CREATE PROGRAM cov_rx_rpt_drug_utilization :dba
   HEAD dh.order_id
    ;CALL echo (build ("Order id --" ,o.order_id ) ) ,
    ;CALL echo (build ("dFacilityAreaCD --" ,dfacilityareacd ) ) ,
-   IF ((locateval (x ,1 ,size (facility_list->qual ,5 ) ,dfacilityareacd ,facility_list->qual[x ].
-    facility_cd ) > 0 ) )
+   IF ((locateval (x ,1 ,size (facility_list->qual ,5 ) ,dfacilityareacd ,facility_list->qual[x ].facility_cd ) > 0 ) )
     ;CALL echo ("Storing order id" ) ,
-    IF ((dfacilityareacd > 0 ) ) facility_area = uar_get_code_display (dfacilityareacd )
+    IF ((dfacilityareacd > 0 ) ) 
+    	facility_area = uar_get_code_display (dfacilityareacd )
     ENDIF
-    ,ordcnt +=1 ,stat = alterlist (orderrec->orderlist ,ordcnt ) ,stat = alterlist (orderrec->
-     orderlist[ordcnt ].ingredient ,0 ) ,orderrec->orderlist[ordcnt ].orderid = o.order_id ,orderrec
-    ->orderlist[ordcnt ].facility = substring (1 ,30 ,facility_area ) ,ningred_cnt = 0 ,
-    IF ((o.protocol_order_id > 0 )
-    AND (dlastprotocolorderid = o.protocol_order_id ) ) orderrec->orderlist[ordcnt ].
-     skip_dup_dot_order_ind = 1
+    ordcnt +=1 
+    stat = alterlist (orderrec->orderlist ,ordcnt ) 
+    stat = alterlist (orderrec->orderlist[ordcnt ].ingredient ,0 ) 
+    orderrec->orderlist[ordcnt ].orderid = o.order_id 
+    orderrec->orderlist[ordcnt ].facility = substring (1 ,30 ,facility_area ) 
+    ningred_cnt = 0
+    IF ((o.protocol_order_id > 0 ) AND (dlastprotocolorderid = o.protocol_order_id ) ) 
+    	orderrec->orderlist[ordcnt ].skip_dup_dot_order_ind = 1
     ENDIF
-    ,dlastprotocolorderid = o.protocol_order_id
+    
+    dlastprotocolorderid = o.protocol_order_id
+   
    ENDIF
+   
   HEAD pdh.item_id
-   IF ((locateval (x ,1 ,size (facility_list->qual ,5 ) ,dfacilityareacd ,facility_list->qual[x ].
-    facility_cd ) > 0 ) )
+   IF ((locateval (x ,1 ,size (facility_list->qual ,5 ) ,dfacilityareacd ,facility_list->qual[x ].facility_cd ) > 0 ) )
     ;CALL echo (build ("pdh item id ---" ,pdh.item_id ) ) ,
-    IF ((dh.order_id > 0 ) ) ningred_cnt +=1 ,stat = alterlist (orderrec->orderlist[ordcnt ].
-      ingredient ,ningred_cnt ) ,
-     IF ((cnvtupper (trim ( $SEARCHTYPE ) ) = "DRUG" ) ) orderrec->orderlist[ordcnt ].ingredient[
-      ningred_cnt ].class_description = fillstring (35 ," " )
-     ENDIF
-     ,nindex = locateval (x ,1 ,nactual_size ,pdh.item_id ,orderrec->qual[x ].item_id ) ,
-     IF ((cnvtupper (trim ( $SEARCHTYPE ) ) = "THERAPEUTIC CLASS" ) ) orderrec->orderlist[ordcnt ].
-      ingredient[ningred_cnt ].class_description = orderrec->qual[nindex ].class_description 
-      ;CALL echo (build ("Class desc --" ,orderrec->orderlist[ordcnt ].ingredient[ningred_cnt ].      class_description ) )
-     ENDIF
-     ,orderrec->orderlist[ordcnt ].ingredient[ningred_cnt ].generic_name = orderrec->qual[nindex ].
-     generic_name ,orderrec->orderlist[ordcnt ].ingredient[ningred_cnt ].item_id = orderrec->qual[
-     nindex ].item_id 
+    IF ((dh.order_id > 0 ) ) 
+    	ningred_cnt +=1
+    	stat = alterlist (orderrec->orderlist[ordcnt ].ingredient ,ningred_cnt ) 
+    	orderrec->orderlist[ordcnt ].ingredient[ningred_cnt ].class_description = fillstring (35 ," " )
+     
+     	nindex = locateval (x ,1 ,nactual_size ,pdh.item_id ,orderrec->qual[x ].item_id )
+     	orderrec->orderlist[ordcnt ].ingredient[ningred_cnt ].generic_name = orderrec->qual[nindex ].generic_name 
+     	orderrec->orderlist[ordcnt ].ingredient[ningred_cnt ].item_id = orderrec->qual[nindex ].item_id 
      ;CALL echo (build ("Label desc ===" ,orderrec->orderlist[ordcnt ].ingredient[ningred_cnt ].generic_name ) )
     ENDIF
    ENDIF
   HEAD pdh.dispense_hx_id
-   IF ((locateval (x ,1 ,size (facility_list->qual ,5 ) ,dfacilityareacd ,facility_list->qual[x ].
-    facility_cd ) > 0 ) )
+   IF ((locateval (x ,1 ,size (facility_list->qual ,5 ) ,dfacilityareacd ,facility_list->qual[x ].facility_cd ) > 0 ) )
     ;CALL echo (build ("dispense_hx id --" ,pdh.dispense_hx_id ) ) ,
     IF ((dh.order_id > 0 ) )
      IF ((pdh.charge_qty > 0 ) )
       ;CALL echo (build ("doses ==" ,dh.doses ) ) ,
-      orderrec->orderlist[ordcnt ].ingredient[ningred_cnt ].dispenses +=dh.doses ,
-      orderrec->orderlist[ordcnt ].ingredient[ningred_cnt ].cost
-      +=(pdh.cost * pdh.charge_qty ) ,orderrec->orderlist[ordcnt ].ingredient[ningred_cnt ].price +=
-      pdh.price
-     ELSE orderrec->orderlist[ordcnt ].ingredient[ningred_cnt ].dispenses -=dh.doses ,orderrec->
-      orderlist[ordcnt ].ingredient[ningred_cnt ].cost -=(pdh.cost * pdh.credit_qty ) ,orderrec->
-      orderlist[ordcnt ].ingredient[ningred_cnt ].price -=pdh.price
+      orderrec->orderlist[ordcnt ].ingredient[ningred_cnt ].dispenses +=dh.doses 
+      
+      orderrec->orderlist[ordcnt ].ingredient[ningred_cnt ].cost+=(pdh.cost * pdh.charge_qty ) 
+      orderrec->orderlist[ordcnt ].ingredient[ningred_cnt ].price += pdh.price
+      orderrec->orderlist[ordcnt ].ingredient[ningred_cnt ].unit_cost = pdh.cost
+     ELSE 
+     	orderrec->orderlist[ordcnt ].ingredient[ningred_cnt ].dispenses -=dh.doses 
+     	orderrec->orderlist[ordcnt ].ingredient[ningred_cnt ].cost -=(pdh.cost * pdh.credit_qty ) 
+     	orderrec->orderlist[ordcnt ].ingredient[ningred_cnt ].price -=pdh.price
+       	orderrec->orderlist[ordcnt ].ingredient[ningred_cnt ].unit_cost = pdh.cost
      ENDIF
     ENDIF
    ENDIF
@@ -719,56 +505,77 @@ CREATE PROGRAM cov_rx_rpt_drug_utilization :dba
     WHERE expand (nexpand ,1 ,nactual_size ,dh.order_id ,orderrec->orderlist[nexpand ].orderid ) )
     JOIN (oi
     WHERE (oi.order_id = dh.order_id )
-    AND (((oi.ingredient_type_flag = ccompound_parent_flag ) ) OR ((oi.ingredient_type_flag =
-    ccompound_child_flag ) ))
+    AND (((oi.ingredient_type_flag = ccompound_parent_flag ) ) 
+    	OR ((oi.ingredient_type_flag = ccompound_child_flag ) ))
     AND (dh.order_id = oi.order_id )
     AND (dh.action_sequence = oi.action_sequence ) )
     JOIN (pdh
-    WHERE (dh.dispense_hx_id = pdh.dispense_hx_id )
-    AND (pdh.ingred_sequence = oi.comp_sequence ) )
+   	 	WHERE (dh.dispense_hx_id = pdh.dispense_hx_id )
+     	AND (pdh.ingred_sequence = oi.comp_sequence ) )
     JOIN (mi
-    WHERE (pdh.item_id = mi.item_id )
-    AND (mi.med_identifier_type_cd = clabel )
-    AND (mi.med_product_id = 0 ) )
+    	WHERE (pdh.item_id = mi.item_id )
+    	AND (mi.med_identifier_type_cd = clabel )
+    	AND (mi.med_product_id = 0 ) )
    DETAIL
-    nindex = locateval (icnt ,1 ,size (orderrec->orderlist ,5 ) ,dh.order_id ,orderrec->orderlist[
-     icnt ].orderid ) ,
-    IF ((nindex > 0 ) ) norderingredlistsize = size (orderrec->orderlist[nindex ].ingredient ,5 ) ,
-     ningred = locateval (icnt ,1 ,norderingredlistsize ,pdh.item_id ,orderrec->orderlist[nindex ].
-      ingredient[icnt ].item_id ) ,
-     IF ((ningred > 0 ) ) orderrec->orderlist[nindex ].ingredient[ningred ].ingredient_type_flag = oi
-      .ingredient_type_flag
-     ELSEIF ((ningred = 0 )
-     AND (cnvtupper (trim ( $SEARCHTYPE ) ) = "DRUG" ) ) norderingredlistsize +=1 ,stat = alterlist (
-       orderrec->orderlist[nindex ].ingredient ,norderingredlistsize ) ,orderrec->orderlist[nindex ].
-      ingredient[norderingredlistsize ].generic_name = substring (1 ,50 ,mi.value ) ,orderrec->
-      orderlist[nindex ].ingredient[norderingredlistsize ].item_id = pdh.item_id ,orderrec->
-      orderlist[nindex ].ingredient[norderingredlistsize ].ingredient_type_flag = oi
-      .ingredient_type_flag ,orderrec->orderlist[nindex ].ingredient[norderingredlistsize ].
-      class_description = fillstring (35 ," " ) ,orderrec->orderlist[nindex ].ingredient[
-      norderingredlistsize ].compound_ingred_add = 1
+    nindex = locateval (icnt ,1 ,size (orderrec->orderlist ,5 ), dh.order_id ,orderrec->orderlist[icnt ].orderid ) 
+   
+    IF ((nindex > 0 ) ) 
+    	norderingredlistsize = size (orderrec->orderlist[nindex ].ingredient ,5 ) 
+     	ningred = locateval (icnt ,1 ,norderingredlistsize ,pdh.item_id ,orderrec->orderlist[nindex ].ingredient[icnt ].item_id ) 
+    
+    
+     IF ((ningred > 0 ) ) 
+     	orderrec->orderlist[nindex ].ingredient[ningred ].ingredient_type_flag = oi.ingredient_type_flag
+     	orderrec->orderlist[nindex ].ingredient[ningred ].volume_unit_cd   = oi.volume_unit
+     	orderrec->orderlist[nindex ].ingredient[ningred ].strength_unit_cd = oi.strength_unit
+     ELSEIF ((ningred = 0 )) 
+     	norderingredlistsize +=1 
+     	stat = alterlist (orderrec->orderlist[nindex ].ingredient ,norderingredlistsize ) 
+     	orderrec->orderlist[nindex ].ingredient[norderingredlistsize ].generic_name = substring (1 ,50 ,mi.value ) 
+     	orderrec->orderlist[nindex ].ingredient[norderingredlistsize ].item_id = pdh.item_id 
+     	orderrec->orderlist[nindex ].ingredient[norderingredlistsize ].ingredient_type_flag = oi.ingredient_type_flag 
+     	orderrec->orderlist[nindex ].ingredient[norderingredlistsize ].class_description = fillstring (35 ," " ) 
+     	orderrec->orderlist[nindex ].ingredient[norderingredlistsize ].compound_ingred_add = 1
+     	orderrec->orderlist[nindex ].ingredient[norderingredlistsize ].volume_unit_cd   = oi.volume_unit
+     	orderrec->orderlist[nindex ].ingredient[norderingredlistsize ].strength_unit_cd = oi.strength_unit
      ENDIF
-     ,
+     
      IF ((orderrec->orderlist[nindex ].ingredient[norderingredlistsize ].item_id = pdh.item_id )
-     AND (orderrec->orderlist[nindex ].ingredient[norderingredlistsize ].compound_ingred_add = 1 ) )
-      IF ((pdh.charge_qty > 0 ) ) orderrec->orderlist[nindex ].ingredient[norderingredlistsize ].
-       dispenses +=dh.doses ,orderrec->orderlist[nindex ].ingredient[norderingredlistsize ].cost +=(
-       pdh.cost * pdh.charge_qty ) ,orderrec->orderlist[nindex ].ingredient[norderingredlistsize ].
-       price +=pdh.price
-      ELSE orderrec->orderlist[nindex ].ingredient[norderingredlistsize ].dispenses -=dh.doses ,
-       orderrec->orderlist[nindex ].ingredient[norderingredlistsize ].cost -=(pdh.cost * pdh
-       .credit_qty ) ,orderrec->orderlist[nindex ].ingredient[norderingredlistsize ].price -=pdh
-       .price
+     		AND (orderrec->orderlist[nindex ].ingredient[norderingredlistsize ].compound_ingred_add = 1 ) )
+      IF ((pdh.charge_qty > 0 ) ) 
+      	orderrec->orderlist[nindex ].ingredient[norderingredlistsize ].dispenses +=dh.doses
+      	orderrec->orderlist[nindex ].ingredient[norderingredlistsize ].cost +=(pdh.cost * pdh.charge_qty )
+      	orderrec->orderlist[nindex ].ingredient[norderingredlistsize ].price +=pdh.price
+        orderrec->orderlist[nindex ].ingredient[norderingredlistsize ].unit_cost = pdh.cost
+        orderrec->orderlist[nindex ].ingredient[norderingredlistsize ].volume_unit_cd   = oi.volume_unit
+     	orderrec->orderlist[nindex ].ingredient[norderingredlistsize ].strength_unit_cd = oi.strength_unit
+      ELSE 
+      	orderrec->orderlist[nindex ].ingredient[norderingredlistsize ].dispenses -=dh.doses
+       orderrec->orderlist[nindex ].ingredient[norderingredlistsize ].cost -=(pdh.cost * pdh.credit_qty ) 
+       orderrec->orderlist[nindex ].ingredient[norderingredlistsize ].price -=pdh.price
+       orderrec->orderlist[nindex ].ingredient[norderingredlistsize ].unit_cost = pdh.cost
+       orderrec->orderlist[nindex ].ingredient[norderingredlistsize ].volume_unit_cd   = oi.volume_unit
+     	orderrec->orderlist[nindex ].ingredient[norderingredlistsize ].strength_unit_cd = oi.strength_unit
       ENDIF
+      
+      
      ELSEIF ((orderrec->orderlist[nindex ].ingredient[ningred ].compound_ingred_add = 1 ) )
-      IF ((pdh.charge_qty > 0 ) ) orderrec->orderlist[nindex ].ingredient[ningred ].dispenses +=dh
-       .doses ,orderrec->orderlist[nindex ].ingredient[ningred ].cost +=(pdh.cost * pdh.charge_qty )
-      ,orderrec->orderlist[nindex ].ingredient[ningred ].price +=pdh.price
-      ELSE orderrec->orderlist[nindex ].ingredient[ningred ].dispenses -=dh.doses ,orderrec->
-       orderlist[nindex ].ingredient[ningred ].cost -=(pdh.cost * pdh.credit_qty ) ,orderrec->
-       orderlist[nindex ].ingredient[ningred ].price -=pdh.price
+      IF ((pdh.charge_qty > 0 ) ) orderrec->orderlist[nindex ].ingredient[ningred ].dispenses +=dh.doses
+      	orderrec->orderlist[nindex ].ingredient[ningred ].cost +=(pdh.cost * pdh.charge_qty )
+      	orderrec->orderlist[nindex ].ingredient[ningred ].price +=pdh.price
+      	orderrec->orderlist[nindex ].ingredient[ningred ].unit_cost = pdh.cost
+      	orderrec->orderlist[nindex ].ingredient[ningred ].volume_unit_cd   = oi.volume_unit
+     	orderrec->orderlist[nindex ].ingredient[ningred ].strength_unit_cd = oi.strength_unit
+      ELSE orderrec->orderlist[nindex ].ingredient[ningred ].dispenses -=dh.doses
+      	orderrec->orderlist[nindex ].ingredient[ningred ].cost -=(pdh.cost * pdh.credit_qty )
+      	orderrec->orderlist[nindex ].ingredient[ningred ].price -=pdh.price
+		orderrec->orderlist[nindex ].ingredient[ningred ].unit_cost = pdh.cost
+		orderrec->orderlist[nindex ].ingredient[ningred ].volume_unit_cd   = oi.volume_unit
+     	orderrec->orderlist[nindex ].ingredient[ningred ].strength_unit_cd = oi.strength_unit
       ENDIF
      ENDIF
+     
+     
     ENDIF
    WITH nocounter, expand =1
   ;end select
@@ -782,64 +589,12 @@ CREATE PROGRAM cov_rx_rpt_drug_utilization :dba
   HEAD order_id
    ningred_cnt = 0 ,
    ;CALL echo (build ("# of ingredients ---" ,size (orderrec->orderlist[d.seq ].ingredient ,5 ) ) ) ,
-   IF ((size (orderrec->orderlist[d.seq ].ingredient ,5 ) > nmax_ingred ) ) nmax_ingred = size (
-     orderrec->orderlist[d.seq ].ingredient ,5 )
+   IF ((size (orderrec->orderlist[d.seq ].ingredient ,5 ) > nmax_ingred ) ) 
+   	nmax_ingred = size (orderrec->orderlist[d.seq ].ingredient ,5 )
    ENDIF
   WITH nocounter
  ;end select
  ;CALL echo (build ("Max ingredients ---" ,nmax_ingred ) )
- IF ((cnvtupper (trim ( $SEARCHTYPE ) ) = "THERAPEUTIC CLASS" ) )
-  SELECT INTO "NL:"
-   gen_name = orderrec->orderlist[d.seq ].ingredient[d2.seq ].generic_name ,
-   class_description = orderrec->orderlist[d.seq ].ingredient[d2.seq ].class_description ,
-   order_id = orderrec->orderlist[d.seq ].orderid ,
-   facility_area = orderrec->orderlist[d.seq ].facility ,
-   encntr = orderrec->orderlist[d.seq ].encntr_id ,
-   ingredient_type_flag = orderrec->orderlist[d.seq ].ingredient[d2.seq ].ingredient_type_flag
-   FROM (dummyt d WITH seq = value (size (orderrec->orderlist ,5 ) ) ),
-    (dummyt d2 WITH seq = nmax_ingred )
-   PLAN (d
-    WHERE (orderrec->orderlist[d.seq ].qualified != "x" ) )
-    JOIN (d2
-    WHERE (d2.seq <= size (orderrec->orderlist[d.seq ].ingredient ,5 ) )
-    AND (orderrec->orderlist[d.seq ].ingredient[d2.seq ].ingredient_type_flag !=
-    ccompound_child_flag ) )
-   ORDER BY facility_area ,
-    class_description ,
-    gen_name
-   HEAD REPORT
-    total_dispenses = 0
-   HEAD facility_area
-    ;CALL echo (build ("Head facility area ---" ,facility_area ) ) ,
-    x = 1
-   HEAD class_description
-    ;CALL echo (build ("Head class desc ---" ,class_description ) ) ,
-    x = 1
-   HEAD gen_name
-    ;CALL echo (build ("Head gen_name ---" ,gen_name ) ) ,
-    x = 1
-   DETAIL
-    ;CALL echo ("Detail" ) ,
-    total_dispenses +=orderrec->orderlist[d.seq ].ingredient[d2.seq ].dispenses 
-    ;CALL echo (build ("Dispenses for dispense--" ,total_dispenses ) )
-   FOOT  gen_name
-    total_dispenses_ther +=total_dispenses ,
-    ;CALL echo (build ("Dispenses for ingred --" ,total_dispenses_ther ) ) ,
-    total_dispenses = 0
-   FOOT  class_description
-    IF ((cnvtupper (trim ( $SEARCHTYPE ) ) != "DRUG" ) ) dispenses_table[prev_dseq ] =
-     total_dispenses_ther ,facility_table[fac_dseq ] +=total_dispenses_ther
-    ENDIF
-    ,
-    ;CALL echo (build ("Dispenses for class ---" ,dispenses_table[prev_dseq ] ) ) ,
-    prev_dseq +=1 ,
-    total_dispenses_ther = 0
-   FOOT  facility_area
-    ;CALL echo (build ("Total Dispenses for facility --" ,facility_table[fac_dseq ] ) ) ,
-    fac_dseq +=1
-   WITH nocounter
-  ;end select
- ENDIF
  SET total_dispenses = 0
  SET total_cost = 0
  SET total_charges = 0
@@ -858,8 +613,7 @@ CREATE PROGRAM cov_rx_rpt_drug_utilization :dba
    ingredient_type_flag )
   IF ((nindex > 0 ) )
    FOR (ningredcnt = 1 TO ningredsize )
-    IF ((orderrec->orderlist[nordercnt ].ingredient[ningredcnt ].ingredient_type_flag =
-    ccompound_child_flag ) )
+    IF ((orderrec->orderlist[nordercnt ].ingredient[ningredcnt ].ingredient_type_flag =ccompound_child_flag ) )
      SET orderrec->orderlist[nordercnt ].ingredient[ningredcnt ].compound_parent = trim (orderrec->
       orderlist[nordercnt ].ingredient[nindex ].generic_name )
      SET orderrec->orderlist[nordercnt ].ingredient[ningredcnt ].generic_name = concat (trim (
@@ -869,189 +623,166 @@ CREATE PROGRAM cov_rx_rpt_drug_utilization :dba
    ENDFOR
   ENDIF
  ENDFOR
- ;CALL echo ("Entering output join" )
- SELECT
-  IF ((cnvtupper (trim ( $OUTDEV ) ) != "MINE" ) )
-   WITH dio = postscript ,maxrow = 55 ,maxcol = 110 ,counter ,nullreport ,format ,format = variable
-  ELSE
-  ENDIF
-  INTO  $OUTDEV
-  gen_name = orderrec->orderlist[d.seq ].ingredient[d2.seq ].generic_name ,
-  class_description = orderrec->orderlist[d.seq ].ingredient[d2.seq ].class_description ,
-  order_id = orderrec->orderlist[d.seq ].orderid ,
-  facility_area = orderrec->orderlist[d.seq ].facility ,
-  dispenses = orderrec->orderlist[d.seq ].ingredient[d2.seq ].dispenses ,
-  cost = orderrec->orderlist[d.seq ].ingredient[d2.seq ].cost ,
-  price = orderrec->orderlist[d.seq ].ingredient[d2.seq ].price ,
-  compound_parent = orderrec->orderlist[d.seq ].ingredient[d2.seq ].compound_parent ,
-  ingredient_type_flag = orderrec->orderlist[d.seq ].ingredient[d2.seq ].ingredient_type_flag
-  FROM (dummyt d WITH seq = value (size (orderrec->orderlist ,5 ) ) ),
-   (dummyt d2 WITH seq = nmax_ingred )
-  PLAN (d
-   WHERE (orderrec->orderlist[d.seq ].qualified != "x" ) )
-   JOIN (d2
-   WHERE (d2.seq <= size (orderrec->orderlist[d.seq ].ingredient ,5 ) )
-   AND (((orderrec->orderlist[d.seq ].ingredient[d2.seq ].ingredient_type_flag !=
-   ccompound_child_flag )
-   AND (cnvtupper (trim ( $SEARCHTYPE ) ) = "THERAPEUTIC CLASS" ) ) OR ((cnvtupper (trim (
-      $SEARCHTYPE ) ) = "DRUG" ) )) )
-  ORDER BY facility_area ,
-   class_description ,
-   gen_name
-  HEAD REPORT
-   idx = 0 ,
-   disp_percent = 0.0 ,
-   dept_stat = fillstring (16 ," " ) ,
-   rpt_line = fillstring (94 ,"=" ) ,
-   label_name = fillstring (25 ," " ) ,
-   do_it = 1 ,
-   ord_mnem = fillstring (25 ," " ) ,
-   name_save = fillstring (30 ," " ) ,
-   pagebreak = 0 ,
-   pagenum = 0 ,
-   report_nbr = "RX_RPT_DRUG_UTILIZATION" ,
-   rpt_title = "DRUG UTILIZATION REPORT" ,
-   cdisplay = fillstring (18 ," " ) ,
-   demoprint = 0 ,
-   nhit_report = 0
-  HEAD PAGE
-   IF ((cnvtupper (trim ( $OUTDEV ) ) != "MINE" ) ) col 0 ,"{lpi/6}{cpi/12}" ,row + 1
-   ENDIF
-   ,demoprint = 0 ,
-   IF ((firsttime = 0 )
-   AND (did_break != 1 ) ) pagenum +=1 ,col 00 ,report_nbr ,
-    CALL center (rpt_title ,0 ,90 ) ,col 86 ,"Page: " ,pagenum "###;r" ,row + 1 ,sutcdatetime =
-    utcdatetime (cnvtdatetime (curdate ,curtime ) ,0 ,0 ,"MM/DD/YYYY HH:mm" ) ,col 60 ,"Run Date: " ,
-    sutcdatetime ,row + 1 ,
-    IF ((cnvtupper (trim ( $SEARCHTYPE ) ) = "THERAPEUTIC CLASS" )
-    AND (internal->alt_sel_cat_id > 0 ) ) col 00 ,"Therapuetic Class: " ,col 19 , $SEARCHSTRING
-    ELSE
-     IF ((trim ( $SEARCHSTRING ) != "*" ) ) col 00 ,"Formulary Item...: " ,col 19 , $SEARCHSTRING
-     ELSE col 00 ,"Formulary Item...: ALL"
-     ENDIF
-    ENDIF
-    ,row + 1 ,col 00 ,"Facility: " ,facility_area ,row + 1 ,col 00 ,"Date Range.......: " ,
-    IF ((internal->begin_dt_tm > 0 ) ) sutcdatetime = concat (format (internal->begin_dt_tm ,
-       "MM/DD/YY HH:MM;;D" ) ," " ,utcshorttz (0 ) ) ,col 19 ,sutcdatetime
-    ENDIF
-    ,
-    IF ((internal->end_dt_tm > 0 ) ) sutcdatetime = concat (format (internal->end_dt_tm ,
-       "MM/DD/YY HH:MM;;D" ) ," " ,utcshorttz (0 ) ) ,col 43 ," TO " ,sutcdatetime
-    ENDIF
-    ,row + 2 ,col 5 ,"  Label Description " ,col 36 ,"# of" ,col 45 ,"  Doses" ,col 59 ,"Total" ,col
-    69 ,"Total" ,
-    IF ((cnvtupper (trim ( $SEARCHTYPE ) ) = "THERAPEUTIC CLASS" ) ) col 79 ,"% of" ,col 86 ,
-     "% of"
-    ENDIF
-    ,row + 1 ,col 36 ,"Orders" ,col 45 ,"Dispensed" ,col 59 ,"Cost" ,col 69 ,"Charge" ,
-    IF ((cnvtupper (trim ( $SEARCHTYPE ) ) = "THERAPEUTIC CLASS" ) ) col 79 ,"Ther" ,col 86 ,
-     "Facility"
-    ENDIF
-    ,row + 1 ,col 00 ,rpt_line ,row + 2 ,did_break = 0 ,firsttime = 0 ,pagebreak = 0
-   ENDIF
-  HEAD facility_area
-   nhit_report = 1 ,pagenum +=1 ,col 00 ,report_nbr ,
-   CALL center (rpt_title ,0 ,90 ) ,col 86 ,"Page: " ,pagenum "###;r" ,row + 1 ,sutcdatetime =
-   utcdatetime (cnvtdatetime (curdate ,curtime ) ,0 ,0 ,"MM/DD/YYYY HH:mm" ) ,col 60 ,"Run Date: " ,
-   sutcdatetime ,row + 1 ,
-   IF ((internal->alt_sel_cat_id > 0 ) ) col 00 ,"Therapuetic Class: " ,col 19 , $SEARCHSTRING
-   ELSE
-    IF ((trim ( $SEARCHSTRING ) != "*" ) ) col 00 ,"Formulary Item...: " ,col 19 , $SEARCHSTRING
-    ELSE col 00 ,"Formulary Item...: ALL"
-    ENDIF
-   ENDIF
-   ,row + 1 ,col 00 ,"Facility: " ,facility_area ,row + 1 ,col 00 ,"Date Range.......: " ,
-   IF ((internal->begin_dt_tm > 0 ) ) sutcdatetime = concat (format (internal->begin_dt_tm ,
-      "MM/DD/YY HH:MM;;D" ) ," " ,utcshorttz (0 ) ) ,col 19 ,sutcdatetime
-   ENDIF
-   ,
-   IF ((internal->end_dt_tm > 0 ) ) sutcdatetime = concat (format (internal->end_dt_tm ,
-      "MM/DD/YY HH:MM;;D" ) ," " ,utcshorttz (0 ) ) ,col 43 ," TO " ,sutcdatetime
-   ENDIF
-   ,row + 2 ,col 5 ,"  Label Description " ,col 33 ,"# of" ,col 41 ,"  Doses" ,col 58 ,"Total" ,col
-   73 ,"Total" ,
-   IF ((cnvtupper (trim ( $SEARCHTYPE ) ) = "THERAPEUTIC CLASS" ) ) col 80 ,"% of" ,col 86 ,"% of"
-   ENDIF
-   ,row + 1 ,col 33 ,"Orders" ,col 41 ,"Dispensed" ,col 58 ,"Cost" ,col 73 ,"Charge" ,
-   IF ((cnvtupper (trim ( $SEARCHTYPE ) ) = "THERAPEUTIC CLASS" ) ) col 80 ,"Ther" ,col 86 ,
-    "Facility"
-   ENDIF
-   ,row + 1 ,col 00 ,rpt_line ,row + 2 ,did_break = 1 ,firsttime = 0 ,pagebreak = 0
-  HEAD class_description
-   IF ((cnvtupper (trim ( $SEARCHTYPE ) ) = "THERAPEUTIC CLASS" ) ) row + 1 ,col 1 ,
-    class_description ,row + 1
-   ENDIF
-  HEAD gen_name
-   ;CALL echo (build ("Head gen_name --" ,gen_name ) ) ,
-   IF ((row > 55 ) ) pagebreak = 1 ,
-    BREAK
-   ENDIF
-  DETAIL
-   ;CALL echo ("Detail" ) ,
-   pagebreak = 1 ,
-   IF ((ingredient_type_flag != ccompound_child_flag ) ) total_dispenses +=dispenses ,total_cost +=
-    cost ,total_charges +=price
-   ENDIF
-   ,
-   IF ((orderrec->orderlist[d.seq ].skip_dup_dot_order_ind = 0 ) ) total_orders +=1
-   ENDIF
-  FOOT  gen_name
-   IF ((total_orders > 0 ) ) test_generic_name = replace (gen_name ,trim (compound_parent ) ,"" ,0 )
-   ,short_generic_name = formattolength (trim (test_generic_name ) ,27 ) ,col 05 ,short_generic_name
-   ,
-    IF ((ingredient_type_flag != ccompound_child_flag ) ) col 32 ,total_orders "#######;," ,col 40 ,
-     total_dispenses "#######;," ,col 48 ,total_cost "############.##;," ,col 64 ,total_charges
-     "############.##;,"
-    ENDIF
-    ,
-    IF ((cnvtupper (trim ( $SEARCHTYPE ) ) = "THERAPEUTIC CLASS" ) )
-     IF ((dispenses_table[prev_dseq ] > 0 ) ) disp_percent = ((total_dispenses / dispenses_table[
-      prev_dseq ] ) * 100 )
-     ELSE disp_percent = 0.0
-     ENDIF
-     ,col 80 ,disp_percent "###.#" ,"%"
-    ENDIF
-    ,
-    IF ((ingredient_type_flag != ccompound_child_flag ) ) total_orders_ther +=total_orders ,
-     total_dispenses_ther +=total_dispenses ,total_cost_ther +=total_cost ,total_charges_ther +=
-     total_charges
-    ENDIF
-    ,row + 1
-   ENDIF
-   ,total_dispenses = 0 ,total_cost = 0 ,total_charges = 0 ,total_orders = 0
-  FOOT  class_description
-   col 32 ,"-------" ,col 40 ,"-------" ,col 48 ,"---------------" ,col 64 ,"---------------" ,row +
-   1 ,col 32 ,total_orders_ther "#######;," ,col 40 ,total_dispenses_ther "#######;," ,col 48 ,
-   total_cost_ther "############.##;," ,col 64 ,total_charges_ther "############.##;," ,
-   IF ((cnvtupper (trim ( $SEARCHTYPE ) ) = "THERAPEUTIC CLASS" ) )
-    IF ((facility_table[fac_dseq ] > 0 ) ) disp_percent = ((dispenses_table[prev_dseq ] /
-     facility_table[fac_dseq ] ) * 100 )
-    ELSE disp_percent = 0.0
-    ENDIF
-    ,col 88 ,disp_percent "###.#" ,"%"
-   ENDIF
-   ,prev_dseq +=1 ,total_dispenses_ther = 0 ,total_cost_ther = 0 ,total_charges_ther = 0 ,
-   total_orders_ther = 0 ,row + 1
-  FOOT  facility_area
-   fac_dseq +=1 ,did_break = 1 ,row + 56
-  FOOT REPORT
-   row + 1 ,
-   IF ((nhit_report = 1 ) ) end_of_report = "* * * End of Report * * *" ,
-    CALL center (end_of_report ,0 ,80 )
-   ELSE "No data qualified for selection"
-   ENDIF
-   
-   ;CALL echo ("*** End of Report ***" )
-  WITH nocounter ,maxrow = 55 ,maxcol = 100 ,nullreport ,format ,format = variable
- ;end select
- IF ((curqual = 0 ) )
-  SET reply->status_data.status = "Z"
-  ;CALL echo ("No Qualifications" )
- ELSE
+
+
+
+select into "nl:"
+from
+	 encntr_alias ea
+	,encounter e
+	,orders o
+	,(dummyt   d1  with seq = size(orderrec->orderlist, 5))
+plan d1
+join o
+	where o.order_id = orderrec->orderlist[d1.seq].orderid
+	and   o.order_id > 0.0
+join e
+	where e.encntr_id = o.encntr_id
+	and   e.encntr_id > 0.0
+join ea
+	where ea.encntr_id = e.encntr_id
+	and   ea.active_ind = 1
+	and   ea.encntr_alias_type_cd = value(uar_get_code_by("MEANING",319,"FIN NBR"))
+	and   cnvtdatetime(curdate,curtime3) between ea.beg_effective_dt_tm and ea.end_effective_dt_tm
+detail
+	orderrec->orderlist[d1.seq].fin_nbr = ea.alias
+	orderrec->orderlist[d1.seq].encntr_id = e.encntr_id
+with nocounter
+ 
+ declare i = i4 with noconstant(0)
+ declare j = i4 with noconstant(0)
+ declare k = i4 with noconstant(0)
+ 
+ for (i=1 to size(orderrec->orderlist,5))
+ 	for (j=1 to size(orderrec->orderlist[i].ingredient,5))
+ 		
+ 		set k += 1
+ 		
+ 		set stat = alterlist(output->qual,k)
+ 		set output->qual[k].pharmacy_identifier = orderrec->orderlist[i].facility
+ 		set output->qual[k].item_id = orderrec->orderlist[i].ingredient[j].item_id
+ 		set output->qual[k].order_id = orderrec->orderlist[i].orderid
+ 		set output->qual[k].encntr_id = orderrec->orderlist[i].encntr_id
+ 		set output->qual[k].ingredient_cost = orderrec->orderlist[i].ingredient[j].unit_cost
+ 		set output->qual[k].dispenses = orderrec->orderlist[i].ingredient[j].dispenses
+ 		
+ 		/*
+ 		 record output (
+ 
+ 		1 cnt = i4
+ 		1 qual[*] 
+ 		 2 pharmacy_identifier = vc
+ 		 2 date_of_service = vc
+ 		 2 date_of_service_dq8 = dq8
+ 		 2 prescriber_ident = vc
+ 		 2 prescriber_id = f8
+ 		 2 ndc = vc
+ 		 
+ 		 
+ 		 2 quantity_dispensed = i2
+ 		 2 unit_of_measure = vc
+ 		 
+ 		 
+ 		 2 gender = i2
+ 		 2 state = vc
+ 		 2 realationship = i2
+			)
+		*/
+ 		set output->cnt = k
+ 	endfor
+ endfor
+
+
+select into "nl:"
+from
+	 encounter e
+	,person p
+	,(dummyt d1 with seq=output->cnt)
+plan d1
+join e
+	where e.encntr_id = output->qual[d1.seq].encntr_id
+join p
+	where p.person_id = e.person_id
+detail
+	if (cnvtupper(substring(1,1,uar_get_code_display(p.sex_cd))) = "F")
+		output->qual[d1.seq].gender = 2
+	elseif (cnvtupper(substring(1,1,uar_get_code_display(p.sex_cd))) = "M")
+		output->qual[d1.seq].gender = 1
+	else
+		output->qual[d1.seq].gender = 0
+	endif
+with nocounter
+    	
+select into "nl:"
+from
+	 order_ingredient oi
+	,dispense_hx dh
+    ,prod_dispense_hx pdh 
+    ,med_identifier mi
+    ,orders o
+    ,order_action oa
+	,(dummyt d1 with seq=output->cnt)
+	,(dummyt d2)
+	,(dummyt d3)
+	,(dummyt d4)
+plan d1
+join dh
+	where dh.order_id = output->qual[d1.seq].order_id
+join d2
+join oi
+	where oi.order_id = dh.order_id
+	and  oi.action_sequence = dh.action_sequence
+join o
+	where o.order_id = oi.order_id
+join oa
+	where oa.order_id = o.order_id
+	and oa.action_sequence = o.last_action_sequence
+join d3
+join pdh
+	where pdh.dispense_hx_id = dh.dispense_hx_id
+	and pdh.ingred_sequence = oi.comp_sequence
+join d4
+join mi
+	where pdh.item_id = mi.item_id
+	and mi.med_product_id = pdh.med_product_id
+	and mi.med_identifier_type_cd = value(uar_get_code_by("MEANING",11000,"NDC"))
+order by
+	oi.order_id
+detail
+	    if (oi.strength_unit > 0.0)
+	    	output->qual[d1.seq].unit_of_measure = uar_get_code_display(oi.strength_unit)
+	    	output->qual[d1.seq].unit_of_dispense = oi.strength
+	    else
+	    	output->qual[d1.seq].unit_of_measure = uar_get_code_display(oi.volume_unit)
+	    	output->qual[d1.seq].unit_of_dispense = oi.volume
+	    endif
+	    output->qual[d1.seq].ndc = mi.value
+	    output->qual[d1.seq].quantity_dispensed = ( output->qual[d1.seq].dispenses *  output->qual[d1.seq].unit_of_dispense)
+	    output->qual[d1.seq].prescriber_id = oa.order_provider_id
+	    output->qual[d1.seq].date_of_service_dq8 = dh.dispense_dt_tm
+	    output->qual[d1.seq].date_of_service = format(dh.dispense_dt_tm,"YYYYMMDD;;q")
+with nocounter, outerjoin=d4
+
+select into "nl:"
+from	
+		  prsnl pr
+		, prsnl_alias pa
+		,(dummyt d1 with seq=output->cnt)
+plan d1
+join pr 
+	where pr.person_id = output->qual[d1.seq].prescriber_id
+join pa where pa.person_id =pr.person_id
+	and pa.alias_pool_cd = value(uar_get_code_by("DISPLAY", 263, 'STAR Doctor Number'))
+	and pa.prsnl_alias_type_cd = value(uar_get_code_by("DISPLAY", 320, 'ORGANIZATION DOCTOR'))
+detail
+	output->qual[d1.seq].prescriber_ident = pa.alias
+with nocounter
+
   SET reply->status_data.status = "S"
   ;CALL echo ("Success" )
- ENDIF
+ 
 #exit_script
+/*
 SELECT into $OUTDEV
 	ORDERLIST_SORT_GENERIC_NAME = SUBSTRING(1, 30, ORDERREC->orderlist[D1.SEQ].sort_generic_name)
 	, ORDERLIST_SORT_LABEL_DESC = ORDERREC->orderlist[D1.SEQ].sort_label_desc
@@ -1096,17 +827,32 @@ PLAN D1 WHERE MAXREC(D2, SIZE(ORDERREC->orderlist[D1.SEQ].ingredient, 5))
 JOIN D2
 
 WITH NOCOUNTER, SEPARATOR=" ", FORMAT
- ;CALL echo ("Last Mod = 021" )
- ;CALL echo ("Mod Date = 29/06/2018" )
- ;CALL echo ("Last Mod = 022" )
- ;CALL echo ("Mod Date = 06/04/2020" )
- ;CALL echo ("Last Mod = 023" )
- ;CALL echo ("Mod Date = 08/27/2020" )
- ;CALL echo ("Last Mod = 024" )
- ;CALL echo ("Mod Date = 12/15/2020" )
- ;CALL echo ("Last Mod = 025" )
- ;CALL echo ("Mod Date = 03/24/2021" )
- 
+*/
+
+SELECT INTO $OUTDEV
+	QUAL_PHARMACY_IDENTIFIER = SUBSTRING(1, 30, OUTPUT->qual[D1.SEQ].pharmacy_identifier)
+	, QUAL_DATE_OF_SERVICE = SUBSTRING(1, 30, OUTPUT->qual[D1.SEQ].date_of_service)
+	, QUAL_PRESCRIBER_IDENT = SUBSTRING(1, 30, OUTPUT->qual[D1.SEQ].prescriber_ident)
+	, QUAL_NDC = SUBSTRING(1, 30, OUTPUT->qual[D1.SEQ].ndc)
+	, QUAL_QUANTITY_DISPENSED = OUTPUT->qual[D1.SEQ].quantity_dispensed
+	, QUAL_UNIT_OF_MEASURE = SUBSTRING(1, 30, OUTPUT->qual[D1.SEQ].unit_of_measure)
+	, QUAL_INGREDIENT_COST = OUTPUT->qual[D1.SEQ].ingredient_cost
+	, QUAL_ORDER_ID = OUTPUT->qual[D1.SEQ].order_id
+	, QUAL_GENDER = OUTPUT->qual[D1.SEQ].gender
+	, QUAL_STATE = SUBSTRING(1, 30, OUTPUT->qual[D1.SEQ].state)
+	, QUAL_REALATIONSHIP = OUTPUT->qual[D1.SEQ].realationship
+	, QUAL_ENCNTR_ID = OUTPUT->qual[D1.SEQ].encntr_id
+	, QUAL_ITEM_ID = OUTPUT->qual[D1.SEQ].item_id
+	, QUAL_DISPENSES = OUTPUT->qual[D1.SEQ].dispenses
+
+FROM
+	(DUMMYT   D1  WITH SEQ = SIZE(OUTPUT->qual, 5))
+
+PLAN D1
+
+WITH NOCOUNTER, SEPARATOR=" ", FORMAT
+
  call echorecord(orderrec)
+ call echorecord(output)
  
 END GO
