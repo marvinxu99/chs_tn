@@ -478,7 +478,9 @@ subroutine AddAlgorithmCETimeResult(vCEventID)
 			else
 				cerequest->clin_event.normalcy_cd = uar_get_code_by_cki("CKI.CODEVALUE!3707")	;>Extreme High
 			endcase
- 
+			
+ 			cerequest->clin_event.normalcy_cd = uar_get_code_by_cki("CKI.CODEVALUE!2690")	;override above and always post Normal
+ 			
 			cerequest->clin_event.subtable_bit_map = 8193
 			cerequest->clin_event.expiration_dt_tm_ind = 1
 			cerequest->clin_event.valid_from_dt_tm = ce.valid_from_dt_tm
