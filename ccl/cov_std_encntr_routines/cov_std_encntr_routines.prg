@@ -106,6 +106,43 @@ subroutine sGetEncntrID_ByFIN(vFIN)
 
 end
 
+
+
+/**********************************************************************************************************************
+** Function sGetPersonID_ByFIN()
+** ---------------------------------------------------------------------------------------
+** Returns the person ID for the FIN supplied
+**********************************************************************************************************************/
+declare sGetPersonID_ByFIN(vFIN=vc) = f8  with copy, persist
+subroutine sGetPersonID_ByFIN(vFIN)
+
+	declare vReturnPersonID = f8 with protect
+	
+	select into "nl:"
+	from
+		encntr_alias ea
+		,encounter e
+	plan ea
+		where ea.alias = vFIN
+		and   ea.encntr_id > 0.0
+		and   ea.active_ind = 1
+		and   ea.encntr_alias_type_cd = value(uar_get_code_by("MEANING",319,"FIN NBR"))
+		and   cnvtdatetime(curdate,curtime3) between ea.beg_effective_dt_tm and ea.end_effective_dt_tm
+	join e
+		where e.encntr_id = ea.encntr_id
+	order by
+		 ea.encntr_id
+		,ea.beg_effective_dt_tm desc
+	head report
+		i = 0
+	head ea.encntr_id
+		vReturnPersonID = e.person_id
+	with nocounter
+	
+	return (vReturnPersonID)
+
+end
+
 /**********************************************************************************************************************
 ** Function sGetInsuranceByEncntrID()
 ** ---------------------------------------------------------------------------------------

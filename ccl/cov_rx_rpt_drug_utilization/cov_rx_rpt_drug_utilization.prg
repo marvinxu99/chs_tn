@@ -211,6 +211,7 @@ with OUTDEV, SEARCHTYPE, SEARCHSTRING, FACILITY, STARTDATE, STOPDATE, PYXIS
  		 2 gender = i2
  		 2 state = vc
  		 2 realationship = i2
+ 		 2 realationship_vc = vc
 	)
 	
  SET internal->begin_dt_tm = cnvtdatetime (start_dt ,nstart_tm )
@@ -772,12 +773,67 @@ plan d1
 join pr 
 	where pr.person_id = output->qual[d1.seq].prescriber_id
 join pa where pa.person_id =pr.person_id
-	and pa.alias_pool_cd = value(uar_get_code_by("DISPLAY", 263, 'STAR Doctor Number'))
-	and pa.prsnl_alias_type_cd = value(uar_get_code_by("DISPLAY", 320, 'ORGANIZATION DOCTOR'))
+	and pa.alias_pool_cd = value(uar_get_code_by("DISPLAY", 263,"National Provider Identifier"))
+	and pa.prsnl_alias_type_cd = value(uar_get_code_by("DISPLAY", 320, "National Provider Identifier"))
 detail
 	output->qual[d1.seq].prescriber_ident = pa.alias
 with nocounter
 
+
+select into "nl:"
+from	
+		  person p
+		, address a
+		, encounter e
+		,(dummyt d1 with seq=output->cnt)
+plan d1
+join e
+	where e.encntr_id = output->qual[d1.seq].encntr_id
+join p 
+	where p.person_id = e.person_id
+join a 
+	where a.parent_entity_id = p.person_id
+	and   a.address_type_cd = value(uar_get_code_by("MEANING",212,"HOME"))
+	and   a.active_ind = 1
+	and   cnvtdatetime(sysdate) between a.beg_effective_dt_tm and a.end_effective_dt_tm
+order by
+	 p.person_id
+	,a.beg_effective_dt_tm
+detail
+	output->qual[d1.seq].state = substring(1,2,cnvtupper(uar_get_code_display(a.state_cd)))
+with nocounter
+
+
+
+select into "nl:"
+	from
+		 encounter e
+		,person_plan_reltn ppr1
+		,person_person_reltn ppr2
+	 	,(dummyt d1 with seq=output->cnt)
+	plan d1
+	join e
+		where e.encntr_id = output->qual[d1.seq].encntr_id
+	join ppr1
+		where ppr1.person_id = e.person_id
+		and   ppr1.active_ind = 1
+		and   cnvtdatetime(sysdate) between ppr1.beg_effective_dt_tm and ppr1.end_effective_dt_tm
+	join ppr2
+		where ppr2.related_person_id = ppr1.subscriber_person_id
+	head report
+		i = 0
+	detail
+		if (ppr2.person_reltn_cd = value(uar_get_code_by("MEANING",40,"SPOUSE")))
+			output->qual[d1.seq].realationship = 2
+		elseif ((ppr2.person_reltn_cd != value(uar_get_code_by("MEANING",40,"SELF"))) and (ppr2.person_reltn_cd > 0.0))
+			output->qual[d1.seq].realationship = 3
+		else
+			output->qual[d1.seq].realationship = 1
+		endif
+		output->qual[d1.seq].realationship_vc = uar_get_code_display(ppr2.person_reltn_cd)
+	with nocounter
+	
+	
   SET reply->status_data.status = "S"
   ;CALL echo ("Success" )
  
