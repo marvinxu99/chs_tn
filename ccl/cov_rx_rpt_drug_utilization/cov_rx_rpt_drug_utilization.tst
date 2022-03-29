@@ -8,3 +8,17 @@ cov_rx_rpt_drug_utilization
 	, "03232022 1043"
 	, "No  "
 go
+
+/*
+execute 
+	COV_RX_RPT_DRUG_UTILIZATION	
+	 "cer_temp:2_medreb8.csv"
+	,"Drug              "
+	, "*"
+	, "*"
+	, "09282021 0000"
+	, "03282022 2359"
+	, "Yes "
+go
+*/
+

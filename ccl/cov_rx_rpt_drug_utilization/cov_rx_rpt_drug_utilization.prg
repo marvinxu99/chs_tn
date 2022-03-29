@@ -256,6 +256,7 @@ with OUTDEV, SEARCHTYPE, SEARCHSTRING, FACILITY, STARTDATE, STOPDATE, PYXIS
      2 loc_room_s = c10
      2 loc_bed_s = c10
      2 facility = c30
+     2 facility_cd = f8
      2 order_status = f8
      2 all_unverified_ind = i2
      2 qualified = c1
@@ -445,7 +446,8 @@ with OUTDEV, SEARCHTYPE, SEARCHSTRING, FACILITY, STARTDATE, STOPDATE, PYXIS
     stat = alterlist (orderrec->orderlist ,ordcnt ) 
     stat = alterlist (orderrec->orderlist[ordcnt ].ingredient ,0 ) 
     orderrec->orderlist[ordcnt ].orderid = o.order_id 
-    orderrec->orderlist[ordcnt ].facility = substring (1 ,30 ,facility_area ) 
+    orderrec->orderlist[ordcnt ].facility = substring (1 ,30 ,facility_area )
+    orderrec->orderlist[ordcnt ].facility_cd = dfacilityareacd
     ningred_cnt = 0
     IF ((o.protocol_order_id > 0 ) AND (dlastprotocolorderid = o.protocol_order_id ) ) 
     	orderrec->orderlist[ordcnt ].skip_dup_dot_order_ind = 1
@@ -493,7 +495,7 @@ with OUTDEV, SEARCHTYPE, SEARCHSTRING, FACILITY, STARTDATE, STOPDATE, PYXIS
  IF ((curqual > 0 ) )
   DECLARE icnt = i4 WITH protect ,noconstant (0 )
   SET nactual_size = size (orderrec->orderlist ,5 )
-  SELECT
+  SELECT into "nl:"
    dh.doses ,
    pdh.cost ,
    pdh.price ,
@@ -661,6 +663,7 @@ with nocounter
  		
  		set stat = alterlist(output->qual,k)
  		set output->qual[k].pharmacy_identifier = orderrec->orderlist[i].facility
+ 		set output->qual[k].pharmacy_identifier = cnvtstring(orderrec->orderlist[i].facility_cd)
  		set output->qual[k].item_id = orderrec->orderlist[i].ingredient[j].item_id
  		set output->qual[k].order_id = orderrec->orderlist[i].orderid
  		set output->qual[k].encntr_id = orderrec->orderlist[i].encntr_id
@@ -772,7 +775,7 @@ from
 plan d1
 join pr 
 	where pr.person_id = output->qual[d1.seq].prescriber_id
-join pa where pa.person_id =pr.person_id
+join pa where pa.person_id = pr.person_id
 	and pa.alias_pool_cd = value(uar_get_code_by("DISPLAY", 263,"National Provider Identifier"))
 	and pa.prsnl_alias_type_cd = value(uar_get_code_by("DISPLAY", 320, "National Provider Identifier"))
 detail
@@ -886,29 +889,34 @@ WITH NOCOUNTER, SEPARATOR=" ", FORMAT
 */
 
 SELECT INTO $OUTDEV
-	QUAL_PHARMACY_IDENTIFIER = SUBSTRING(1, 30, OUTPUT->qual[D1.SEQ].pharmacy_identifier)
+	  QUAL_PHARMACY_IDENTIFIER = SUBSTRING(1, 30, OUTPUT->qual[D1.SEQ].pharmacy_identifier)
 	, QUAL_DATE_OF_SERVICE = SUBSTRING(1, 30, OUTPUT->qual[D1.SEQ].date_of_service)
 	, QUAL_PRESCRIBER_IDENT = SUBSTRING(1, 30, OUTPUT->qual[D1.SEQ].prescriber_ident)
+	;, QUAL_PRESCRIBER_ID = OUTPUT->qual[D1.SEQ].prescriber_id
 	, QUAL_NDC = SUBSTRING(1, 30, OUTPUT->qual[D1.SEQ].ndc)
 	, QUAL_QUANTITY_DISPENSED = OUTPUT->qual[D1.SEQ].quantity_dispensed
 	, QUAL_UNIT_OF_MEASURE = SUBSTRING(1, 30, OUTPUT->qual[D1.SEQ].unit_of_measure)
 	, QUAL_INGREDIENT_COST = OUTPUT->qual[D1.SEQ].ingredient_cost
-	, QUAL_ORDER_ID = OUTPUT->qual[D1.SEQ].order_id
+	;, QUAL_ORDER_ID = OUTPUT->qual[D1.SEQ].order_id
 	, QUAL_GENDER = OUTPUT->qual[D1.SEQ].gender
 	, QUAL_STATE = SUBSTRING(1, 30, OUTPUT->qual[D1.SEQ].state)
 	, QUAL_REALATIONSHIP = OUTPUT->qual[D1.SEQ].realationship
-	, QUAL_ENCNTR_ID = OUTPUT->qual[D1.SEQ].encntr_id
-	, QUAL_ITEM_ID = OUTPUT->qual[D1.SEQ].item_id
-	, QUAL_DISPENSES = OUTPUT->qual[D1.SEQ].dispenses
+	;, QUAL_ENCNTR_ID = OUTPUT->qual[D1.SEQ].encntr_id
+	;, QUAL_ITEM_ID = OUTPUT->qual[D1.SEQ].item_id
+	;, QUAL_DISPENSES = OUTPUT->qual[D1.SEQ].dispenses
 
 FROM
 	(DUMMYT   D1  WITH SEQ = SIZE(OUTPUT->qual, 5))
 
 PLAN D1
+	where output->qual[d1.seq].prescriber_id not in(   18111746.00,0.0)
+	and   output->qual[d1.seq].item_id not in(77903336)
 
-WITH NOCOUNTER, SEPARATOR=" ", FORMAT
+;WITH NOCOUNTER, SEPARATOR=" ", FORMAT
+with nocounter, pcformat(^"^, ^,^, 1,0),format=stream,formfeed=none,maxcol=32000,format
 
- call echorecord(orderrec)
- call echorecord(output)
+
+; call echorecord(orderrec)
+; call echorecord(output)
  
 END GO
