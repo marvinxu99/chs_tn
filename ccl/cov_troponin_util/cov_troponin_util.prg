@@ -560,7 +560,7 @@ end
 subroutine GethsTropAlgOrderMargin(null)
 	declare vReturnNumberofMinues = i4 with noconstant(0), protect
  
-	set vReturnNumberofMinues = 175 ;(1 hours)
+	set vReturnNumberofMinues = 30 ;(1 hours)
  	
 	return (vReturnNumberofMinues)
 end ;GethsTropAlgOrderMargin
@@ -568,7 +568,7 @@ end ;GethsTropAlgOrderMargin
 subroutine GethsTropAlgOrderMarginMax(null)
 	declare vReturnNumberofMinues = i4 with noconstant(0), protect
  
-	set vReturnNumberofMinues = 10 ;(6 hours)
+	set vReturnNumberofMinues = 360 ;(6 hours)
  
 	return (vReturnNumberofMinues)
 end ;GethsTropAlgOrderMargin
