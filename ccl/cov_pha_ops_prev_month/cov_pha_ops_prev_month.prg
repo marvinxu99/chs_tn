@@ -73,6 +73,7 @@ record t_rec
 	 2 paths
 	  3 temp					= vc
 	  3 astream					= vc
+	  3 astream_ccl				= vc
 	 2 lookback
 	  3 year					= vc
 	  3 month					= vc
@@ -106,15 +107,16 @@ record t_rec
 	 2 end_dt_tm_vc				= vc
 	 2 start_dt_tm				= dq8
 	 2 end_dt_tm				= dq8
+	 2 override_astream_ccl		= i2
 	 2 instance_cnt				= i2
 	 2 instances[*]
-	  3 facility				= vc
-	  3 params					= vc
-	  3 filename				= vc
-	  3 temp_path				= vc
-	  3 final_path				= vc
-	  3 ccl_command				= vc
-	  3 astream_copy_command	= vc
+	  3 facility					= vc
+	  3 params						= vc
+	  3 filename					= vc
+	  3 temp_path					= vc
+	  3 final_path					= vc
+	  3 ccl_command					= vc
+	  3 astream_copy_command		= vc
 )
  
 ;call addEmailLog("chad.cummings@covhlth.com")
@@ -155,7 +157,7 @@ set t_rec->cons.paths.astream	= build("/nfs/middle_fs/to_client_site/"
 										,trim(cnvtlower(curdomain)),"/ClinicalAncillary/Pharmacy/R2W/")
 ;\\chstn_astream_prod.cernerasp.com\middle_fs\to_client_site\p0665\ClinicalAncillary\Pharmacy\R2W
  
-;set t_rec->cons.paths.astream	= build("/nfs/middle_fs/to_client_site/",trim(cnvtlower(curdomain)),"/CernerCCL/")
+set t_rec->cons.paths.astream_ccl	= build("/nfs/middle_fs/to_client_site/",trim(cnvtlower(curdomain)),"/CernerCCL/")
  
 set reply->status_data.status = "Z"
  
@@ -2195,6 +2197,7 @@ set t_rec->reports[k].start_dt_tm		= t_rec->cons.dates.prev_month_start_dt_tm
 set t_rec->reports[k].end_dt_tm			= t_rec->cons.dates.prev_month_end_dt_tm
 set t_rec->reports[k].start_dt_tm_vc	= format(t_rec->reports[k].start_dt_tm,	"DD-MMM-YYYY HH:MM:SS;;q")
 set t_rec->reports[k].end_dt_tm_vc		= format(t_rec->reports[k].end_dt_tm,	"DD-MMM-YYYY HH:MM:SS;;q")
+set t_rec->reports[k].override_astream_ccl	= 1
  
 ;Report Option 1
 set j = 0
@@ -2220,10 +2223,17 @@ for (i=1 to 1) ;only need 1 instance
 																 t_rec->cons.paths.temp
 																,t_rec->reports[k].instances[j].filename
 															)
-	set t_rec->reports[k].instances[j].final_path	= build(
-																 t_rec->cons.paths.astream
-																,t_rec->reports[k].instances[j].filename
-															)
+	if (t_rec->reports[k].override_astream_ccl = 1)
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream_ccl
+																	,t_rec->reports[k].instances[j].filename
+																)	
+	else
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream
+																	,t_rec->reports[k].instances[j].filename
+																)
+	endif
  
 	set t_rec->reports[k].instances[j].params = replace(
 															 t_rec->reports[k].instances[j].params
