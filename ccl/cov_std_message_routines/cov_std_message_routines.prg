@@ -76,8 +76,10 @@ subroutine send_discern_notification(vUsername,vSubject,vContent)
 			set vReturnStatus = TRUE
 		endif
 	endif
-	call echojson(3051004Request,"3051004Request.json")
-	call echojson(3051004Reply,"3051004Reply.json")
+	
+	;call echojson(3051004Request,"3051004Request.json")
+	;call echojson(3051004Reply,"3051004Reply.json")
+	
 	return (vReturnStatus)
 end
 
