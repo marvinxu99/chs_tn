@@ -32,7 +32,12 @@ function InitMain()	{
 
 	//add the debug section
 	$("body").append('<div id=debug_section class=debug_font></div>');
-	$('<div id="new-block-2">test</div>').appendTo('#debug_section');
+}
+
+function AddDebugInfo(debugText,debugID)	{
+
+	$('<div id="'+debugID+'">'+debugText+'</div>').appendTo('#debug_section');
+
 }
 
 function BuildPatientBannerBar()	{
@@ -84,7 +89,8 @@ function BuildPatientBannerBar()	{
 	bannerObj.send('"MINE"');		
  
 	if (bannerObj.status == 200) {
- 		//to-do add debug section document.getElementById('patientdatajson').innerHTML = bannerObj.responseText;
+
+		AddDebugInfo(bannerObj.responseText,"banner bar");
  		var patientBanner = JSON.parse(bannerObj.responseText);
  		document.getElementById('patient_name').innerHTML 			=  patientBanner.PATIENT_BANNER.NAME_FULL;
  		document.getElementById('patient_dob').innerHTML 			=  patientBanner.PATIENT_BANNER.DOB;
@@ -100,8 +106,7 @@ function BuildPatientBannerBar()	{
    		alert('XMLCclRequest failed with status of ' + bannerObj.status);
 	}
  
-	//bannerObj.cleanup();
-    
+	bannerObj.cleanup();
 
 }
 
