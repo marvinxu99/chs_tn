@@ -33,6 +33,7 @@ drop program cov_troponin_util:dba go
 create program cov_troponin_util:dba
 
 execute cov_std_html_routines
+execute cov_std_message_routines
  
 declare i=i4 with noconstant(0), protect
 declare j=i4 with noconstant(0), protect
@@ -422,56 +423,28 @@ subroutine AddAlgorithmCEDeltaResult(vCEventID)
 		if (validate(CEReply->rb_list[1].event_id))
 			set vReturnSuccess = CEReply->rb_list[1].event_id
 			
-			set vhtml_output = get_html_template("cov_troponin_util_notify.html")
- 			set vUsername = sGetUsername(vVerifiedPrsnlID)
+		 	if (hsTroponin_data->algorithm_info.current_delta >= 7)
+				set vhtml_output = get_html_template("cov_troponin_util_notify.html")
+ 				set vUsername = sGetUsername(vVerifiedPrsnlID)
  			
- 			set vhtml_output = replace_html_token(
- 													 vhtml_output
- 													,"@MESSAGE:[PATIENTDATA]"
- 													,build_patientdata(cerequest->clin_event.person_id,cerequest->clin_event.encntr_id)
- 													)
- 			
- 			set vhtml_output = replace_html_token(
+ 				set vhtml_output = add_patientdata(cerequest->clin_event.person_id,cerequest->clin_event.encntr_id,vhtml_output)
+
+ 				set vhtml_output = replace_html_token(
  													 vhtml_output
  													,"%%DELTA_VALUE%%"
  													,cnvtstring(hsTroponin_data->algorithm_info.current_delta)
  													)	
  													
  			
- 			set vhtml_output = replace_html_token(
+ 				set vhtml_output = replace_html_token(
  													 vhtml_output
  													,"%%RESULT_VALUE%%"
  													,cnvtstring(hsTroponin_data->algorithm_info.current_result_val)
  													)	
  																						
- 			call echo(build2("vhtml_output=",vhtml_output))
- 			
-			free record 3051004Request 
-			record 3051004Request (
-			  1 MsgText = vc
-			  1 Priority = i4
-			  1 TypeFlag = i4
-			  1 Subject = vc
-			  1 MsgClass = vc
-			  1 MsgSubClass = vc
-			  1 Location = vc
-			  1 UserName = vc
-			) 
-			
-			set 3051004Request->MsgText = vhtml_output 
-			set 3051004Request->Priority = 100 
-			set 3051004Request->TypeFlag = 0 
-			set 3051004Request->Subject = "Critical Troponin HS Result" 
-			set 3051004Request->MsgClass = "APPLICATION" 
-			set 3051004Request->MsgSubClass = "DISCERN" 
-			set 3051004Request->Location = "REPLY" 
-			set 3051004Request->UserName = vUsername
-		 
-		 
-		 	if (hsTroponin_data->algorithm_info.current_delta >= 7)
-		 		set stat = tdbexecute(3030000,3036100,3051004,"REC",3051004Request,"REC",3051004Reply)
-		 	endif
-		 	
+ 				call echo(build2("vhtml_output=",vhtml_output)) 			
+		 		call echo(build2("send_discern_notification=",send_discern_notification(vUsername,"Critical Troponin HS Result",vhtml_output)))
+		 	endif 	
 		 	
 		else
 			call echo("CEReply->rb_list[1].event_id not valid")
@@ -582,6 +555,7 @@ subroutine AddAlgorithmCETimeResult(vCEventID)
 		;call echojson(CEReply,"cmc2.json")
 		call echorecord(CERequest)
 		call echorecord(CEReply)
+		
 		call echo(build2("CEReply->rb_list[1].event_id=",CEReply->rb_list[1].event_id))
 		if (validate(CEReply->rb_list[1].event_id))
 			set vReturnSuccess = CEReply->rb_list[1].event_id

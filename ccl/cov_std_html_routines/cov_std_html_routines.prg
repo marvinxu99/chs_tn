@@ -201,6 +201,21 @@ subroutine replace_html_token(vHTML,vToken,vContent)
 	return (vReturnHTML)
 end
 
+
+/**********************************************************************************************************************
+** Function ADD_PATIENTDATA(person_id,encntr_id,content)
+** ---------------------------------------------------------------------------------------
+** Updates the provided string by prelacing @MESSAGE:[PATIENTDATA] the proper PATIENTDATA based on provided person_id and encntr_id
+**
+**********************************************************************************************************************/
+declare add_patientdata(vPersonID=f8,vEncntrID=f8,vContent=gvc) = gvc with persist, copy
+subroutine add_patientdata(vPersonID,vEncntrID,vContent)
+	
+	set vContent = replace_html_token(vContent,"@MESSAGE:[PATIENTDATA]",build_patientdata(vPersonID,vEncntrID))
+								
+	return (vContent)
+end
+
 call echo(build2("finishing ",trim(cnvtlower(curprog))))
  
 end go
