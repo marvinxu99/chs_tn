@@ -29,6 +29,8 @@ drop program cov_std_html_routines:dba go
 create program cov_std_html_routines:dba
  
 call echo(build2("starting ",trim(cnvtlower(curprog))))
+
+execute cov_std_log_routines
  
 declare i=i4 with noconstant(0), protect
 declare j=i4 with noconstant(0), protect
@@ -157,6 +159,46 @@ subroutine get_static_content_base(null)
 	with nocounter 
 	
 	return (vReturnURL)
+end
+
+
+/**********************************************************************************************************************
+** Function BUILD_PATIENTDATA(person_id,encntr_id)
+** ---------------------------------------------------------------------------------------
+** Return JSON string for PATIENTDATA based on provided person_id and encntr_id
+**
+**********************************************************************************************************************/
+declare build_patientdata(vPersonID=f8,vEncntrID=f8) = vc with persist, copy
+subroutine build_patientdata(vPersonID,vEncntrID)
+	
+	declare vReturnPatientData = vc with protect
+	
+	set vReturnPatientData = build(
+										vPersonID
+									,"|",
+										vEncntrID
+							 	 )
+								
+	return (vReturnPatientData)
+end
+
+
+/**********************************************************************************************************************
+** Function REPLACE_HTML_TOKEN(html,token,content)
+** ---------------------------------------------------------------------------------------
+** return string after replacing the token with the provided content
+**
+**********************************************************************************************************************/
+declare replace_html_token(vHTML=gvc,vToken=vc,vContent=vc) = gvc with persist, copy
+subroutine replace_html_token(vHTML,vToken,vContent)
+	
+	declare vReturnHTML = gvc with protect
+	
+	set vReturnHTML = vHTML
+	
+	set vReturnHTML = replace(vReturnHTML,vToken,vContent)
+								
+	return (vReturnHTML)
 end
 
 call echo(build2("finishing ",trim(cnvtlower(curprog))))

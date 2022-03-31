@@ -31,6 +31,8 @@ Mod   Mod Date    Developer              Comment
 ******************************************************************************/
 drop program cov_troponin_util:dba go
 create program cov_troponin_util:dba
+
+execute cov_std_html_routines
  
 declare i=i4 with noconstant(0), protect
 declare j=i4 with noconstant(0), protect
@@ -332,7 +334,11 @@ end ;AddAlgorithmCEResult
 subroutine AddAlgorithmCEDeltaResult(vCEventID)
 	declare vReturnSuccess = f8 with noconstant(FALSE)
 	declare vInterpEC = f8 with constant(GethsTropDeltaEC(null))
- 
+	
+ 	declare vhtml_output = vc with protect
+ 	declare vUsername = vc with protect
+ 	declare vVerifiedPrsnlID = f8 with protect
+ 	
 	if (validate(hsTroponin_data) = FALSE)
 		return (vReturnSuccess)
 	else
@@ -405,16 +411,68 @@ subroutine AddAlgorithmCEDeltaResult(vCEventID)
 			cerequest->clin_event.event_prsnl_list[2].action_prsnl_id = 1.0
 			cerequest->clin_event.event_prsnl_list[2].action_status_cd = 653
 			cerequest->clin_event.event_prsnl_list[2].valid_until_dt_tm = cnvtdatetime("31-DEC-2100 00:00:00")
+			
+			vVerifiedPrsnlID = ce.verified_prsnl_id
+			
 		with nocounter
  
 		set stat = tdbexecute(0,3055000,1000012,"REC",CERequest,"REC",CEReply,1)
  
-		;call echojson(CEReply,"cmc2.json")
-		call echorecord(CERequest)
-		call echorecord(CEReply)
 		call echo(build2("CEReply->rb_list[1].event_id=",CEReply->rb_list[1].event_id))
 		if (validate(CEReply->rb_list[1].event_id))
 			set vReturnSuccess = CEReply->rb_list[1].event_id
+			
+			set vhtml_output = get_html_template("cov_troponin_util_notify.html")
+ 			set vUsername = sGetUsername(vVerifiedPrsnlID)
+ 			
+ 			set vhtml_output = replace_html_token(
+ 													 vhtml_output
+ 													,"@MESSAGE:[PATIENTDATA]"
+ 													,build_patientdata(cerequest->clin_event.person_id,cerequest->clin_event.encntr_id)
+ 													)
+ 			
+ 			set vhtml_output = replace_html_token(
+ 													 vhtml_output
+ 													,"%%DELTA_VALUE%%"
+ 													,cnvtstring(hsTroponin_data->algorithm_info.current_delta)
+ 													)	
+ 													
+ 			
+ 			set vhtml_output = replace_html_token(
+ 													 vhtml_output
+ 													,"%%RESULT_VALUE%%"
+ 													,cnvtstring(hsTroponin_data->algorithm_info.current_result_val)
+ 													)	
+ 																						
+ 			call echo(build2("vhtml_output=",vhtml_output))
+ 			
+			free record 3051004Request 
+			record 3051004Request (
+			  1 MsgText = vc
+			  1 Priority = i4
+			  1 TypeFlag = i4
+			  1 Subject = vc
+			  1 MsgClass = vc
+			  1 MsgSubClass = vc
+			  1 Location = vc
+			  1 UserName = vc
+			) 
+			
+			set 3051004Request->MsgText = vhtml_output 
+			set 3051004Request->Priority = 100 
+			set 3051004Request->TypeFlag = 0 
+			set 3051004Request->Subject = "Critical Troponin HS Result" 
+			set 3051004Request->MsgClass = "APPLICATION" 
+			set 3051004Request->MsgSubClass = "DISCERN" 
+			set 3051004Request->Location = "REPLY" 
+			set 3051004Request->UserName = vUsername
+		 
+		 
+		 	if (hsTroponin_data->algorithm_info.current_delta >= 7)
+		 		set stat = tdbexecute(3030000,3036100,3051004,"REC",3051004Request,"REC",3051004Reply)
+		 	endif
+		 	
+		 	
 		else
 			call echo("CEReply->rb_list[1].event_id not valid")
 			set vReturnSuccess = FALSE
@@ -1494,9 +1552,11 @@ subroutine SetNormalcybyMilestone(vMilestone)
 		of "ONEHOUR":	set vMilestoneDisplay = "1h"
 						set vCollectDtTm = format(hsTroponin_data->one_hour.collect_dt_tm,"dd-mmm-yyyy hh:mm:ss zzz;;q")
 						set hsTroponin_data->algorithm_info.current_delta = hsTroponin_data->one_hour.delta
+						set hsTroponin_data->algorithm_info.current_result_val = hsTroponin_data->one_hour.result_val
 		of "THREEHOUR":	set vMilestoneDisplay = "3h"
 						set vCollectDtTm = format(hsTroponin_data->three_hour.collect_dt_tm,"dd-mmm-yyyy hh:mm:ss zzz;;q")
 						set hsTroponin_data->algorithm_info.current_delta = hsTroponin_data->three_hour.delta
+						set hsTroponin_data->algorithm_info.current_result_val = hsTroponin_data->three_hour.result_val
 	endcase
 	
 	select into "nl:"
