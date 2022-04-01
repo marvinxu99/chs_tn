@@ -8,4 +8,4 @@
 2022-03-24: Development
 ## Change Requests
 ### 12206 - Add Action script to Discern Dev for Add Reminder
-2022-04-01L Initial Messaging Script
+2022-04-01: Initial Messaging Script
