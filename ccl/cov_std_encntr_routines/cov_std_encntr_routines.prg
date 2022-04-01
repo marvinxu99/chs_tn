@@ -143,6 +143,34 @@ subroutine sGetPersonID_ByFIN(vFIN)
 
 end
 
+
+/**********************************************************************************************************************
+** Function sGetPersonID_ByEncntrID()
+** ---------------------------------------------------------------------------------------
+** Returns the person ID for the FIN supplied
+**********************************************************************************************************************/
+declare sGetPersonID_ByEncntrID(vEncntrID=f8) = f8  with copy, persist
+subroutine sGetPersonID_ByEncntrID(vEncntrID)
+
+	declare vReturnPersonID = f8 with protect
+	
+	select into "nl:"
+	from
+		encounter e
+	plan e
+		where e.encntr_id = vEncntrID
+	order by
+		 e.encntr_id
+	head report
+		i = 0
+	head e.encntr_id
+		vReturnPersonID = e.person_id
+	with nocounter
+	
+	return (vReturnPersonID)
+
+end
+
 /**********************************************************************************************************************
 ** Function sGetInsuranceByEncntrID()
 ** ---------------------------------------------------------------------------------------
