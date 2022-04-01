@@ -114,6 +114,7 @@ subroutine add_reminder(vReceiverID,vSenderID,vEncntrID,vSubject,vContent,vDateT
    									
 	declare vReturnSuccess = i2 with noconstant(0), protect
 	
+	free record 967731_reply
 	free record 967731_request
 	record 967731_request (
 	  1 action_pool_id = f8   
@@ -181,8 +182,17 @@ subroutine add_reminder(vReceiverID,vSenderID,vEncntrID,vSubject,vContent,vDateT
 	set 967731_request->reminders[1].recipients[1].pool_id = vReceiverID 
 	set 967731_request->reminders[1].recipients[1].selection_nbr = 1 
 
+	call SubroutineLog("967731_request","record")
 	set stat = tdbexecute(600005,967100,967731,"rec",967731_request,"rec",967731_reply) 
+	call SubroutineLog("967731_reply","record")
 	
+	if (validate(967731_reply))
+		if (967731_reply->transaction_status->success_ind = 1)
+			set vReturnSuccess = 1
+		endif
+	endif
+	
+	call SubroutineLog(build2('end add_reminder=',vReturnSuccess))	
 	return (vReturnSuccess)
 end 																	
 
