@@ -172,8 +172,8 @@ subroutine add_reminder(vReceiverID,vSenderID,vEncntrID,vSubject,vContent,vDateT
 	
 	set stat = alterlist(967731_request->reminders,1) 
 	set 967731_request->reminders[1].action.send_to_recipient_ind = 1 
-	set 967731_request->reminders[1].subject = "hi jobina" 
-	set 967731_request->reminders[1].text = vSubject 
+	set 967731_request->reminders[1].subject = vSubject 
+	set 967731_request->reminders[1].text = vContent 
 	set 967731_request->reminders[1].person_id = sGetPersonID_ByEncntrID(vEncntrID) 
 	set 967731_request->reminders[1].encounter_id= vEncntrID 
 	set 967731_request->reminders[1].remind_dt_tm = vDateTime	 
@@ -183,7 +183,7 @@ subroutine add_reminder(vReceiverID,vSenderID,vEncntrID,vSubject,vContent,vDateT
 	set 967731_request->reminders[1].recipients[1].selection_nbr = 1 
 
 	call SubroutineLog("967731_request","record")
-	set stat = tdbexecute(600005,967100,967731,"rec",967731_request,"rec",967731_reply) 
+	set stat = tdbexecute(600005,967100,967731,"REC",967731_request,"REC",967731_reply) 
 	call SubroutineLog("967731_reply","record")
 	
 	if (validate(967731_reply))
