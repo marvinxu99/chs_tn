@@ -51,8 +51,8 @@ execute VCCL_RUN_PROGRAM go
 set debug_ind = 0 go
 ;execute cov_rpt_cpoe_orders "OPS","01-SEP-2020 00:00:00","30-SEP-2020 23:59:00",0,1  go
 ;execute cov_rpt_cpoe_orders "OPS","01-SEP-2020 00:00:00","30-SEP-2020 23:59:00",0,0  go
-execute cov_rpt_cpoe_orders "OPS","01-FEB-2022 00:00:00","28-FEB-2022 23:59:00",0,1  go
-execute cov_rpt_cpoe_orders "OPS","01-FEB-2022 00:00:00","28-FEB-2022	 23:59:00",0,0  go
+execute cov_rpt_cpoe_orders "OPS","01-MAR-2022 00:00:00","31-MAR-2022 23:59:00",0,1  go
+execute cov_rpt_cpoe_orders "OPS","01-MAR-2022 00:00:00","31-MAR-2022 23:59:00",0,0  go
  
  
  
