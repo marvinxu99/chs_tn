@@ -15,4 +15,5 @@
 2022-03-30: Added GL_CANCEL_CBC_CD4 to EKS
 
 ## Change Requests
-
+### 12206 - Add Action script to Discern Dev for Add Reminder
+2022-04-01: Initial Messaging Script
