@@ -110,6 +110,7 @@ record t_rec
 	 2 loc_nurse_unit_cd		= f8
 	 2 order_provider			= vc
 	 2 order_provider_id		= f8
+	 2 order_provider_position  = vc
 	 2 pathway_catalog_id		= f8
 	 2 pathway_id				= f8
 	 2 pathway_action_id		= f8
@@ -294,6 +295,7 @@ head o.order_id
 	t_rec->qual[t_rec->cnt].order_id					= o.order_id
 	t_rec->qual[t_rec->cnt].order_mnemonic				= o.order_mnemonic
 	t_rec->qual[t_rec->cnt].order_provider				= p2.name_full_formatted
+	t_rec->qual[t_rec->cnt].order_provider_position		= uar_get_code_display(p2.position_cd)
 	t_rec->qual[t_rec->cnt].order_provider_id			= oa.order_provider_id
 	t_rec->qual[t_rec->cnt].order_status_cd				= o.order_status_cd
 	t_rec->qual[t_rec->cnt].orig_order_dt_tm			= o.orig_order_dt_tm
@@ -547,6 +549,7 @@ if (datetimediff(cnvtdatetime(t_rec->dates.end_dt_tm),cnvtdatetime(t_rec->dates.
 	,reg_dt_tm					= substring(1,20,format(t_rec->qual[d1.seq].reg_dt_tm,"dd-mmm-yyyy hh:mm:ss;;q"))
 	,disch_dt_tm				= substring(1,20,format(t_rec->qual[d1.seq].disch_dt_tm,"dd-mmm-yyyy hh:mm:ss;;q"))
 	,order_provider				= substring(1,100,t_rec->qual[d1.seq].order_provider)	
+	,position					= substring(1,100,t_rec->qual[d1.seq].order_provider_position)	
 	,order_mnemonic				= substring(1,100,t_rec->qual[d1.seq].order_mnemonic)	
 	,order_status_cd			= substring(1,100,uar_get_code_display(t_rec->qual[d1.seq].order_status_cd))
 	,orig_order_dt_tm			= substring(1,20,format(t_rec->qual[d1.seq].orig_order_dt_tm,"dd-mmm-yyyy hh:mm:ss;;q"))
