@@ -78,7 +78,6 @@ record t_rec
 	 2 run_dt_tm 				= dq8
 	 2 hsTrop_cd				= f8
 	 2 order_dt_tm_margin_min	= i4
-	 2 order_dt_tm_margin_max	= i4
 	1 dates
 	 2 start_dt_tm	= dq8
 	 2 stop_dt_tm	= dq8
@@ -134,7 +133,6 @@ endif
  
 set t_rec->cons.hsTrop_cd = GethsTropAlgEC(null)
 set t_rec->cons.order_dt_tm_margin_min = GethsTropAlgOrderMargin(null)
-set t_rec->cons.order_dt_tm_margin_max = GethsTropAlgOrderMarginMax(null)
  
 declare order_comment = vc with noconstant(" "), protect
  
@@ -235,24 +233,15 @@ for (i=1 to t_rec->event_cnt)
 	endif
  
 	if ((t_rec->event_list[i].three_hour.needed_ind = 1) and (t_rec->event_list[i].three_hour.order_id = 0.0))
-		call writeLog(build2("-three_hour order still needed=",t_rec->event_list[i].three_hour.order_id))
+		call writeLog(build2("-one_hour order still needed=",t_rec->event_list[i].three_hour.order_id))
 		set t_rec->event_list[i].three_hour.run_dt_tm_diff
 			= datetimediff(t_rec->event_list[i].three_hour.target_dt_tm,t_rec->cons.run_dt_tm,4)
-		call writeLog(build2("-three_hour.run_dt_tm_diff=",t_rec->event_list[i].three_hour.run_dt_tm_diff))
+		call writeLog(build2("-one_hour.run_dt_tm_diff=",t_rec->event_list[i].three_hour.run_dt_tm_diff))
  
 		if (t_rec->event_list[i].three_hour.run_dt_tm_diff < t_rec->cons.order_dt_tm_margin_min)
 			set t_rec->event_list[i].three_hour.order_now_ind = 1
 		endif
-	elseif ((t_rec->event_list[i].three_hour.needed_ind = 1) and (t_rec->event_list[i].three_hour.order_id > 0.0))
-		call writeLog(build2("-three_hour order still needed and active=",t_rec->event_list[i].three_hour.order_id))
-		set t_rec->event_list[i].three_hour.run_dt_tm_diff
-			= datetimediff(t_rec->event_list[i].three_hour.target_dt_tm,t_rec->cons.run_dt_tm,4)
-		call writeLog(build2("-three_hour.run_dt_tm_diff=",t_rec->event_list[i].three_hour.run_dt_tm_diff))
-
-		if (t_rec->event_list[i].three_hour.run_dt_tm_diff > t_rec->cons.order_dt_tm_margin_max)
-			set t_rec->event_list[i].three_hour.cancel_ind = 1
-		endif
-
+ 
 	endif
 endfor
  
@@ -384,36 +373,6 @@ for (ii=1 to t_rec->event_cnt)
 				call writeLog(build2("* FAILED TO ADD THREE HOUR ORDER"))
 				set t_rec->ord_process_ind = 1
 			endif
-		if (hsTroponin_data->three_hour.ecg_order_id = 0.0)
-			if (SetupNewECGOrder(t_rec->event_list[ii].person_id,t_rec->event_list[ii].encntr_id) = FALSE)
-				call writeLog("unable to setup request for hour three ECG order")
-				go to exit_script
-			else
-				call writeLog("setup request for hour three ECG order")
-			endif
- 
-	 		set stat = UpdateECGOrderDetailDtTm("REQSTARTDTTM",hsTroponin_data->three_hour.target_dt_tm)
-	 		set stat = UpdateECGOrderDetailValueCd("PRIORITY",value(uar_get_code_by("MEANING",1304,"STAT")))
-			set order_comment = build2(	 "Ordered automatically per rapid screening protocols. "
-													,"Initiated from accession "
-													,trim(GetOrderAccessionbyOrderID(hsTroponin_data->initial.order_id))
-													," ["
-													,GethsTropAlgDescription(null)
-													,"]"
-									)
-			set stat = AddECGOrderComment(order_comment)
-			set hsTroponin_data->three_hour.ecg_order_id = CallNewECGOrderServer(null)
- 
-			if (hsTroponin_data->three_hour.ecg_order_id > 0.0)
-				call writeLog("created three hour ECG order")
-				if (AddOrderTohsTropList(hsTroponin_data->three_hour.ecg_order_id) = FALSE)
-					call writeLog("unable to three  hour ecg_order_id to list")
-					go to exit_script
-				endif
-			else
-				call writeLog("did not create three hour ECG order")
-			endif
- 		 endif
 		endif ;three_hour order now
  
 		;add hsTroponin_data record structure to chart for tracking
