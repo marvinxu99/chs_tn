@@ -158,6 +158,7 @@ set t_rec->cons.paths.astream	= build("/nfs/middle_fs/to_client_site/"
 ;\\chstn_astream_prod.cernerasp.com\middle_fs\to_client_site\p0665\ClinicalAncillary\Pharmacy\R2W
  
 set t_rec->cons.paths.astream_ccl	= build("/nfs/middle_fs/to_client_site/",trim(cnvtlower(curdomain)),"/CernerCCL/")
+set t_rec->cons.paths.astream = t_rec->cons.paths.astream_ccl
  
 set reply->status_data.status = "Z"
  
@@ -292,7 +293,13 @@ join cv
 						^FLMC^,
 						^FLMC Therapy LC^,
 						^FLMC Therapy LO^,
-						^FLMC Card Rehab^
+						^FLMC Card Rehab^,
+						^LCMC Blount INF^,
+						^LCMC Dwtn INF^,
+						^FSR INF Lenoir^,
+						^FSR INF Oridge^,
+						^LCMC Sevier INF^,
+						^LCMC West INF^
 					)
 order by
    cv.display
@@ -353,11 +360,17 @@ for (i=1 to t_rec->cons.acute_facility_cnt)
 																 t_rec->cons.paths.temp
 																,t_rec->reports[k].instances[j].filename
 															)
-	set t_rec->reports[k].instances[j].final_path	= build(
-																 t_rec->cons.paths.astream
-																,t_rec->reports[k].instances[j].filename
-															)
- 
+	if (t_rec->reports[k].override_astream_ccl = 1)
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream_ccl
+																	,t_rec->reports[k].instances[j].filename
+																)	
+	else
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream
+																	,t_rec->reports[k].instances[j].filename
+																)
+	endif
 	set t_rec->reports[k].instances[j].params = replace(
 															 t_rec->reports[k].instances[j].params
 															,"FILENAME"
@@ -409,11 +422,17 @@ for (i=1 to t_rec->cons.acute_facility_cnt)
 																 t_rec->cons.paths.temp
 																,t_rec->reports[k].instances[j].filename
 															)
-	set t_rec->reports[k].instances[j].final_path	= build(
-																 t_rec->cons.paths.astream
-																,t_rec->reports[k].instances[j].filename
-															)
- 
+	if (t_rec->reports[k].override_astream_ccl = 1)
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream_ccl
+																	,t_rec->reports[k].instances[j].filename
+																)	
+	else
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream
+																	,t_rec->reports[k].instances[j].filename
+																)
+	endif
 	set t_rec->reports[k].instances[j].params = replace(
 															 t_rec->reports[k].instances[j].params
 															,"FILENAME"
@@ -494,11 +513,17 @@ set t_rec->reports[k].instances[j].filename		= build(
 																 t_rec->cons.paths.temp
 																,t_rec->reports[k].instances[j].filename
 															)
-	set t_rec->reports[k].instances[j].final_path	= build(
-																 t_rec->cons.paths.astream
-																,t_rec->reports[k].instances[j].filename
-															)
- 
+	if (t_rec->reports[k].override_astream_ccl = 1)
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream_ccl
+																	,t_rec->reports[k].instances[j].filename
+																)	
+	else
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream
+																	,t_rec->reports[k].instances[j].filename
+																)
+	endif
 	set t_rec->reports[k].instances[j].params = replace(
 															 t_rec->reports[k].instances[j].params
 															,"FILENAME"
@@ -551,11 +576,17 @@ set t_rec->reports[k].instances[j].filename		= build(
 																 t_rec->cons.paths.temp
 																,t_rec->reports[k].instances[j].filename
 															)
-	set t_rec->reports[k].instances[j].final_path	= build(
-																 t_rec->cons.paths.astream
-																,t_rec->reports[k].instances[j].filename
-															)
- 
+	if (t_rec->reports[k].override_astream_ccl = 1)
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream_ccl
+																	,t_rec->reports[k].instances[j].filename
+																)	
+	else
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream
+																	,t_rec->reports[k].instances[j].filename
+																)
+	endif
 	set t_rec->reports[k].instances[j].params = replace(
 															 t_rec->reports[k].instances[j].params
 															,"FILENAME"
@@ -606,11 +637,17 @@ set t_rec->reports[k].instances[j].filename		= build(
 																 t_rec->cons.paths.temp
 																,t_rec->reports[k].instances[j].filename
 															)
-	set t_rec->reports[k].instances[j].final_path	= build(
-																 t_rec->cons.paths.astream
-																,t_rec->reports[k].instances[j].filename
-															)
- 
+	if (t_rec->reports[k].override_astream_ccl = 1)
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream_ccl
+																	,t_rec->reports[k].instances[j].filename
+																)	
+	else
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream
+																	,t_rec->reports[k].instances[j].filename
+																)
+	endif
 	set t_rec->reports[k].instances[j].params = replace(
 															 t_rec->reports[k].instances[j].params
 															,"FILENAME"
@@ -663,11 +700,17 @@ set t_rec->reports[k].instances[j].filename		= build(
 																 t_rec->cons.paths.temp
 																,t_rec->reports[k].instances[j].filename
 															)
-	set t_rec->reports[k].instances[j].final_path	= build(
-																 t_rec->cons.paths.astream
-																,t_rec->reports[k].instances[j].filename
-															)
- 
+	if (t_rec->reports[k].override_astream_ccl = 1)
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream_ccl
+																	,t_rec->reports[k].instances[j].filename
+																)	
+	else
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream
+																	,t_rec->reports[k].instances[j].filename
+																)
+	endif
 	set t_rec->reports[k].instances[j].params = replace(
 															 t_rec->reports[k].instances[j].params
 															,"FILENAME"
@@ -718,11 +761,17 @@ set t_rec->reports[k].instances[j].filename		= build(
 																 t_rec->cons.paths.temp
 																,t_rec->reports[k].instances[j].filename
 															)
-	set t_rec->reports[k].instances[j].final_path	= build(
-																 t_rec->cons.paths.astream
-																,t_rec->reports[k].instances[j].filename
-															)
- 
+	if (t_rec->reports[k].override_astream_ccl = 1)
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream_ccl
+																	,t_rec->reports[k].instances[j].filename
+																)	
+	else
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream
+																	,t_rec->reports[k].instances[j].filename
+																)
+	endif
 	set t_rec->reports[k].instances[j].params = replace(
 															 t_rec->reports[k].instances[j].params
 															,"FILENAME"
@@ -774,11 +823,17 @@ set t_rec->reports[k].instances[j].filename		= build(
 																 t_rec->cons.paths.temp
 																,t_rec->reports[k].instances[j].filename
 															)
-	set t_rec->reports[k].instances[j].final_path	= build(
-																 t_rec->cons.paths.astream
-																,t_rec->reports[k].instances[j].filename
-															)
- 
+	if (t_rec->reports[k].override_astream_ccl = 1)
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream_ccl
+																	,t_rec->reports[k].instances[j].filename
+																)	
+	else
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream
+																	,t_rec->reports[k].instances[j].filename
+																)
+	endif
 	set t_rec->reports[k].instances[j].params = replace(
 															 t_rec->reports[k].instances[j].params
 															,"FILENAME"
@@ -846,11 +901,17 @@ set t_rec->reports[k].instances[j].filename		= build(
 																 t_rec->cons.paths.temp
 																,t_rec->reports[k].instances[j].filename
 															)
-	set t_rec->reports[k].instances[j].final_path	= build(
-																 t_rec->cons.paths.astream
-																,t_rec->reports[k].instances[j].filename
-															)
- 
+	if (t_rec->reports[k].override_astream_ccl = 1)
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream_ccl
+																	,t_rec->reports[k].instances[j].filename
+																)	
+	else
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream
+																	,t_rec->reports[k].instances[j].filename
+																)
+	endif
 	set t_rec->reports[k].instances[j].params = replace(
 															 t_rec->reports[k].instances[j].params
 															,"FILENAME"
@@ -918,11 +979,123 @@ set t_rec->reports[k].instances[j].filename		= build(
 																 t_rec->cons.paths.temp
 																,t_rec->reports[k].instances[j].filename
 															)
-	set t_rec->reports[k].instances[j].final_path	= build(
-																 t_rec->cons.paths.astream
-																,t_rec->reports[k].instances[j].filename
+	if (t_rec->reports[k].override_astream_ccl = 1)
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream_ccl
+																	,t_rec->reports[k].instances[j].filename
+																)	
+	else
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream
+																	,t_rec->reports[k].instances[j].filename
+																)
+	endif
+	set t_rec->reports[k].instances[j].params = replace(
+															 t_rec->reports[k].instances[j].params
+															,"FILENAME"
+															,t_rec->reports[k].instances[j].temp_path
+														)
+ 
+	set t_rec->reports[k].instances[j].params = replace(
+															 t_rec->reports[k].instances[j].params
+															,"START_DT_TM_VAR"
+															,t_rec->reports[k].start_dt_tm_vc
+														)
+ 
+	set t_rec->reports[k].instances[j].params = replace(
+															 t_rec->reports[k].instances[j].params
+															,"END_DT_TM_VAR"
+															,t_rec->reports[k].end_dt_tm_vc
+														)
+ 
+	set t_rec->reports[k].instances[j].params = replace(
+															 t_rec->reports[k].instances[j].params
+															,"ALL_FACILITY"
+															,t_rec->reports[k].instances[j].facility
+														)
+
+;Infusion Centers
+/*
+LCMC Infusion Clinic - Blount
+LCMC Infusion Clinic - Downtown
+FSR Infusion Clinic - Lenoir City
+FSR Infusion Clinic - Oak Ridge
+LCMC Infusion Clinic - Sevier
+LCMC Infusion Clinic - West
+*/
+
+set j = (j + 1)
+set t_rec->reports[k].instance_cnt = j
+set stat = alterlist(t_rec->reports[k].instances,j)
+set t_rec->reports[k].instances[j].facility 	= build(^value(^)
+for (i=1 to t_rec->cons.all_facility_cnt)
+	if (t_rec->cons.all_facilities[i].description 		= "LCMC Infusion Clinic - Blount")
+		set t_rec->reports[k].instances[j].facility 	= build(
+																	 t_rec->reports[k].instances[j].facility
+																	,t_rec->cons.all_facilities[i].value
+																)
+	endif
+	if (t_rec->cons.all_facilities[i].description 		= "LCMC Infusion Clinic - Downtown")
+		set t_rec->reports[k].instances[j].facility 	= build(
+																	t_rec->reports[k].instances[j].facility
+																	,","
+																	,t_rec->cons.all_facilities[i].value
+																)
+	endif
+	if (t_rec->cons.all_facilities[i].description 		= "FSR Infusion Clinic - Lenoir City")
+		set t_rec->reports[k].instances[j].facility 	= build(
+																	t_rec->reports[k].instances[j].facility
+																	,","
+																	,t_rec->cons.all_facilities[i].value
+																)
+	endif
+	if (t_rec->cons.all_facilities[i].description 		= "FSR Infusion Clinic - Oak Ridge")
+		set t_rec->reports[k].instances[j].facility 	= build(
+																	t_rec->reports[k].instances[j].facility
+																	,","
+																	,t_rec->cons.all_facilities[i].value
+																)
+	endif
+	if (t_rec->cons.all_facilities[i].description 		= "LCMC Infusion Clinic - Sevier")
+		set t_rec->reports[k].instances[j].facility 	= build(
+																	t_rec->reports[k].instances[j].facility
+																	,","
+																	,t_rec->cons.all_facilities[i].value
+																)
+	endif
+	if (t_rec->cons.all_facilities[i].description 		= "LCMC Infusion Clinic - West")
+		set t_rec->reports[k].instances[j].facility 	= build(
+																	t_rec->reports[k].instances[j].facility
+																	,","
+																	,t_rec->cons.all_facilities[i].value
+																)
+	endif
+endfor
+set t_rec->reports[k].instances[j].facility 	= build(t_rec->reports[k].instances[j].facility,^)^)
+set t_rec->reports[k].instances[j].params 		= t_rec->reports[k].param_template
+set t_rec->reports[k].instances[j].filename		= build(
+																 cnvtlower("INF")
+																,"_"
+																,cnvtlower(t_rec->reports[k].object)
+																,"_ccl"
+																,".xls"
 															)
  
+	set t_rec->reports[k].instances[j].temp_path	= build(
+																 t_rec->cons.paths.temp
+																,t_rec->reports[k].instances[j].filename
+															)
+	if (t_rec->reports[k].override_astream_ccl = 1)
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream_ccl
+																	,t_rec->reports[k].instances[j].filename
+																)	
+	else
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream
+																	,t_rec->reports[k].instances[j].filename
+																)
+	endif
 	set t_rec->reports[k].instances[j].params = replace(
 															 t_rec->reports[k].instances[j].params
 															,"FILENAME"
@@ -984,11 +1157,17 @@ for (i=1 to t_rec->cons.acute_facility_cnt)
 																 t_rec->cons.paths.temp
 																,t_rec->reports[k].instances[j].filename
 															)
-	set t_rec->reports[k].instances[j].final_path	= build(
-																 t_rec->cons.paths.astream
-																,t_rec->reports[k].instances[j].filename
-															)
- 
+	if (t_rec->reports[k].override_astream_ccl = 1)
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream_ccl
+																	,t_rec->reports[k].instances[j].filename
+																)	
+	else
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream
+																	,t_rec->reports[k].instances[j].filename
+																)
+	endif
 	set t_rec->reports[k].instances[j].params = replace(
 															 t_rec->reports[k].instances[j].params
 															,"FILENAME"
@@ -1078,11 +1257,17 @@ set t_rec->reports[k].instances[j].filename		= build(
 																 t_rec->cons.paths.temp
 																,t_rec->reports[k].instances[j].filename
 															)
-	set t_rec->reports[k].instances[j].final_path	= build(
-																 t_rec->cons.paths.astream
-																,t_rec->reports[k].instances[j].filename
-															)
- 
+	if (t_rec->reports[k].override_astream_ccl = 1)
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream_ccl
+																	,t_rec->reports[k].instances[j].filename
+																)	
+	else
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream
+																	,t_rec->reports[k].instances[j].filename
+																)
+	endif
 	set t_rec->reports[k].instances[j].params = replace(
 															 t_rec->reports[k].instances[j].params
 															,"FILENAME"
@@ -1198,11 +1383,17 @@ set t_rec->reports[k].instances[j].filename		= build(
 																 t_rec->cons.paths.temp
 																,t_rec->reports[k].instances[j].filename
 															)
-	set t_rec->reports[k].instances[j].final_path	= build(
-																 t_rec->cons.paths.astream
-																,t_rec->reports[k].instances[j].filename
-															)
- 
+	if (t_rec->reports[k].override_astream_ccl = 1)
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream_ccl
+																	,t_rec->reports[k].instances[j].filename
+																)	
+	else
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream
+																	,t_rec->reports[k].instances[j].filename
+																)
+	endif
 	set t_rec->reports[k].instances[j].params = replace(
 															 t_rec->reports[k].instances[j].params
 															,"FILENAME"
@@ -1254,11 +1445,17 @@ set t_rec->reports[k].instances[j].filename		= build(
 																 t_rec->cons.paths.temp
 																,t_rec->reports[k].instances[j].filename
 															)
-	set t_rec->reports[k].instances[j].final_path	= build(
-																 t_rec->cons.paths.astream
-																,t_rec->reports[k].instances[j].filename
-															)
- 
+	if (t_rec->reports[k].override_astream_ccl = 1)
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream_ccl
+																	,t_rec->reports[k].instances[j].filename
+																)	
+	else
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream
+																	,t_rec->reports[k].instances[j].filename
+																)
+	endif
 	set t_rec->reports[k].instances[j].params = replace(
 															 t_rec->reports[k].instances[j].params
 															,"FILENAME"
@@ -1358,11 +1555,17 @@ set t_rec->reports[k].instances[j].filename		= build(
 																 t_rec->cons.paths.temp
 																,t_rec->reports[k].instances[j].filename
 															)
-	set t_rec->reports[k].instances[j].final_path	= build(
-																 t_rec->cons.paths.astream
-																,t_rec->reports[k].instances[j].filename
-															)
- 
+	if (t_rec->reports[k].override_astream_ccl = 1)
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream_ccl
+																	,t_rec->reports[k].instances[j].filename
+																)	
+	else
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream
+																	,t_rec->reports[k].instances[j].filename
+																)
+	endif
 	set t_rec->reports[k].instances[j].params = replace(
 															 t_rec->reports[k].instances[j].params
 															,"FILENAME"
@@ -1454,11 +1657,17 @@ set t_rec->reports[k].instances[j].filename		= build(
 																 t_rec->cons.paths.temp
 																,t_rec->reports[k].instances[j].filename
 															)
-	set t_rec->reports[k].instances[j].final_path	= build(
-																 t_rec->cons.paths.astream
-																,t_rec->reports[k].instances[j].filename
-															)
- 
+	if (t_rec->reports[k].override_astream_ccl = 1)
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream_ccl
+																	,t_rec->reports[k].instances[j].filename
+																)	
+	else
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream
+																	,t_rec->reports[k].instances[j].filename
+																)
+	endif
 	set t_rec->reports[k].instances[j].params = replace(
 															 t_rec->reports[k].instances[j].params
 															,"FILENAME"
@@ -1558,11 +1767,17 @@ set t_rec->reports[k].instances[j].filename		= build(
 																 t_rec->cons.paths.temp
 																,t_rec->reports[k].instances[j].filename
 															)
-	set t_rec->reports[k].instances[j].final_path	= build(
-																 t_rec->cons.paths.astream
-																,t_rec->reports[k].instances[j].filename
-															)
- 
+	if (t_rec->reports[k].override_astream_ccl = 1)
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream_ccl
+																	,t_rec->reports[k].instances[j].filename
+																)	
+	else
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream
+																	,t_rec->reports[k].instances[j].filename
+																)
+	endif
 	set t_rec->reports[k].instances[j].params = replace(
 															 t_rec->reports[k].instances[j].params
 															,"FILENAME"
@@ -1671,11 +1886,17 @@ set t_rec->reports[k].instances[j].filename		= build(
 																 t_rec->cons.paths.temp
 																,t_rec->reports[k].instances[j].filename
 															)
-	set t_rec->reports[k].instances[j].final_path	= build(
-																 t_rec->cons.paths.astream
-																,t_rec->reports[k].instances[j].filename
-															)
- 
+	if (t_rec->reports[k].override_astream_ccl = 1)
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream_ccl
+																	,t_rec->reports[k].instances[j].filename
+																)	
+	else
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream
+																	,t_rec->reports[k].instances[j].filename
+																)
+	endif
 	set t_rec->reports[k].instances[j].params = replace(
 															 t_rec->reports[k].instances[j].params
 															,"FILENAME"
@@ -1751,11 +1972,17 @@ set t_rec->reports[k].instances[j].filename		= build(
 																 t_rec->cons.paths.temp
 																,t_rec->reports[k].instances[j].filename
 															)
-	set t_rec->reports[k].instances[j].final_path	= build(
-																 t_rec->cons.paths.astream
-																,t_rec->reports[k].instances[j].filename
-															)
- 
+	if (t_rec->reports[k].override_astream_ccl = 1)
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream_ccl
+																	,t_rec->reports[k].instances[j].filename
+																)	
+	else
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream
+																	,t_rec->reports[k].instances[j].filename
+																)
+	endif
 	set t_rec->reports[k].instances[j].params = replace(
 															 t_rec->reports[k].instances[j].params
 															,"FILENAME"
@@ -1821,11 +2048,17 @@ set t_rec->reports[k].instances[j].filename		= build(
 																 t_rec->cons.paths.temp
 																,t_rec->reports[k].instances[j].filename
 															)
-	set t_rec->reports[k].instances[j].final_path	= build(
-																 t_rec->cons.paths.astream
-																,t_rec->reports[k].instances[j].filename
-															)
- 
+	if (t_rec->reports[k].override_astream_ccl = 1)
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream_ccl
+																	,t_rec->reports[k].instances[j].filename
+																)	
+	else
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream
+																	,t_rec->reports[k].instances[j].filename
+																)
+	endif
 	set t_rec->reports[k].instances[j].params = replace(
 															 t_rec->reports[k].instances[j].params
 															,"FILENAME"
@@ -1877,11 +2110,17 @@ set t_rec->reports[k].instances[j].filename		= build(
 																 t_rec->cons.paths.temp
 																,t_rec->reports[k].instances[j].filename
 															)
-	set t_rec->reports[k].instances[j].final_path	= build(
-																 t_rec->cons.paths.astream
-																,t_rec->reports[k].instances[j].filename
-															)
- 
+	if (t_rec->reports[k].override_astream_ccl = 1)
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream_ccl
+																	,t_rec->reports[k].instances[j].filename
+																)	
+	else
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream
+																	,t_rec->reports[k].instances[j].filename
+																)
+	endif
 	set t_rec->reports[k].instances[j].params = replace(
 															 t_rec->reports[k].instances[j].params
 															,"FILENAME"
@@ -1932,11 +2171,17 @@ set t_rec->reports[k].instances[j].filename		= build(
 																 t_rec->cons.paths.temp
 																,t_rec->reports[k].instances[j].filename
 															)
-	set t_rec->reports[k].instances[j].final_path	= build(
-																 t_rec->cons.paths.astream
-																,t_rec->reports[k].instances[j].filename
-															)
- 
+	if (t_rec->reports[k].override_astream_ccl = 1)
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream_ccl
+																	,t_rec->reports[k].instances[j].filename
+																)	
+	else
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream
+																	,t_rec->reports[k].instances[j].filename
+																)
+	endif
 	set t_rec->reports[k].instances[j].params = replace(
 															 t_rec->reports[k].instances[j].params
 															,"FILENAME"
@@ -1988,11 +2233,17 @@ set t_rec->reports[k].instances[j].filename		= build(
 																 t_rec->cons.paths.temp
 																,t_rec->reports[k].instances[j].filename
 															)
-	set t_rec->reports[k].instances[j].final_path	= build(
-																 t_rec->cons.paths.astream
-																,t_rec->reports[k].instances[j].filename
-															)
- 
+if (t_rec->reports[k].override_astream_ccl = 1)
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream_ccl
+																	,t_rec->reports[k].instances[j].filename
+																)	
+	else
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream
+																	,t_rec->reports[k].instances[j].filename
+																)
+	endif 
 	set t_rec->reports[k].instances[j].params = replace(
 															 t_rec->reports[k].instances[j].params
 															,"FILENAME"
@@ -2044,11 +2295,17 @@ set t_rec->reports[k].instances[j].filename		= build(
 																 t_rec->cons.paths.temp
 																,t_rec->reports[k].instances[j].filename
 															)
-	set t_rec->reports[k].instances[j].final_path	= build(
-																 t_rec->cons.paths.astream
-																,t_rec->reports[k].instances[j].filename
-															)
- 
+if (t_rec->reports[k].override_astream_ccl = 1)
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream_ccl
+																	,t_rec->reports[k].instances[j].filename
+																)	
+	else
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream
+																	,t_rec->reports[k].instances[j].filename
+																)
+	endif 
 	set t_rec->reports[k].instances[j].params = replace(
 															 t_rec->reports[k].instances[j].params
 															,"FILENAME"
@@ -2100,11 +2357,17 @@ set t_rec->reports[k].instances[j].filename		= build(
 																 t_rec->cons.paths.temp
 																,t_rec->reports[k].instances[j].filename
 															)
-	set t_rec->reports[k].instances[j].final_path	= build(
-																 t_rec->cons.paths.astream
-																,t_rec->reports[k].instances[j].filename
-															)
- 
+if (t_rec->reports[k].override_astream_ccl = 1)
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream_ccl
+																	,t_rec->reports[k].instances[j].filename
+																)	
+	else
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream
+																	,t_rec->reports[k].instances[j].filename
+																)
+	endif 
 	set t_rec->reports[k].instances[j].params = replace(
 															 t_rec->reports[k].instances[j].params
 															,"FILENAME"
@@ -2156,11 +2419,17 @@ set t_rec->reports[k].instances[j].filename		= build(
 																 t_rec->cons.paths.temp
 																,t_rec->reports[k].instances[j].filename
 															)
-	set t_rec->reports[k].instances[j].final_path	= build(
-																 t_rec->cons.paths.astream
-																,t_rec->reports[k].instances[j].filename
-															)
- 
+	if (t_rec->reports[k].override_astream_ccl = 1)
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream_ccl
+																	,t_rec->reports[k].instances[j].filename
+																)	
+	else
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream
+																	,t_rec->reports[k].instances[j].filename
+																)
+	endif 
 	set t_rec->reports[k].instances[j].params = replace(
 															 t_rec->reports[k].instances[j].params
 															,"FILENAME"
@@ -2184,6 +2453,116 @@ set t_rec->reports[k].instances[j].filename		= build(
 															,"ALL_FACILITY"
 															,t_rec->reports[k].instances[j].facility
 														)
+
+
+;Infusion Centers
+/*
+LCMC Infusion Clinic - Blount
+LCMC Infusion Clinic - Downtown
+FSR Infusion Clinic - Lenoir City
+FSR Infusion Clinic - Oak Ridge
+LCMC Infusion Clinic - Sevier
+LCMC Infusion Clinic - West
+*/
+set j = (j + 1)
+set t_rec->reports[k].instance_cnt = j
+set stat = alterlist(t_rec->reports[k].instances,j)
+set t_rec->reports[k].instances[j].facility 	= build(^value(^)
+for (i=1 to t_rec->cons.all_facility_cnt)
+	if (t_rec->cons.all_facilities[i].description 		= "LCMC Infusion Clinic - Blount")
+		set t_rec->reports[k].instances[j].facility 	= build(
+																	 t_rec->reports[k].instances[j].facility
+																	,t_rec->cons.all_facilities[i].value
+																)
+	endif
+	if (t_rec->cons.all_facilities[i].description 		= "LCMC Infusion Clinic - Downtown")
+		set t_rec->reports[k].instances[j].facility 	= build(
+																	t_rec->reports[k].instances[j].facility
+																	,","
+																	,t_rec->cons.all_facilities[i].value
+																)
+	endif
+	if (t_rec->cons.all_facilities[i].description 		= "FSR Infusion Clinic - Lenoir City")
+		set t_rec->reports[k].instances[j].facility 	= build(
+																	t_rec->reports[k].instances[j].facility
+																	,","
+																	,t_rec->cons.all_facilities[i].value
+																)
+	endif
+	if (t_rec->cons.all_facilities[i].description 		= "FSR Infusion Clinic - Oak Ridge")
+		set t_rec->reports[k].instances[j].facility 	= build(
+																	t_rec->reports[k].instances[j].facility
+																	,","
+																	,t_rec->cons.all_facilities[i].value
+																)
+	endif
+	if (t_rec->cons.all_facilities[i].description 		= "LCMC Infusion Clinic - Sevier")
+		set t_rec->reports[k].instances[j].facility 	= build(
+																	t_rec->reports[k].instances[j].facility
+																	,","
+																	,t_rec->cons.all_facilities[i].value
+																)
+	endif
+	if (t_rec->cons.all_facilities[i].description 		= "LCMC Infusion Clinic - West")
+		set t_rec->reports[k].instances[j].facility 	= build(
+																	t_rec->reports[k].instances[j].facility
+																	,","
+																	,t_rec->cons.all_facilities[i].value
+																)
+	endif
+endfor
+set t_rec->reports[k].instances[j].facility 	= build(t_rec->reports[k].instances[j].facility,^)^)
+set t_rec->reports[k].instances[j].params 		= t_rec->reports[k].param_template
+set t_rec->reports[k].instances[j].filename		= build(
+																 cnvtlower("INF")
+																,"_"
+																,cnvtlower(t_rec->reports[k].object)
+																,"_ccl"
+																,".pdf"
+															)
+ 
+	set t_rec->reports[k].instances[j].temp_path	= build(
+																 t_rec->cons.paths.temp
+																,t_rec->reports[k].instances[j].filename
+															)
+	if (t_rec->reports[k].override_astream_ccl = 1)
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream_ccl
+																	,t_rec->reports[k].instances[j].filename
+																)	
+	else
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream
+																	,t_rec->reports[k].instances[j].filename
+																)
+	endif 
+	set t_rec->reports[k].instances[j].params = replace(
+															 t_rec->reports[k].instances[j].params
+															,"FILENAME"
+															,t_rec->reports[k].instances[j].temp_path
+														)
+ 
+	set t_rec->reports[k].instances[j].params = replace(
+															 t_rec->reports[k].instances[j].params
+															,"START_DT_TM_VAR"
+															,t_rec->reports[k].start_dt_tm_vc
+														)
+ 
+	set t_rec->reports[k].instances[j].params = replace(
+															 t_rec->reports[k].instances[j].params
+															,"END_DT_TM_VAR"
+															,t_rec->reports[k].end_dt_tm_vc
+														)
+ 
+	set t_rec->reports[k].instances[j].params = replace(
+															 t_rec->reports[k].instances[j].params
+															,"ALL_FACILITY"
+															,t_rec->reports[k].instances[j].facility
+														)
+
+
+
+
  
 ;Report 6 - Pharmacy Specialty Report (COV_PHA_SPECIALTY_RX_MEDS)
 set t_rec->cnt = 6
@@ -2316,11 +2695,18 @@ set t_rec->reports[k].instances[j].filename		= build(
 																 t_rec->cons.paths.temp
 																,t_rec->reports[k].instances[j].filename
 															)
-	set t_rec->reports[k].instances[j].final_path	= build(
-																 t_rec->cons.paths.astream
-																,t_rec->reports[k].instances[j].filename
-															)
- 
+	if (t_rec->reports[k].override_astream_ccl = 1)
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream_ccl
+																	,t_rec->reports[k].instances[j].filename
+																)	
+	else
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream
+																	,t_rec->reports[k].instances[j].filename
+																)
+	endif
+	
 	set t_rec->reports[k].instances[j].params = replace(
 															 t_rec->reports[k].instances[j].params
 															,"FILENAME"
@@ -2378,11 +2764,17 @@ set t_rec->reports[k].instances[j].filename		= build(
 																 t_rec->cons.paths.temp
 																,t_rec->reports[k].instances[j].filename
 															)
-	set t_rec->reports[k].instances[j].final_path	= build(
-																 t_rec->cons.paths.astream
-																,t_rec->reports[k].instances[j].filename
-															)
- 
+	if (t_rec->reports[k].override_astream_ccl = 1)
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream_ccl
+																	,t_rec->reports[k].instances[j].filename
+																)	
+	else
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream
+																	,t_rec->reports[k].instances[j].filename
+																)
+	endif 
 	set t_rec->reports[k].instances[j].params = replace(
 															 t_rec->reports[k].instances[j].params
 															,"FILENAME"
@@ -2440,11 +2832,17 @@ set t_rec->reports[k].instances[j].filename		= build(
 																 t_rec->cons.paths.temp
 																,t_rec->reports[k].instances[j].filename
 															)
-	set t_rec->reports[k].instances[j].final_path	= build(
-																 t_rec->cons.paths.astream
-																,t_rec->reports[k].instances[j].filename
-															)
- 
+	if (t_rec->reports[k].override_astream_ccl = 1)
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream_ccl
+																	,t_rec->reports[k].instances[j].filename
+																)	
+	else
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream
+																	,t_rec->reports[k].instances[j].filename
+																)
+	endif
 	set t_rec->reports[k].instances[j].params = replace(
 															 t_rec->reports[k].instances[j].params
 															,"FILENAME"
@@ -2503,11 +2901,17 @@ set t_rec->reports[k].instances[j].filename		= build(
 																 t_rec->cons.paths.temp
 																,t_rec->reports[k].instances[j].filename
 															)
-	set t_rec->reports[k].instances[j].final_path	= build(
-																 t_rec->cons.paths.astream
-																,t_rec->reports[k].instances[j].filename
-															)
- 
+	if (t_rec->reports[k].override_astream_ccl = 1)
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream_ccl
+																	,t_rec->reports[k].instances[j].filename
+																)	
+	else
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream
+																	,t_rec->reports[k].instances[j].filename
+																)
+	endif
 	set t_rec->reports[k].instances[j].params = replace(
 															 t_rec->reports[k].instances[j].params
 															,"FILENAME"
@@ -2564,11 +2968,17 @@ set t_rec->reports[k].instances[j].filename		= build(
 																 t_rec->cons.paths.temp
 																,t_rec->reports[k].instances[j].filename
 															)
-	set t_rec->reports[k].instances[j].final_path	= build(
-																 t_rec->cons.paths.astream
-																,t_rec->reports[k].instances[j].filename
-															)
- 
+	if (t_rec->reports[k].override_astream_ccl = 1)
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream_ccl
+																	,t_rec->reports[k].instances[j].filename
+																)	
+	else
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream
+																	,t_rec->reports[k].instances[j].filename
+																)
+	endif
 	set t_rec->reports[k].instances[j].params = replace(
 															 t_rec->reports[k].instances[j].params
 															,"FILENAME"
@@ -2626,11 +3036,17 @@ set t_rec->reports[k].instances[j].filename		= build(
 																 t_rec->cons.paths.temp
 																,t_rec->reports[k].instances[j].filename
 															)
-	set t_rec->reports[k].instances[j].final_path	= build(
-																 t_rec->cons.paths.astream
-																,t_rec->reports[k].instances[j].filename
-															)
- 
+	if (t_rec->reports[k].override_astream_ccl = 1)
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream_ccl
+																	,t_rec->reports[k].instances[j].filename
+																)	
+	else
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream
+																	,t_rec->reports[k].instances[j].filename
+																)
+	endif
 	set t_rec->reports[k].instances[j].params = replace(
 															 t_rec->reports[k].instances[j].params
 															,"FILENAME"
@@ -2704,11 +3120,17 @@ set t_rec->reports[k].instances[j].filename		= build(
 																 t_rec->cons.paths.temp
 																,t_rec->reports[k].instances[j].filename
 															)
-	set t_rec->reports[k].instances[j].final_path	= build(
-																 t_rec->cons.paths.astream
-																,t_rec->reports[k].instances[j].filename
-															)
- 
+	if (t_rec->reports[k].override_astream_ccl = 1)
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream_ccl
+																	,t_rec->reports[k].instances[j].filename
+																)	
+	else
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream
+																	,t_rec->reports[k].instances[j].filename
+																)
+	endif
 	set t_rec->reports[k].instances[j].params = replace(
 															 t_rec->reports[k].instances[j].params
 															,"FILENAME"
@@ -2782,11 +3204,18 @@ set t_rec->reports[k].instances[j].filename		= build(
 																 t_rec->cons.paths.temp
 																,t_rec->reports[k].instances[j].filename
 															)
-	set t_rec->reports[k].instances[j].final_path	= build(
-																 t_rec->cons.paths.astream
-																,t_rec->reports[k].instances[j].filename
-															)
- 
+	if (t_rec->reports[k].override_astream_ccl = 1)
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream_ccl
+																	,t_rec->reports[k].instances[j].filename
+																)	
+	else
+		set t_rec->reports[k].instances[j].final_path	= build(
+																	 t_rec->cons.paths.astream
+																	,t_rec->reports[k].instances[j].filename
+																)
+	endif
+	
 	set t_rec->reports[k].instances[j].params = replace(
 															 t_rec->reports[k].instances[j].params
 															,"FILENAME"
@@ -2828,7 +3257,7 @@ call writeLog(build2("**********************************************************
 call writeLog(build2("* START Executing Each Report Instance *********************"))
 for (k=1 to t_rec->cnt)
 	for (j=1 to t_rec->reports[k].instance_cnt)
-		;if (k=3) ;remove after testing, this will limit the extract to running just one report
+		;if (k in(6)) ;remove after testing, this will limit the extract to running just one report
 		set t_rec->reports[k].instances[j].ccl_command = build2(
 																	 "execute "
 																	,t_rec->reports[k].object
