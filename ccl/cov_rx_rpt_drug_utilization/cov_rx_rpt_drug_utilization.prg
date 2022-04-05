@@ -425,7 +425,7 @@ with OUTDEV, SEARCHTYPE, SEARCHSTRING, FACILITY, STARTDATE, STOPDATE, PYXIS
    AND (dh.charge_ind = 1 )
    AND (o.prn_ind = 1 ) )) )) )
    JOIN (eh
-   WHERE (eh.encntr_id = o.encntr_id ) )
+   WHERE (eh.encntr_id = o.encntr_id ) and (eh.encntr_type_cd = value(uar_get_code_by("MEANING",71,"INPATIENT"))))
   ORDER BY o.protocol_order_id ,
    dh.order_id ,
    pdh.item_id ,

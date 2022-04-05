@@ -110,6 +110,7 @@ record t_rec
 	 2 loc_nurse_unit_cd		= f8
 	 2 order_provider			= vc
 	 2 order_provider_id		= f8
+	 2 order_provider_position  = vc
 	 2 pathway_catalog_id		= f8
 	 2 pathway_id				= f8
 	 2 pathway_action_id		= f8
@@ -122,6 +123,7 @@ record t_rec
  	 2 faciliy				= vc
  	 2 provider_id			= f8
  	 2 provider_specialty	= vc
+ 	 2 provider_position	= vc
  	 2 patient_type			= vc
  	 2 order_count			= i4
  	 2 communication_type	= vc
@@ -294,6 +296,7 @@ head o.order_id
 	t_rec->qual[t_rec->cnt].order_id					= o.order_id
 	t_rec->qual[t_rec->cnt].order_mnemonic				= o.order_mnemonic
 	t_rec->qual[t_rec->cnt].order_provider				= p2.name_full_formatted
+	t_rec->qual[t_rec->cnt].order_provider_position		= uar_get_code_display(p2.position_cd)
 	t_rec->qual[t_rec->cnt].order_provider_id			= oa.order_provider_id
 	t_rec->qual[t_rec->cnt].order_status_cd				= o.order_status_cd
 	t_rec->qual[t_rec->cnt].orig_order_dt_tm			= o.orig_order_dt_tm
@@ -380,6 +383,7 @@ select into "nl:"
 	,patient_type 		= substring(1,40,uar_get_code_display(t_rec->qual[d1.seq].encntr_type_cd))
 	,facility			= substring(1,40,uar_get_code_display(t_rec->qual[d1.seq].loc_facility_cd))
 	,provider			= substring(1,100,t_rec->qual[d1.seq].order_provider)
+	,provider_position	= substring(1,100,t_rec->qual[d1.seq].order_provider_position)
 	,order_provider_id	= t_rec->qual[d1.seq].order_provider_id
 	,order_id			= t_rec->qual[d1.seq].order_id
 from
@@ -412,6 +416,7 @@ head provider
 	t_rec->by_provider_qual[t_rec->by_provider_cnt].communication_type	= communication_type
 	t_rec->by_provider_qual[t_rec->by_provider_cnt].provider_name		= provider
 	t_rec->by_provider_qual[t_rec->by_provider_cnt].provider_id			= order_provider_id
+	t_rec->by_provider_qual[t_rec->by_provider_cnt].provider_position	= provider_position
 head order_id
 	stat = 0
 	t_rec->by_provider_qual[t_rec->by_provider_cnt].order_count = (t_rec->by_provider_qual[t_rec->by_provider_cnt].order_count + 1)
@@ -547,6 +552,7 @@ if (datetimediff(cnvtdatetime(t_rec->dates.end_dt_tm),cnvtdatetime(t_rec->dates.
 	,reg_dt_tm					= substring(1,20,format(t_rec->qual[d1.seq].reg_dt_tm,"dd-mmm-yyyy hh:mm:ss;;q"))
 	,disch_dt_tm				= substring(1,20,format(t_rec->qual[d1.seq].disch_dt_tm,"dd-mmm-yyyy hh:mm:ss;;q"))
 	,order_provider				= substring(1,100,t_rec->qual[d1.seq].order_provider)	
+	,position					= substring(1,100,t_rec->qual[d1.seq].order_provider_position)	
 	,order_mnemonic				= substring(1,100,t_rec->qual[d1.seq].order_mnemonic)	
 	,order_status_cd			= substring(1,100,uar_get_code_display(t_rec->qual[d1.seq].order_status_cd))
 	,orig_order_dt_tm			= substring(1,20,format(t_rec->qual[d1.seq].orig_order_dt_tm,"dd-mmm-yyyy hh:mm:ss;;q"))
@@ -627,6 +633,7 @@ if ((program_log->run_from_ops = 1) or ((program_log->run_from_ops = 0) and (t_r
 		,patient_type		= substring(1,20,t_rec->by_provider_qual[d1.seq].patient_type)
 		,facility			= substring(1,20,t_rec->by_provider_qual[d1.seq].faciliy)
 		,provider			= substring(1,100,t_rec->by_provider_qual[d1.seq].provider_name)
+		,provider_position	= substring(1,100,t_rec->by_provider_qual[d1.seq].provider_position)
 		,provider_specialty	= substring(1,40,t_rec->by_provider_qual[d1.seq].provider_specialty)
 		,order_provider_id	= t_rec->by_provider_qual[d1.seq].provider_id
 		,order_count		= t_rec->by_provider_qual[d1.seq].order_count

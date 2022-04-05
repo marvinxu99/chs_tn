@@ -10,6 +10,7 @@
 ### 12505 - MedReb8 Sample Data and Proof of Concept
 2022-03-23: Initial Script Creation
 2022-03-24: Development
+2022-04-05: Updated to only pull Inpatients
 
 ### 11831 - Rule to cancel CBC w/ automated diff when activated with CD4/CD8 lab order
 2022-03-30: Added GL_CANCEL_CBC_CD4 to EKS
