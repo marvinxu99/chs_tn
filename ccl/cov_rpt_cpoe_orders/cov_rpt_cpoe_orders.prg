@@ -123,6 +123,7 @@ record t_rec
  	 2 faciliy				= vc
  	 2 provider_id			= f8
  	 2 provider_specialty	= vc
+ 	 2 provider_position	= vc
  	 2 patient_type			= vc
  	 2 order_count			= i4
  	 2 communication_type	= vc
@@ -382,6 +383,7 @@ select into "nl:"
 	,patient_type 		= substring(1,40,uar_get_code_display(t_rec->qual[d1.seq].encntr_type_cd))
 	,facility			= substring(1,40,uar_get_code_display(t_rec->qual[d1.seq].loc_facility_cd))
 	,provider			= substring(1,100,t_rec->qual[d1.seq].order_provider)
+	,provider_position	= substring(1,100,t_rec->qual[d1.seq].order_provider_position)
 	,order_provider_id	= t_rec->qual[d1.seq].order_provider_id
 	,order_id			= t_rec->qual[d1.seq].order_id
 from
@@ -414,6 +416,7 @@ head provider
 	t_rec->by_provider_qual[t_rec->by_provider_cnt].communication_type	= communication_type
 	t_rec->by_provider_qual[t_rec->by_provider_cnt].provider_name		= provider
 	t_rec->by_provider_qual[t_rec->by_provider_cnt].provider_id			= order_provider_id
+	t_rec->by_provider_qual[t_rec->by_provider_cnt].provider_position	= provider_position
 head order_id
 	stat = 0
 	t_rec->by_provider_qual[t_rec->by_provider_cnt].order_count = (t_rec->by_provider_qual[t_rec->by_provider_cnt].order_count + 1)
@@ -630,6 +633,7 @@ if ((program_log->run_from_ops = 1) or ((program_log->run_from_ops = 0) and (t_r
 		,patient_type		= substring(1,20,t_rec->by_provider_qual[d1.seq].patient_type)
 		,facility			= substring(1,20,t_rec->by_provider_qual[d1.seq].faciliy)
 		,provider			= substring(1,100,t_rec->by_provider_qual[d1.seq].provider_name)
+		,provider_position	= substring(1,100,t_rec->by_provider_qual[d1.seq].provider_position)
 		,provider_specialty	= substring(1,40,t_rec->by_provider_qual[d1.seq].provider_specialty)
 		,order_provider_id	= t_rec->by_provider_qual[d1.seq].provider_id
 		,order_count		= t_rec->by_provider_qual[d1.seq].order_count
