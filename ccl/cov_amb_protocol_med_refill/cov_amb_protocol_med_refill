@@ -16,6 +16,13 @@
  
  	Special Notes:		Called by ccl program(s).
  					    use cov_st_ccl_template.tst test
+						1) Find new CKI
+							a. Select * from clinical_note_template go
+							b. CKI.NOTETEMPLATE!Protocol-MedicationRefill(LPN&RNOnly)
+						2) Updated CODE_VALUE table with new CKI
+							a. update into code_value Set CKI = "CKI.NOTETEMPLATE!Protocol-MedicationRefill(LPN&RNOnly)"
+								Where code_value = 3161599639 and code_set = 16529
+
  
 ******************************************************************************
   GENERATED MODIFICATION CONTROL LOG
