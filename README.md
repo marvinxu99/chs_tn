@@ -19,3 +19,6 @@
 ### 12206 - Add Action script to Discern Dev for Add Reminder
 2022-04-01: Initial Messaging Script
 2022-04-04: Production Release Created
+
+### 6965 - Break/Fix: Update WH_RHOD_IG_INPT_ADM_1 to resolve issue with Mother/Baby Link
+2022-04-06: Production release (WH_RHOD_IG_INPT_OPEN_1)
