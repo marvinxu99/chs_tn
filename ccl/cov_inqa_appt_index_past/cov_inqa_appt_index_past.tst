@@ -35,7 +35,7 @@ from
 	encntr_alias ea
 	,encounter e
 plan ea
-	where ea.alias = "2105602557"
+	where ea.alias = "2120701272"
 	and   ea.active_ind = 1
 join e
 	where e.encntr_id = ea.encntr_id
@@ -46,4 +46,4 @@ with nocounter go
 ;set stat = tdbexecute(600005,652000,651164,"REC",651164Request,"REC",651164Reply) go
 execute cov_inqa_appt_index_past with replace(REQUEST,651164REQUEST), replace(REPLY,651164REPLY) go
 
-;call echorecord(651164Reply) go
+call echorecord(651164Reply->QUERY_QUAL) go

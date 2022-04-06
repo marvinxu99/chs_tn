@@ -68,11 +68,7 @@ record t_rec
 (
 	1 cnt			= i4
 	1 encntr_id		= f8
-	1 insurance
-	 2 primary = vc
-	 2 secondary = vc
-	 2 tertiary = vc
-	 2 quaternary = vc
+	1 person_id		= f8
 ) with protect
  
  
@@ -81,7 +77,7 @@ call writeLog(build2("**********************************************************
  
  
 call writeLog(build2("************************************************************"))
-call writeLog(build2("* START Set Encounter ID ***********************************"))
+call writeLog(build2("* START Set Person/Encounter ID ****************************"))
  
 if (validate(request->visit[1].encntr_id))
 	set t_rec->encntr_id = request->visit[1].encntr_id
@@ -95,105 +91,171 @@ if (t_rec->encntr_id = 0.0)
 	set reply->status_data.subeventstatus.targetobjectvalue = "Encoutner ID not found or set in request"
 	go to exit_script
 endif
- 
-call writeLog(build2("* END   Set Encounter ID ***********************************"))
-call writeLog(build2("************************************************************"))
- 
-call writeLog(build2("************************************************************"))
-call writeLog(build2("* START Getting Insurance   ********************************"))
- 
-set stat = cnvtjsontorec(sGetInsuranceByEncntrID(t_rec->encntr_id))
- 
-if (stat = TRUE)
-	call echorecord(insurance_list)
-	
-	set t_rec->insurance.primary 		= concat(
-													 insurance_list->insurance.primary.plan_name
-													,rtf_definitions->st.rtab
-													," Group#: ",trim(insurance_list->insurance.primary.group_nbr)
-													,rtf_definitions->st.rtab
-													," Member#: ",trim(insurance_list->insurance.primary.member_nbr)
-												)
-	set t_rec->insurance.secondary 		= concat(
-													 insurance_list->insurance.secondary.plan_name 
-													 ,rtf_definitions->st.rtab
-													 ," Group#: ",trim(insurance_list->secondary.group_nbr)
-													 ,rtf_definitions->st.rtab
-													 ," Member#: ",trim(insurance_list->secondary.member_nbr)
-												)
-	set t_rec->insurance.tertiary	 	= concat(
-													 insurance_list->insurance.tertiary.plan_name 
-													 ,rtf_definitions->st.rtab
-													 ," Group#: ",trim(insurance_list->insurance.tertiary.group_nbr)
-													 ,rtf_definitions->st.rtab
-													 ," Member#: ",trim(insurance_list->insurance.tertiary.member_nbr)
-												) 
-	set t_rec->insurance.quaternary 	= concat(
-													 insurance_list->insurance.quaternary.plan_name 
-													 ,rtf_definitions->st.rtab
-													 ," Group#: ",trim(insurance_list->insurance.quaternary.group_nbr)
-													 ,rtf_definitions->st.rtab
-													 ," Member#: ",trim(insurance_list->insurance.quaternary.member_nbr)
-												) 
-	
-else
+
+set t_rec->person_id = sGetPersonID_ByEncntrID(t_rec->encntr_id)
+
+if (t_rec->person_id = 0.0)
 	set reply->status_data.status = "F"
-	set reply->status_data.subeventstatus.operationname = "INSURANCE_LIST"
+	set reply->status_data.subeventstatus.operationname = "PERSON_ID"
 	set reply->status_data.subeventstatus.operationstatus = "F"
-	set reply->status_data.subeventstatus.targetobjectname = "INSURANCE_LIST"
-	set reply->status_data.subeventstatus.targetobjectvalue = "Standard Insurance List routine failed"
+	set reply->status_data.subeventstatus.targetobjectname = "PERSON_ID"
+	set reply->status_data.subeventstatus.targetobjectvalue = "Person ID not found"
 	go to exit_script
 endif
- 
-call writeLog(build2("* END   Getting Insurance   ********************************"))
-call writeLog(build2("************************************************************"))
- 
- 
-call writeLog(build2("************************************************************"))
-call writeLog(build2("* START Building Reply  ************************************"))
- 
+
+
 set reply->text =  build2(reply->text,rtf_definitions->st.rhead)
 set reply->text =  build2(reply->text,rtf_definitions->st.wr)
 
-call echorecord(rtf_definitions)
+ 
+call writeLog(build2("* END   Set Person/Encounter ID ****************************"))
+call writeLog(build2("************************************************************"))
+ 
+call writeLog(build2("************************************************************"))
+call writeLog(build2("* START Past Appointments   ********************************"))
+ 
+set reply->text =  build2(reply->text," 1) Last Visit with provider:")
+set reply->text =  build2(reply->text,rtf_definitions->st.reol)
+set reply->text =  build2(reply->text,rtf_definitions->st.reol)
 
-if (t_rec->insurance.primary > "")
-	set reply->text =  build2(	 reply->text
-								,"Primary:"
-								,rtf_definitions->st.rtab
-								,t_rec->insurance.primary
-								,rtf_definitions->st.reol
-							)
-endif
 
-if (t_rec->insurance.secondary > "")
-	set reply->text =  build2(	 reply->text
-								," Secondary:"
-								,rtf_definitions->st.rtab
-								,t_rec->insurance.secondary
-								,rtf_definitions->st.reol
-							  )
-endif
+set stat = cnvtjsontorec(sGetAppts_ByPersonID(t_rec->person_id,0,"PAST"))
 
-if (t_rec->insurance.tertiary > "")
-	set reply->text =  build2(	 reply->text
-								," Tertiary:"
-								,rtf_definitions->st.rtab
-								,t_rec->insurance.tertiary
-								,rtf_definitions->st.reol
-							  )
+if (stat = TRUE)
+	for (i=1 to appointment_list->cnt)
+		call writeLog(build2("appointment_list_i=",i))
+		call writeLog(build2("appointment_list->qual[i].scheventid=",appointment_list->qual[i].scheventid))
+		set reply->text =  build2(reply->text," \trowd\cellx2000\cellx4000\cellx6000\cellx10000\cellx12000 ")
+		set reply->text =  build2(reply->text,"\intbl ",format(appointment_list->qual[i].beg_dt_tm,"MM/DD/YYYY - HH:MM;;q"),"\cell")
+		set reply->text =  build2(reply->text,"\intbl ",appointment_list->qual[i].state,"\cell")
+		set reply->text =  build2(reply->text,"\intbl ",appointment_list->qual[i].appt_type,"\cell")
+		set reply->text =  build2(reply->text,"\intbl ",appointment_list->qual[i].prime_res,"\cell")
+		set reply->text =  build2(reply->text,"\intbl ",appointment_list->qual[i].location,"\cell")
+		set reply->text =  build2(reply->text," \row ")
+	endfor
+	set reply->text =  build2(reply->text," \pard ")
+	set reply->status_data.status = "S"
+else
+	set reply->status_data.status = "F"
+	set reply->status_data.subeventstatus.operationname = "PAST_APPT"
+	set reply->status_data.subeventstatus.operationstatus = "F"
+	set reply->status_data.subeventstatus.targetobjectname = "PAST_APPT"
+	set reply->status_data.subeventstatus.targetobjectvalue = "Past appointments failed"
+	go to exit_script
 endif
+ 
+call writeLog(build2("* END   Past Appointments   ********************************"))
+call writeLog(build2("************************************************************"))
+ 
+call writeLog(build2("************************************************************"))
+call writeLog(build2("* START Future Appointments   ******************************"))
 
-if (t_rec->insurance.quaternary > "")
-	set reply->text =  build2(	 reply->text
-								," Quaternary:"
-								,rtf_definitions->st.rtab
-								,t_rec->insurance.quaternary
-								,rtf_definitions->st.reol
-							 )
+set reply->text =  build2(reply->text,rtf_definitions->st.reol)	
+set reply->text =  build2(reply->text,rtf_definitions->st.reol)	
+set reply->text =  build2(reply->text," 2) Next scheduled visit with provider: ")
+set reply->text =  build2(reply->text,rtf_definitions->st.reol)
+set reply->text =  build2(reply->text,rtf_definitions->st.reol)
+
+set stat = cnvtjsontorec(sGetAppts_ByPersonID(t_rec->person_id,0,"FUTURE"))
+call echorecord(appointment_list)
+call writeLog(build2("stat=",stat))
+
+if (stat = TRUE)
+	for (i=1 to appointment_list->cnt)
+		call writeLog(build2("appointment_list_i=",i))
+		call writeLog(build2("appointment_list->qual[i].scheventid=",appointment_list->qual[i].scheventid))
+		set reply->text =  build2(reply->text," \trowd\cellx2000\cellx4000\cellx6000\cellx10000\cellx12000 ")
+		set reply->text =  build2(reply->text,"\intbl ",format(appointment_list->qual[i].beg_dt_tm,"MM/DD/YYYY - HH:MM;;q"),"\cell")
+		set reply->text =  build2(reply->text,"\intbl ",appointment_list->qual[i].state,"\cell")
+		set reply->text =  build2(reply->text,"\intbl ",appointment_list->qual[i].appt_type,"\cell")
+		set reply->text =  build2(reply->text,"\intbl ",appointment_list->qual[i].prime_res,"\cell")
+		set reply->text =  build2(reply->text,"\intbl ",appointment_list->qual[i].location,"\cell")
+		set reply->text =  build2(reply->text," \row ")
+	endfor
+	set reply->text =  build2(reply->text," \pard ")
+	set reply->status_data.status = "S"
+else
+	set reply->status_data.status = "F"
+	set reply->status_data.subeventstatus.operationname = "FUTURE_APPT"
+	set reply->status_data.subeventstatus.operationstatus = "F"
+	set reply->status_data.subeventstatus.targetobjectname = "FUTURE_APPT"
+	set reply->status_data.subeventstatus.targetobjectvalue = "Past appointments failed"
+	go to exit_script
 endif
+ 
+call writeLog(build2("* END   Future Appointments   ******************************"))
+call writeLog(build2("************************************************************"))
+ 
+  
+call writeLog(build2("************************************************************"))
+call writeLog(build2("* START Building Reply  ************************************"))
+
+set reply->text =  build2(reply->text,rtf_definitions->st.reol)	
+set reply->text =  build2(reply->text,rtf_definitions->st.reol)	
+
+set reply->text =  build2(reply->text," If no visit is scheduled for the future - ",
+										"schedule an appointment or a preventive/wellness visit if due.")
+set reply->text =  build2(reply->text,rtf_definitions->st.reol)
+set reply->text =  build2(reply->text,rtf_definitions->st.reol)	
+
+									
+set reply->text =  build2(reply->text," If patient missed appointment since last refill or refuses to make a future appt - ",
+									  " Notify the provider.")
+									  
+set reply->text =  build2(reply->text,rtf_definitions->st.reol)
+set reply->text =  build2(reply->text,rtf_definitions->st.reol)
+set reply->text =  build2(reply->text,rtf_definitions->st.reol)
+
+set reply->text =  build2(reply->text," DO NOT Refill.")
+
+set reply->text =  build2(reply->text,rtf_definitions->st.reol)
+set reply->text =  build2(reply->text,rtf_definitions->st.reol)
+set reply->text =  build2(reply->text,rtf_definitions->st.reol)
+
+set reply->text =  build2(reply->text,
+	" 4) Has the patient been on this medication at current dose for less than 3 months? (   ) Yes   (   ) No")
+set reply->text =  build2(reply->text,rtf_definitions->st.reol)
+set reply->text =  build2(reply->text," If No, consult with provider, Do Not Refill per protocol")
+
+
+set reply->text =  build2(reply->text,rtf_definitions->st.reol)
+set reply->text =  build2(reply->text,rtf_definitions->st.reol)
+set reply->text =  build2(reply->text,rtf_definitions->st.reol)
+
+set reply->text =  build2(reply->text,
+	" 5) Is the patient Symptomatic? (via labs or patient report)  (   ) Yes   (   ) No")
+set reply->text =  build2(reply->text,rtf_definitions->st.reol)
+set reply->text =  build2(reply->text,rtf_definitions->st.reol)
+set reply->text =  build2(reply->text," If YES, explain symptoms.")
+set reply->text =  build2(reply->text,rtf_definitions->st.reol)
+set reply->text =  build2(reply->text,rtf_definitions->st.reol)
+set reply->text =  build2(reply->text," If No, consult with provider, Do Not Refill per protocol")
+
+
+set reply->text =  build2(reply->text,rtf_definitions->st.reol)
+set reply->text =  build2(reply->text,rtf_definitions->st.reol)
+set reply->text =  build2(reply->text,rtf_definitions->st.reol)
+
+set reply->text =  build2(reply->text,
+	" 6) Pertinent Labs or test required for renewal up to date per protocol?")
+set reply->text =  build2(reply->text,rtf_definitions->st.reol)
+set reply->text =  build2(reply->text,rtf_definitions->st.reol)
+set reply->text =  build2(reply->text," Order labs per protocol if needed in anticipation of office visit.")
+set reply->text =  build2(reply->text,rtf_definitions->st.reol)
+set reply->text =  build2(reply->text,rtf_definitions->st.reol)
+set reply->text =  build2(reply->text," Refill if normal, notify provider if abnormal.")
+
+
+
+set reply->text =  build2(reply->text,
+	" 7) Prescription Renewed? (   ) Yes   (   ) No")
+set reply->text =  build2(reply->text,rtf_definitions->st.reol)
+set reply->text =  build2(reply->text,rtf_definitions->st.reol)
+set reply->text =  build2(reply->text," If NO, document reason:")
+
 set reply->text =  build2(reply->text,rtf_definitions->st.rtfeof)
 
+call writeLog(build2("*->reply->text=",reply->text))
 call echorecord(reply)
 
  

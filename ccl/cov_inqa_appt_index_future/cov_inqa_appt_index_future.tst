@@ -25,10 +25,24 @@ set 651164Request->query_type_cd = 4054262 go
 set 651164Request->query_meaning = "APPTINDEXFUT" go
 set 651164Request->sch_query_id = 614426 go
 set stat = alterlist(651164Request->qual,1) go
-set 651164Request->qual[1].oe_field_value =  14805768 go
+
 set 651164Request->qual[1].oe_field_meaning = "PERSON" go
+
+select into "nl:"
+	e.person_id
+from
+	encntr_alias ea
+	,encounter e
+plan ea
+	where ea.alias = "2302913670"
+	and   ea.active_ind = 1
+join e
+	where e.encntr_id = ea.encntr_id
+detail
+	651164Request->qual[1].oe_field_value =  e.person_id
+with nocounter go
 
 ;set stat = tdbexecute(600005,652000,651164,"REC",651164Request,"REC",651164Reply) go
 execute cov_inqa_appt_index_future with replace(REQUEST,651164REQUEST), replace(REPLY,651164REPLY) go
 
-call echorecord(651164Reply) go
+call echorecord(651164Reply->QUERY_QUAL) go
