@@ -69,6 +69,7 @@ record t_rec
 	1 cnt			= i4
 	1 encntr_id		= f8
 	1 person_id		= f8
+	1 facility      = vc
 ) with protect
  
  
@@ -103,6 +104,7 @@ if (t_rec->person_id = 0.0)
 	go to exit_script
 endif
 
+set t_rec->facility = sGetFacility_ByEncntrID(t_rec->encntr_id)
 
 set reply->text =  build2(reply->text,rtf_definitions->st.rhead)
 set reply->text =  build2(reply->text,rtf_definitions->st.wr)
@@ -123,6 +125,7 @@ set stat = cnvtjsontorec(sGetAppts_ByPersonID(t_rec->person_id,0,"PAST"))
 
 if (stat = TRUE)
 	for (i=1 to appointment_list->cnt)
+	 if (appointment_list->qual[i].location = t_rec->facility)
 		call writeLog(build2("appointment_list_i=",i))
 		call writeLog(build2("appointment_list->qual[i].scheventid=",appointment_list->qual[i].scheventid))
 		set reply->text =  build2(reply->text," \trowd\cellx2000\cellx4000\cellx6000\cellx10000\cellx12000 ")
@@ -132,6 +135,7 @@ if (stat = TRUE)
 		set reply->text =  build2(reply->text,"\intbl ",appointment_list->qual[i].prime_res,"\cell")
 		set reply->text =  build2(reply->text,"\intbl ",appointment_list->qual[i].location,"\cell")
 		set reply->text =  build2(reply->text," \row ")
+	 endif
 	endfor
 	set reply->text =  build2(reply->text," \pard ")
 	set reply->status_data.status = "S"
@@ -162,6 +166,7 @@ call writeLog(build2("stat=",stat))
 
 if (stat = TRUE)
 	for (i=1 to appointment_list->cnt)
+	  if (appointment_list->qual[i].location = t_rec->facility)
 		call writeLog(build2("appointment_list_i=",i))
 		call writeLog(build2("appointment_list->qual[i].scheventid=",appointment_list->qual[i].scheventid))
 		set reply->text =  build2(reply->text," \trowd\cellx2000\cellx4000\cellx6000\cellx10000\cellx12000 ")
@@ -171,6 +176,7 @@ if (stat = TRUE)
 		set reply->text =  build2(reply->text,"\intbl ",appointment_list->qual[i].prime_res,"\cell")
 		set reply->text =  build2(reply->text,"\intbl ",appointment_list->qual[i].location,"\cell")
 		set reply->text =  build2(reply->text," \row ")
+	 endif
 	endfor
 	set reply->text =  build2(reply->text," \pard ")
 	set reply->status_data.status = "S"

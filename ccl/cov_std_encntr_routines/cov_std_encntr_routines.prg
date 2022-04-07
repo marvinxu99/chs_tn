@@ -171,6 +171,37 @@ subroutine sGetPersonID_ByEncntrID(vEncntrID)
 
 end
 
+/**********************************************************************************************************************
+** Function sGetFacility_ByEncntrID(encntr_id,[DISPLAY,DESCRIPTION])
+** ---------------------------------------------------------------------------------------
+** Returns the Facility [display] or description based on the provided encntr_id
+**********************************************************************************************************************/
+declare sGetFacility_ByEncntrID(vEncntrID=f8,vType=vc(VALUE,"DISPLAY")) = vc  with copy, persist
+subroutine sGetFacility_ByEncntrID(vEncntrID,vType)
+
+	declare vReturnFacility = vc with protect
+	
+	select into "nl:"
+	from
+		encounter e
+	plan e
+		where e.encntr_id = vEncntrID
+	order by
+		 e.encntr_id
+	head report
+		i = 0
+	head e.encntr_id
+		if (cnvtupper(vType) = "DESCRIPTION")
+			vReturnFacility = uar_get_code_description(e.loc_facility_cd)
+		else
+			vReturnFacility = uar_get_code_display(e.loc_facility_cd)
+		endif
+	with nocounter
+	
+	return (vReturnFacility)
+
+end
+
 
 /**********************************************************************************************************************
 ** Function sGetAppts_ByPersonID()
