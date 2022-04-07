@@ -121,7 +121,7 @@ set reply->text =  build2(reply->text,rtf_definitions->st.reol)
 set reply->text =  build2(reply->text,rtf_definitions->st.reol)
 
 
-set stat = cnvtjsontorec(sGetAppts_ByPersonID(t_rec->person_id,0,"PAST"))
+set stat = cnvtjsontorec(sGetAppts_ByPersonID(t_rec->person_id,365,"PAST"))
 
 if (stat = TRUE)
 	for (i=1 to appointment_list->cnt)
@@ -160,7 +160,7 @@ set reply->text =  build2(reply->text," 2) Next scheduled visit with provider: "
 set reply->text =  build2(reply->text,rtf_definitions->st.reol)
 set reply->text =  build2(reply->text,rtf_definitions->st.reol)
 
-set stat = cnvtjsontorec(sGetAppts_ByPersonID(t_rec->person_id,0,"FUTURE"))
+set stat = cnvtjsontorec(sGetAppts_ByPersonID(t_rec->person_id,365,"FUTURE"))
 call echorecord(appointment_list)
 call writeLog(build2("stat=",stat))
 
