@@ -208,12 +208,13 @@ end
 ** ---------------------------------------------------------------------------------------
 ** Returns a list of past or [future] appointments by the PersonID 
 **********************************************************************************************************************/
-declare sGetAppts_ByPersonID(vPersonID=f8,vDays=i2(VALUE,360),vPastFuture=vc(VALUE,"FUTURE")) = vc  with copy, persist
+declare sGetAppts_ByPersonID(vPersonID=f8,vDays=i2(VALUE,365),vPastFuture=vc(VALUE,"FUTURE")) = vc  with copy, persist
 subroutine sGetAppts_ByPersonID(vPersonID,vDays,vPastFuture)
 
 	call SubroutineLog(build2('start sGetPastAppts_ByPersonID(',vPersonID,',',vDays,',',vPastFuture,')'))
 	
 	declare vReturnAppts = vc with protect
+	declare appt_pass = i2 with protect
 	
 	free record 651164Reply
 	free record 651164Request 
@@ -286,26 +287,35 @@ subroutine sGetAppts_ByPersonID(vPersonID,vDays,vPastFuture)
 	
 	for (j=1 to 651164Reply->query_qual_cnt)
 		set appointment_list->person_id = vPersonID
+		set appt_pass = 0
+		if (vDays > 0)
+			if (abs(datetimediff(cnvtdatetime(sysdate),651164reply->query_qual[j].beg_dt_tm,1)) < vDays)
+		   		set appt_pass = 1
+		 	endif
+		else
+		  	set appt_pass = 1
+		endif
 		
-		set appointment_list->cnt = (appointment_list->cnt + 1)
-		set stat = alterlist(appointment_list->qual,appointment_list->cnt)
-		set appointment_list->qual[appointment_list->cnt].scheventid   		= 651164reply->query_qual[j].hide#scheventid
-		set appointment_list->qual[appointment_list->cnt].scheduleid  		= 651164reply->query_qual[j].hide#scheduleid
-		set appointment_list->qual[appointment_list->cnt].scheduleseq 	 	= 651164reply->query_qual[j].hide#scheduleseq
-		set appointment_list->qual[appointment_list->cnt].schapptid 		= 651164reply->query_qual[j].hide#schapptid
-		set appointment_list->qual[appointment_list->cnt].statemeaning 		= 651164reply->query_qual[j].hide#statemeaning
-		set appointment_list->qual[appointment_list->cnt].encounterid  		= 651164reply->query_qual[j].hide#encounterid
-		set appointment_list->qual[appointment_list->cnt].personid 			= 651164reply->query_qual[j].hide#personid 
-		set appointment_list->qual[appointment_list->cnt].bitmask  			= 651164reply->query_qual[j].hide#bitmask
-		set appointment_list->qual[appointment_list->cnt].schappttypecd  	= 651164reply->query_qual[j].hide#schappttypecd
-		set appointment_list->qual[appointment_list->cnt].beg_dt_tm  		= 651164reply->query_qual[j].beg_dt_tm
-		set appointment_list->qual[appointment_list->cnt].duration 			= 651164reply->query_qual[j].duration
-		set appointment_list->qual[appointment_list->cnt].state    			= 651164reply->query_qual[j].state
-		set appointment_list->qual[appointment_list->cnt].appt_type 		= 651164reply->query_qual[j].appt_type
-		set appointment_list->qual[appointment_list->cnt].appt_reason 		= 651164reply->query_qual[j].appt_reason
-		set appointment_list->qual[appointment_list->cnt].prime_res 		= 651164reply->query_qual[j].prime_res
-		set appointment_list->qual[appointment_list->cnt].location 			= 651164reply->query_qual[j].location
-			
+		if (appt_pass = 1)
+			set appointment_list->cnt = (appointment_list->cnt + 1)
+			set stat = alterlist(appointment_list->qual,appointment_list->cnt)
+			set appointment_list->qual[appointment_list->cnt].scheventid   		= 651164reply->query_qual[j].hide#scheventid
+			set appointment_list->qual[appointment_list->cnt].scheduleid  		= 651164reply->query_qual[j].hide#scheduleid
+			set appointment_list->qual[appointment_list->cnt].scheduleseq 	 	= 651164reply->query_qual[j].hide#scheduleseq
+			set appointment_list->qual[appointment_list->cnt].schapptid 		= 651164reply->query_qual[j].hide#schapptid
+			set appointment_list->qual[appointment_list->cnt].statemeaning 		= 651164reply->query_qual[j].hide#statemeaning
+			set appointment_list->qual[appointment_list->cnt].encounterid  		= 651164reply->query_qual[j].hide#encounterid
+			set appointment_list->qual[appointment_list->cnt].personid 			= 651164reply->query_qual[j].hide#personid 
+			set appointment_list->qual[appointment_list->cnt].bitmask  			= 651164reply->query_qual[j].hide#bitmask
+			set appointment_list->qual[appointment_list->cnt].schappttypecd  	= 651164reply->query_qual[j].hide#schappttypecd
+			set appointment_list->qual[appointment_list->cnt].beg_dt_tm  		= 651164reply->query_qual[j].beg_dt_tm
+			set appointment_list->qual[appointment_list->cnt].duration 			= 651164reply->query_qual[j].duration
+			set appointment_list->qual[appointment_list->cnt].state    			= 651164reply->query_qual[j].state
+			set appointment_list->qual[appointment_list->cnt].appt_type 		= 651164reply->query_qual[j].appt_type
+			set appointment_list->qual[appointment_list->cnt].appt_reason 		= 651164reply->query_qual[j].appt_reason
+			set appointment_list->qual[appointment_list->cnt].prime_res 		= 651164reply->query_qual[j].prime_res
+			set appointment_list->qual[appointment_list->cnt].location 			= 651164reply->query_qual[j].location
+		endif	
 	endfor
 	
 	set vReturnAppts = cnvtrectojson(appointment_list)
