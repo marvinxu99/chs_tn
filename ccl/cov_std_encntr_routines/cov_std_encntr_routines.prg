@@ -204,6 +204,38 @@ end
 
 
 /**********************************************************************************************************************
+** Function sGetUnit_ByEncntrID(encntr_id,[DISPLAY,DESCRIPTION])
+** ---------------------------------------------------------------------------------------
+** Returns the Unit [display] or description based on the provided encntr_id
+**********************************************************************************************************************/
+declare sGetUnit_ByEncntrID(vEncntrID=f8,vType=vc(VALUE,"DISPLAY")) = vc  with copy, persist
+subroutine sGetUnit_ByEncntrID(vEncntrID,vType)
+
+	declare vReturnUnit = vc with protect
+	
+	select into "nl:"
+	from
+		encounter e
+	plan e
+		where e.encntr_id = vEncntrID
+	order by
+		 e.encntr_id
+	head report
+		i = 0
+	head e.encntr_id
+		if (cnvtupper(vType) = "DESCRIPTION")
+			vReturnUnit = uar_get_code_description(e.loc_nurse_unit_cd)
+		else
+			vReturnUnit = uar_get_code_display(e.loc_nurse_unit_cd)
+		endif
+	with nocounter
+	
+	return (vReturnUnit)
+
+end
+
+
+/**********************************************************************************************************************
 ** Function sGetAppts_ByPersonID()
 ** ---------------------------------------------------------------------------------------
 ** Returns a list of past or [future] appointments by the PersonID 
@@ -260,63 +292,67 @@ subroutine sGetAppts_ByPersonID(vPersonID,vDays,vPastFuture)
 			2 location = vc
 	)
 	
-	set 651164Request->call_echo_ind = 1 
-	set 651164Request->advanced_ind = 1
 	
-	if (cnvtupper(vPastFuture) = "PAST")
-		set 651164Request->query_meaning = "APPTINDEXPAS" 
-		set 651164Request->program_name = "cov_inqa_appt_index_past" 
-		set 651164Request->sch_query_id = 614425
-	else
-		set 651164Request->query_meaning = "APPTINDEXFUT" 
-		set 651164Request->program_name = "cov_inqa_appt_index_future" 
-		set 651164Request->sch_query_id = 614426
-	endif
+	if (vPersonID > 0.0)
 	
-	set 651164Request->query_type_cd = uar_get_code_by("MEANING",14349,651164Request->query_meaning) 
-	 
-	set stat = alterlist(651164Request->qual,1) 
-	set 651164Request->qual[1].oe_field_value =  vPersonID 
-	set 651164Request->qual[1].oe_field_meaning = "PERSON" 
-	
-	call SubroutineLog("651164Request","record")	
-	
-	set stat = tdbexecute(600005,652000,651164,"REC",651164Request,"REC",651164Reply) 
-	
-	call SubroutineLog("651164Reply","record")	
-	
-	for (j=1 to 651164Reply->query_qual_cnt)
-		set appointment_list->person_id = vPersonID
-		set appt_pass = 0
-		if (vDays > 0)
-			if (abs(datetimediff(cnvtdatetime(sysdate),651164reply->query_qual[j].beg_dt_tm,1)) < vDays)
-		   		set appt_pass = 1
-		 	endif
+		set 651164Request->call_echo_ind = 1 
+		set 651164Request->advanced_ind = 1
+		
+		if (cnvtupper(vPastFuture) = "PAST")
+			set 651164Request->query_meaning = "APPTINDEXPAS" 
+			set 651164Request->program_name = "cov_inqa_appt_index_past" 
+			set 651164Request->sch_query_id = 614425
 		else
-		  	set appt_pass = 1
+			set 651164Request->query_meaning = "APPTINDEXFUT" 
+			set 651164Request->program_name = "cov_inqa_appt_index_future" 
+			set 651164Request->sch_query_id = 614426
 		endif
 		
-		if (appt_pass = 1)
-			set appointment_list->cnt = (appointment_list->cnt + 1)
-			set stat = alterlist(appointment_list->qual,appointment_list->cnt)
-			set appointment_list->qual[appointment_list->cnt].scheventid   		= 651164reply->query_qual[j].hide#scheventid
-			set appointment_list->qual[appointment_list->cnt].scheduleid  		= 651164reply->query_qual[j].hide#scheduleid
-			set appointment_list->qual[appointment_list->cnt].scheduleseq 	 	= 651164reply->query_qual[j].hide#scheduleseq
-			set appointment_list->qual[appointment_list->cnt].schapptid 		= 651164reply->query_qual[j].hide#schapptid
-			set appointment_list->qual[appointment_list->cnt].statemeaning 		= 651164reply->query_qual[j].hide#statemeaning
-			set appointment_list->qual[appointment_list->cnt].encounterid  		= 651164reply->query_qual[j].hide#encounterid
-			set appointment_list->qual[appointment_list->cnt].personid 			= 651164reply->query_qual[j].hide#personid 
-			set appointment_list->qual[appointment_list->cnt].bitmask  			= 651164reply->query_qual[j].hide#bitmask
-			set appointment_list->qual[appointment_list->cnt].schappttypecd  	= 651164reply->query_qual[j].hide#schappttypecd
-			set appointment_list->qual[appointment_list->cnt].beg_dt_tm  		= 651164reply->query_qual[j].beg_dt_tm
-			set appointment_list->qual[appointment_list->cnt].duration 			= 651164reply->query_qual[j].duration
-			set appointment_list->qual[appointment_list->cnt].state    			= 651164reply->query_qual[j].state
-			set appointment_list->qual[appointment_list->cnt].appt_type 		= 651164reply->query_qual[j].appt_type
-			set appointment_list->qual[appointment_list->cnt].appt_reason 		= 651164reply->query_qual[j].appt_reason
-			set appointment_list->qual[appointment_list->cnt].prime_res 		= 651164reply->query_qual[j].prime_res
-			set appointment_list->qual[appointment_list->cnt].location 			= 651164reply->query_qual[j].location
-		endif	
-	endfor
+		set 651164Request->query_type_cd = uar_get_code_by("MEANING",14349,651164Request->query_meaning) 
+		 
+		set stat = alterlist(651164Request->qual,1) 
+		set 651164Request->qual[1].oe_field_value =  vPersonID 
+		set 651164Request->qual[1].oe_field_meaning = "PERSON" 
+		
+		call SubroutineLog("651164Request","record")	
+		
+		set stat = tdbexecute(600005,652000,651164,"REC",651164Request,"REC",651164Reply) 
+		
+		call SubroutineLog("651164Reply","record")	
+		
+		for (j=1 to 651164Reply->query_qual_cnt)
+			set appointment_list->person_id = vPersonID
+			set appt_pass = 0
+			if (vDays > 0)
+				if (abs(datetimediff(cnvtdatetime(sysdate),651164reply->query_qual[j].beg_dt_tm,1)) < vDays)
+			   		set appt_pass = 1
+			 	endif
+			else
+			  	set appt_pass = 1
+			endif
+			
+			if (appt_pass = 1)
+				set appointment_list->cnt = (appointment_list->cnt + 1)
+				set stat = alterlist(appointment_list->qual,appointment_list->cnt)
+				set appointment_list->qual[appointment_list->cnt].scheventid   		= 651164reply->query_qual[j].hide#scheventid
+				set appointment_list->qual[appointment_list->cnt].scheduleid  		= 651164reply->query_qual[j].hide#scheduleid
+				set appointment_list->qual[appointment_list->cnt].scheduleseq 	 	= 651164reply->query_qual[j].hide#scheduleseq
+				set appointment_list->qual[appointment_list->cnt].schapptid 		= 651164reply->query_qual[j].hide#schapptid
+				set appointment_list->qual[appointment_list->cnt].statemeaning 		= 651164reply->query_qual[j].hide#statemeaning
+				set appointment_list->qual[appointment_list->cnt].encounterid  		= 651164reply->query_qual[j].hide#encounterid
+				set appointment_list->qual[appointment_list->cnt].personid 			= 651164reply->query_qual[j].hide#personid 
+				set appointment_list->qual[appointment_list->cnt].bitmask  			= 651164reply->query_qual[j].hide#bitmask
+				set appointment_list->qual[appointment_list->cnt].schappttypecd  	= 651164reply->query_qual[j].hide#schappttypecd
+				set appointment_list->qual[appointment_list->cnt].beg_dt_tm  		= 651164reply->query_qual[j].beg_dt_tm
+				set appointment_list->qual[appointment_list->cnt].duration 			= 651164reply->query_qual[j].duration
+				set appointment_list->qual[appointment_list->cnt].state    			= 651164reply->query_qual[j].state
+				set appointment_list->qual[appointment_list->cnt].appt_type 		= 651164reply->query_qual[j].appt_type
+				set appointment_list->qual[appointment_list->cnt].appt_reason 		= 651164reply->query_qual[j].appt_reason
+				set appointment_list->qual[appointment_list->cnt].prime_res 		= 651164reply->query_qual[j].prime_res
+				set appointment_list->qual[appointment_list->cnt].location 			= 651164reply->query_qual[j].location
+			endif	
+		endfor
+	endif
 	
 	set vReturnAppts = cnvtrectojson(appointment_list)
 	
