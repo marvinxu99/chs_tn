@@ -97,6 +97,9 @@ declare HEPATITISBIMMUNEGLOBULIN_VAR	= f8 with constant(uar_get_code_by("DISPLAY
 declare GLUCOSE_VAR				= f8 with constant(uar_get_code_by("DISPLAYKEY",  72, "GLUCOSE")),protect
 declare NEWBORN_TYPE_VAR		= f8 with constant(uar_get_code_by("DISPLAYKEY",  71, "NEWBORN")),protect
 declare ORDERED_VAR				= f8 with constant(uar_get_code_by("DISPLAYKEY",6004, "ORDERED")),protect
+declare LIDOCAINEPRILOCAINETOPICAL_VAR	= f8 with constant(uar_get_code_by("DISPLAYKEY",  72, "LIDOCAINEPRILOCAINETOPICAL")),protect
+declare LIDOCAINE_VAR	= f8 with constant(uar_get_code_by("DISPLAYKEY",  72, "LIDOCAINE")),protect
+declare ACETAMINOPHEN_VAR = f8 with constant(uar_get_code_by("DISPLAYKEY",  72, "ACETAMINOPHEN")),protect
 ;--
 declare ACTIVE_VAR				= f8 with constant(uar_get_code_by("MEANING",8, "ACTIVE")),protect
 declare AUTHVERIFIED_VAR		= f8 with constant(uar_get_code_by("MEANING",8, "AUTH")),protect
@@ -138,6 +141,9 @@ from ENCOUNTER e
 		and ce.event_cd in (	ERYTHROMYCIN_VAR
 							, PHYTONADIONE_VAR
 							, HEPATITISBPEDIATRIC_VAR
+							,LIDOCAINEPRILOCAINETOPICAL_VAR
+							,LIDOCAINE_VAR
+							,ACETAMINOPHEN_VAR
 							, HEPATITISBIMMUNEGLOBULIN_VAR) ;2797711, 2798478, 19952796
 		and ce.result_status_cd in (ACTIVE_VAR, AUTHVERIFIED_VAR, MODIFIED_VAR, ALTERED_VAR, NOTDONE_VAR) ;23,25,34,35,36
 		and ce.valid_until_dt_tm > cnvtdatetime (curdate ,curtime3))
@@ -225,12 +231,12 @@ where e.encntr_id = request->visit[1].encntr_id
 	and e.encntr_type_cd = NEWBORN_TYPE_VAR
 	and e.active_ind = 1
  
-order by e.encntr_id, ce.event_id
+order by e.encntr_id, ce.event_end_dt_tm desc
  
 head report
 	cnt  = rec->rec_cnt
  
-detail
+e.encntr_id
 	cnt = cnt + 1
  
 	stat = alterlist(rec->list, cnt)
@@ -243,7 +249,7 @@ detail
 	rec->list[cnt].fin				= ea.alias
 	rec->list[cnt].reg_dt			= e.reg_dt_tm
 	rec->list[cnt].encntr_type		= uar_get_code_display(e.encntr_type_cd)
-	rec->list[cnt].ce_event			= uar_get_code_display(ce.event_cd)
+	rec->list[cnt].ce_event			= ocs.mnemonic ;uar_get_code_display(ce.event_cd)
 	rec->list[cnt].ce_event_tag		= ce.event_tag
 	rec->list[cnt].ce_result		= ce.result_val
 	rec->list[cnt].ce_result_status	= ce.result_status_cd
