@@ -223,7 +223,7 @@ set reply->text =  build2(reply->text,rtf_definitions->st.reol)
 set reply->text =  build2(reply->text,
 	" 4) Has the patient been on this medication at current dose for less than 3 months? (   ) Yes   (   ) No")
 set reply->text =  build2(reply->text,rtf_definitions->st.reol)
-set reply->text =  build2(reply->text," If No, consult with provider, Do Not Refill per protocol")
+set reply->text =  build2(reply->text," If Yes, consult with provider, Do Not Refill per protocol")
 
 
 set reply->text =  build2(reply->text,rtf_definitions->st.reol)
