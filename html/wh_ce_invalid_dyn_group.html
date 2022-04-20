@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Template EKS Notify Tempate</title>
+<meta name="discern" content="CCLLINK,CCLNEWWINDOW,CCLEVENT,MPAGES_EVENT,APPLINK,XMLCCLREQUEST">
+<meta http-equiv="x-ua-compatible" content="IE=edge" />
+ 
+<link rel="stylesheet" type="text/css" href="I:/Winintel/static_content/custom_mpage_content/eks/css/cov_standard_lib.css"></style>
+ 
+<script language="javascript">
+	var patientDataSplit = "@MESSAGE:[PATIENTDATA]";
+</script>
+ 
+<script type="text/javascript" src="I:/Winintel/static_content/custom_mpage_content/jquery/jquery-current.js"></script>
+<script type="text/javascript" src="I:/Winintel/static_content/custom_mpage_content/eks/js/cov_standard_lib.js"></script>
+ 
+<script language="javascript">
+ 
+ 
+	function closeNotify() {
+	      javascript:CCLEVENT("EVENT_NOTIFY_DELETE", "");
+	}
+ 
+ 
+</script>
+ 
+</head>
+<body onload='InitMain();'>
+<div id=patientBannerBar onload="BuildPatientBannerBar()"></div>
+ A Baby Dynamic Group has been added in iView on this patient instead of Adding a Pregnancy as the first step.
+ Please resolve by navigating to the proper workflow page to Add a Pregnancy.
+ <br><br>
+ <input type="button" value="Acknowledge and Remove Message" onclick="closeNotify();" />
+</body>
+</html>
+ 
+ 
