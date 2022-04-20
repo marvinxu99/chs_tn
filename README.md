@@ -29,3 +29,6 @@ Included CRs and Hotfixes
 
 ### 12538 COV_SO_FUTURE_LIMIT Rule to Limit Future Order Dates
 2022-04-18: Release
+
+### 9231 New Notifications to WH IT Team & End Users if Proper Add Pregnancy Workflow Not Followed2
+2022-04-20: Release of Notification
