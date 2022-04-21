@@ -370,10 +370,28 @@ from
 where
 	o.order_id = t_rec->orders.order_id
 detail
-	t_rec->cancel_reason_1	= cancel_reason
-	t_rec->cancel_reason_2	= cancel_reason2
-	t_rec->cancel_comment_1	= comment1
-	t_rec->cancel_comment_2	= comment2
+	call echo(build2("cancel_reason=",cancel_reason))
+	call echo(build2("cancel_reason2=",cancel_reason2))
+	
+	call echo(build2("comment1=",comment1))
+	call echo(build2("comment2=",comment2))
+	
+	if (cancel_reason > " ")
+		t_rec->cancel_reason_1	= cancel_reason
+	endif
+	
+	if (cancel_reason2 > " ")
+		t_rec->cancel_reason_2	= cancel_reason2
+	endif
+	
+	if (comment1 > " ")
+		t_rec->cancel_comment_1	= comment1
+	endif
+	
+	if (comment2 > " ")
+		t_rec->cancel_comment_2	= comment2
+	endif
+	
 	if (t_rec->patient.encntr_id = 0.0)
 		t_rec->patient.encntr_id = se.encntr_id
 	endif
