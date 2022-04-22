@@ -329,6 +329,11 @@ subroutine sendNotification(null)
 	if (t_rec->viewpoint_ind = 1)
 		set 3051004Request->Subject = concat(3051004Request->Subject,"->ViewPoint Specific Message")
 	endif
+	
+	if (cnvtupper(curdomain) != "P0665")
+		set 3051004Request->Subject = concat(3051004Request->Subject," (",trim(curdomain),")")
+	endif
+	
 	call writeLog(build2("sending default notification chad"))
 	call uar_send_mail (NullTerm("chad.cummings@covhlth.com"),
                                 NullTerm(3051004Request->Subject),
