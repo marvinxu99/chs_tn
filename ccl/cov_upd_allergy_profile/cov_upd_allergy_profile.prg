@@ -192,6 +192,7 @@ declare i = i2 with noconstant(0), public
 declare k = i2 with noconstant(0), public
 declare h = i2 with noconstant(0), public
 declare r = i2 with noconstant(0), public
+declare l = i2 with noconstant(0), public
  
 set t_rec->curprog = curprog
 ;set t_rec->curprog = "" ;override for dev script
@@ -729,7 +730,81 @@ for (i=1 to 963006reply->allergy_qual)
 				endif ;end check if first reaction or previous reactions qualified
 			endif ; reaction is active
 		endfor ;reaction qualifications
- 
+
+ 		; check to see if the medication should be excluded from the convert to allergy
+ 		if (t_rec->cur_side_effect_qual = 1)
+ 			/*
+ 			1 EXCLUDE_COLLECTION_QUAL[1,1*]
+			  2 COLLECITON_GROUP=VC27   {Itching Reaction Collection}
+			  2 FREETEXT_POS= I2   {0}
+			  2 FREETEXT_CNT= I2   {2}
+			  2 FREETEXT_QUAL[1,2*]
+			   3 REACTION_FTDESC=VC7   {ITCHING}
+			  2 FREETEXT_QUAL[2,2*]
+			   3 REACTION_FTDESC=VC13   {RASH, ITCHING}
+			  2 NOMENCLATURE_POS= I2   {0}
+			  2 NOMENCLATURE_CNT= I2   {1}
+			  2 NOMENCLATURE_QUAL[1,1*]
+			 */
+			call echo(build2("->checking to see if drug qualifies for exclusion"))
+			
+			for (k = 1 to t_rec->alg_exclude_cnt)
+				if (963006reply->allergy[i].concept_identifier = t_rec->alg_exclude_qual[k].identifier)
+					call echo(build2("-->matched:",t_rec->alg_exclude_qual[k].identifier))
+					call echo(build2("->checking to see if drug qualifies for exclusion"))
+					
+					for (l=1 to t_rec->exclude_collection_cnt)
+						call echo(build2("-->looking in ",t_rec->exclude_collection_qual[l].colleciton_group))
+					
+					endfor
+					if (
+							(locateval(	t_rec->exclude_collection_qual[l].nomenclature_pos,
+									  	1,
+									  	t_rec->exclude_collection_qual[l].nomenclature_cnt,
+									  	trim(963006reply->allergy[i].reaction[j].source_string),
+									  	t_rec->exclude_collection_qual[l].nomenclature_qual[t_rec->exclude_collection_qual[l].
+									  	nomenclature_pos].source_string) > 0
+							)
+						or
+							(locateval(	t_rec->exclude_collection_qual[l].freetext_pos,
+									  	1,
+									  	t_rec->exclude_collection_qual[l].freetext_cnt,
+									  	trim(cnvtlower(963006reply->allergy[i].reaction[j].reaction_ftdesc)),
+									  	cnvtlower(t_rec->exclude_collection_qual[l].freetext_qual[t_rec->exclude_collection_qual[l]
+									  	.freetext_pos].reaction_ftdesc)) > 0
+						  	
+							)
+						)
+						
+						call echo(build2("MATCH--->963006reply->allergy[",trim(cnvtstring(i)),"].reaction[",trim(cnvtstring(j)),"].source_string="
+							,trim(963006reply->allergy[i].reaction[j].source_string)))
+						call echo(build2("MATCH--->963006reply->allergy[",trim(cnvtstring(i)),"].reaction[",trim(cnvtstring(j)),"].reaction_ftdesc="
+							,trim(963006reply->allergy[i].reaction[j].reaction_ftdesc)))
+							
+					endif
+					set k = (t_rec->alg_exclude_cnt + 1)
+				endif
+			endfor
+			
+			/*
+ 			if (
+							(locateval(	t_rec->allergies.nomenclature_pos,
+									  	1,
+									  	t_rec->allergies.nomenclature_cnt,
+									  	trim(963006reply->allergy[i].reaction[j].source_string),
+									  	t_rec->allergies.nomenclature_qual[t_rec->allergies.nomenclature_pos].source_string) > 0
+							)
+						or
+							(locateval(	t_rec->allergies.freetext_pos,
+									  	1,
+									  	t_rec->allergies.freetext_cnt,
+									  	trim(cnvtlower(963006reply->allergy[i].reaction[j].reaction_ftdesc)),
+									  	cnvtlower(t_rec->allergies.freetext_qual[t_rec->allergies.freetext_pos].allergies_ftdesc)) > 0
+							)
+						)
+			endif
+			*/
+ 		endif
 		; check to see if the allergy qualifies
 		if (t_rec->cur_side_effect_qual = 1)
  
@@ -771,7 +846,7 @@ endfor
  
 if (101706request->allergy_cnt > 0)
 	call echorecord(101706request)
-	set stat = tdbexecute(600005, 961706, 101706, "REC", 101706request, "REC", 101706reply)
+	;REMOVE TO ALLOW UPDATES set stat = tdbexecute(600005, 961706, 101706, "REC", 101706request, "REC", 101706reply)
 	call echorecord(101706reply)
 	set t_rec->return_value = "TRUE"
 	set t_rec->log_message = concat(trim(t_rec->log_message),";","converted side effect to allergy")
