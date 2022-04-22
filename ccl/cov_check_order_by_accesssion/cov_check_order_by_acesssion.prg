@@ -336,6 +336,7 @@ subroutine sendNotification(null)
                                 NullTerm("eCare@covhlth.net"),
                                 5,
                                 "IPM.Note")
+	
 	call writeLog(build2("sending default notification paula"))
 	call uar_send_mail (NullTerm("pfische1@CovHlth.com"),
                                 NullTerm(3051004Request->Subject),
@@ -343,13 +344,14 @@ subroutine sendNotification(null)
                                 NullTerm("eCare@covhlth.net"),
                                 5,
                                 "IPM.Note")
+    call writeLog(build2("sending default notification carlos"))
 	call uar_send_mail (NullTerm("ccarrasq@CovHlth.com"),
                                 NullTerm(3051004Request->Subject),
                                 NullTerm(3051004Request->MsgText),
                                 NullTerm("eCare@covhlth.net"),
                                 5,
                                 "IPM.Note")
-								
+							
 	;set t_rec->return_value = "TRUE"
 end ;sendNotification
 
