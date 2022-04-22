@@ -76,6 +76,7 @@ record t_rec
 	1 order_status			= vc
 	1 dept_status			= vc
 	1 accession				= vc
+	1 viewpoint_ind			= i2
 	1 order_mnemonic		= vc
 	1 send_notification_ind	= i2
 	1 memory_reply_string	= vc
@@ -84,6 +85,7 @@ record t_rec
 	1 page_qual[*]
 	  2 address				= vc
 	  2 facility			= vc
+	  2 viewpoint			= i2
 )
 
 free record 3051004Request 
@@ -156,6 +158,9 @@ head o.order_id
 	t_rec->order_mnemonic	= o.order_mnemonic
 	t_rec->accession		= cnvtacc(a.accession)
 	t_rec->encntr_id		= o.encntr_id
+	if (t_rec->accession = "*-CA-*")
+		t_rec->viewpoint_ind = 1
+	endif
 with nocounter
 
 if (t_rec->order_id = 0.0)
@@ -305,7 +310,7 @@ subroutine sendNotification(null)
 		set 3051004Request->Subject = "Report failure"
 		set 3051004Request->MsgText = concat("(",t_rec->accession,") report failed not completed within timeframe.")
 	endif
-	
+
 	for (i=1 to t_rec->page_cnt)
 		if (t_rec->page_qual[i].facility = t_rec->facility)
 			call writeLog(build2("sending notification to ",t_rec->page_qual[i].address," for ",t_rec->page_qual[i].facility))
@@ -320,6 +325,10 @@ subroutine sendNotification(null)
             
 		endif
 	endfor
+
+	if (t_rec->viewpoint_ind = 1)
+		set 3051004Request->Subject = concat(3051004Request->Subject,"->ViewPoint Specific Message")
+	endif
 	call writeLog(build2("sending default notification chad"))
 	call uar_send_mail (NullTerm("chad.cummings@covhlth.com"),
                                 NullTerm(3051004Request->Subject),
@@ -334,6 +343,13 @@ subroutine sendNotification(null)
                                 NullTerm("eCare@covhlth.net"),
                                 5,
                                 "IPM.Note")
+	call uar_send_mail (NullTerm("ccarrasq@CovHlth.com"),
+                                NullTerm(3051004Request->Subject),
+                                NullTerm(3051004Request->MsgText),
+                                NullTerm("eCare@covhlth.net"),
+                                5,
+                                "IPM.Note")
+								
 	;set t_rec->return_value = "TRUE"
 end ;sendNotification
 
