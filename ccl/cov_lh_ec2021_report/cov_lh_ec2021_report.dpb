@@ -1,0 +1,701 @@
+<prompt-def program = 'LH_EC2021_REPORT' group = '0' auto-arrange = 'false' stream-ver = '0' export-dt-tm = '202204261437' version = '128' script-enabled = 'true' prompt-control-version = '3.000000' updt_dt_tm = '06/02/2021 19:42:50' resource-enabled = 'false'><control name = 'OUTDEV' control = '6' height = '20' width = '330' position = '0' result-type = '1' exclude = 'false'><display align = 'left'>Output to File/Printer/MINE</display>
+<description>Enter or select the printer or file name to send this report to.</description>
+<default>MINE</default>
+<component name = 'CWizOutputDevice'><property name = 'OUTPUT-DEVICES:00'><![CDATA[HIDE-BROWSER='false' DEVICES='' DISPLAY-ALL='true' DISALLOW-FREETEXT='false'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            ]]></property>
+</component>
+<component name = 'GENERAL'><property name = 'PROGRAM'><![CDATA[PROMPT-CONTROL-VERSION='3.000000' AUTO-ARRANGE='false' OWNER='' DU-BASE-HORZ='8' VERSION='128' STREAM-VER='0' REPORT-NAME='' UPDT_DT_TM='2021-06-02 19:42:50' DU-BASE-VERT='16' SCRIPT-ENABLED='true'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   ]]></property>
+<property name = 'PROMPT'><![CDATA[CTRL-VERT-OFFSET='' REQUIRED='true' HIDE-LABEL='false' BOTTOM='20' BORDER='false' AUTO-GROUP='false' LABEL-POS-LEFT='10' LABEL-POS-TOP='10' CTRL-WIDTH='' LEFT='284' CTRL-TOP='' EXCLUDE-RUNTIME='false' CTRL-HEIGHT='20' RESIZABLE='false' RIGHT='330' CTRL-HORZ-OFFSET='' LABEL-POS-HEIGHT='13' LABEL-LEFT='true' TOP='10' TRIM='false' LABEL-POS-WIDTH='162' CTRL-LEFT='' ]]></property>
+</component>
+<component name = 'JAVASCRIPT'><property name = 'CODE:00'><![CDATA[var theForm = null;
+
+//if trim is not implemented for strings, add it
+if (!String.prototype.trim) {
+   String.prototype.trim=function(){return this.replace(/^\s+|\s+$/g, '');};
+}
+
+
+function onLoad() {
+
+    theForm = new DiscernForm();
+
+    theForm.year.enabled = true;
+    theForm.dt_quarter_year.enabled = false;
+    theForm.start_dt.enabled = false;
+    theForm.end_dt.enabled = false;    
+    theForm.EPFilter.value = "A ]";
+    theForm.tier2.value = -1;
+    theForm.tier1.value = -1;
+
+    //Delete the Hide Me record 
+    for (var j = 0; j < theForm.tier2.recordCount; j++) {
+      if(theForm.tier2.getfield(j, 0) == -2) {
+         theForm.tier2.deleteRecord(j);
+      }
+      
+     }
+
+   //Record with -2 value should be hidden or deleted
+    for (var i = 0; i < theForm.tier1.recordCount; i++) {
+      if(theForm.tier1.getfield(i, 1) == -2) {
+         theForm.tier1.deleteRecord(i);
+      }
+      
+     }
+  
+    // insert event handlers
+    theForm.optInitiative.onChange = changeRptTmFrmOpt;
+ ]]></property>
+<property name = 'CODE:01'><![CDATA[   theForm.ReportBy.onChange = changeReportBy;
+    theForm.tier2.onChange = onTier2Change;
+    theForm.tier1.onChange = onTier1Change;
+    theForm.lstEligbleProvider.onChange = onlstEligibleProvider;
+      
+  }
+
+function changeRptTmFrmOpt(sender, button, x, y) {
+    
+    switch(theForm.optInitiative.value) {
+        case "YEAR": 
+            theForm.year.enabled = true;
+            theForm.dt_quarter_year.enabled = false;
+            theForm.start_dt.enabled = false;
+            theForm.end_dt.enabled = false;
+            break;
+        case "QTR_YEAR": 
+            theForm.year.enabled = false;
+            theForm.dt_quarter_year.enabled = true;
+            theForm.start_dt.enabled = false;
+            theForm.end_dt.enabled = false;              
+            break;
+        case "90_DAY": 
+            theForm.year.enabled = false;
+            theForm.dt_quarter_year.enabled = false;
+            theForm.start_dt.enabled = true;
+            theForm.end_dt.enabled = false;            
+  ]]></property>
+<property name = 'CODE:02'><![CDATA[          break;  
+        case "CUSTTF": 
+            theForm.year.enabled = false;
+            theForm.dt_quarter_year.enabled = false;
+            theForm.start_dt.enabled = true;
+            theForm.end_dt.enabled = true;            
+            break;
+        default:
+            theForm.year.enabled = true;
+            theForm.dt_quarter_year.enabled = false;
+            theForm.end_dt.enabled = false;
+            theForm.start_dt.enabled = false;            
+    }
+
+}
+
+function onTier1Change(sender) {
+
+    
+     if(theForm.tier1.isRecordSelected(0)) {
+        theForm.tier1.selectAll(1);            
+     }
+     
+    //Record with -2 value should be deleted
+    for (var i = 0; i < theForm.tier1.recordCount; i++) {
+      if(theForm.tier1.getfield(i, 1) == -2) {
+         theForm.tier1.deleteRecord(i);
+      }
+      
+     }        
+}
+
+function onTier2Change(sender) {
+
+  theForm.tier1.value = "-1";  
+ 
+ if(theForm.tier2.isRecordSelected(0)) {
+        theForm.tier2.selectAll(1);
+       ]]></property>
+<property name = 'CODE:03'><![CDATA[ theForm.tier1.selectAll(1);
+    }
+    
+    //Delete the Hide Me record 
+    for (var j = 0; j < theForm.tier2.recordCount; j++) {
+      if(theForm.tier2.getfield(j, 0) == -2) {
+         theForm.tier2.deleteRecord(j);
+      }
+      
+     }
+
+    //Record with -2 value should be deleted
+    for (var i = 0; i < theForm.tier1.recordCount; i++) {
+      if(theForm.tier1.getfield(i, 1) == -2) {
+         theForm.tier1.deleteRecord(i);
+      }
+      
+     }   
+    
+}
+
+function onlstEligibleProvider(sender)
+{
+if(theForm.lstEligbleProvider.isRecordSelected(0))
+ {
+   theForm.lstEligbleProvider.selectAll(1); 
+ } 
+}
+
+function changeReportBy(sender, button, x, y) {
+
+   switch(theForm.ReportBy.value) {
+       case "GPRO":
+           theForm.EPFilter.enabled = false;
+           theForm.OrgFilter.enabled = false;
+           theForm.OrgFilter.value = "-1";
+           theForm.lstEligbleProvider.label = "Group";
+           theForm.tier1.enabled = false;
+           theForm.tier2.enabled = false;
+           ]]></property>
+<property name = 'CODE:04'><![CDATA[theForm.tier1.visible = false;
+           theForm.tier2.visible = false;
+           theForm.BrDefMeas = "-1";
+           break;
+       case "CPC":
+           theForm.EPFilter.enabled = false;
+           theForm.OrgFilter.enabled = false;
+           theForm.OrgFilter.value = "-1";
+           theForm.lstEligbleProvider.label = "CPC";
+           theForm.tier1.enabled = false;
+           theForm.tier2.enabled = false;
+           theForm.tier1.visible = false;
+           theForm.tier2.visible = false;
+           theForm.BrDefMeas = "-1"; 
+           break;
+       case "PCF":
+           theForm.EPFilter.enabled = false;
+           theForm.OrgFilter.enabled = false;
+           theForm.OrgFilter.value = "-1";
+           theForm.lstEligbleProvider.label = "PCF";
+           theForm.tier1.enabled = false;
+           theForm.tier2.enabled = false;
+           theForm.tier1.visible = false;
+           theForm.tier2.visible = false;
+           theForm.BrDefMeas = "-1"; 
+           break;
+       defau]]></property>
+<property name = 'CODE:05'><![CDATA[lt:
+           theForm.EPFilter.enabled = true;
+           theForm.OrgFilter.enabled = true;
+           theForm.OrgFilter.value = -1;
+           theForm.lstEligbleProvider.label = "Eligible Clinician";
+           theForm.tier1.enabled = true;
+           theForm.tier2.enabled = true;
+           theForm.tier1.visible = true;
+           theForm.tier2.visible = true;
+           theForm.tier1.value = -1;
+           theForm.tier2.value = -1;
+           theForm.BrDefMeas = "-1";
+   
+           
+}
+
+}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       ]]></property>
+</component>
+</control>
+<control name = 'optInitiative' control = '7' height = '40' width = '250' position = '1' result-type = '1' exclude = 'false'><display align = 'left'>Reporting Time Frame</display>
+<description></description>
+<default>YEAR</default>
+<component name = 'GENERAL'><property name = 'PROMPT'><![CDATA[CTRL-VERT-OFFSET='' REQUIRED='false' HIDE-LABEL='false' BOTTOM='40' BORDER='false' AUTO-GROUP='false' LABEL-POS-LEFT='10' LABEL-POS-TOP='37' CTRL-WIDTH='' LEFT='284' CTRL-TOP='' EXCLUDE-RUNTIME='false' CTRL-HEIGHT='' RESIZABLE='false' RIGHT='250' CTRL-HORZ-OFFSET='' LABEL-POS-HEIGHT='13' LABEL-LEFT='true' TOP='30' TRIM='true' LABEL-POS-WIDTH='104' CTRL-LEFT='' ]]></property>
+</component>
+<component name = 'GROUPBOX'><property name = 'BUTTONS:00'><![CDATA[VALUE0='YEAR' VALUE1='QTR_YEAR' VALUE2='90_DAY' VALUE3='CUSTTF' LABEL3='Custom Dates (testing only) ' LABEL2='90 Days' LABEL1='1 Quarter (2021 only)' LABEL0='1 Year'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   ]]></property>
+<property name = 'GROUP-SETTINGS'><![CDATA[ALIGN-VERT='false' WRAP='true' DEFAULT='YEAR'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           ]]></property>
+</component>
+</control>
+<control name = 'year' control = '2' height = '18' width = '310' position = '2' result-type = '1' exclude = 'false'><display align = 'left'>Year</display>
+<description></description>
+<default></default>
+<component name = 'CWizDataSource'><property name = 'DATASRC:00'><![CDATA[MODIFIABLE='false' SORT='false' INC-ANY='false' DUAL-LIST='false' KEEP-SELECTION='false' DB-EXE='SCRIPT' LABEL-COLUMNS='false' QBE-SOURCE='' MULTI-SELECT='false' SOURCE-TYPE='DATABASE' MULTI_COLUMN='false'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           ]]></property>
+<property name = 'SETTINGS:00'><![CDATA[DEFAULT-KEY='' QUERY-STRING='select
+  rptg_year &#061; trim(cnvtstring(2017 + d.seq), 3)
+from
+  (dummyt d with seq &#061; 10)
+with
+  nocounter
+
+
+
+
+
+
+
+
+
+
+
+
+' QUERY-OPTIONS='1067' COLUMNS='&#123;TABLE&#061;&#034;&#034; ORDINAL&#061;&#034;0&#034; VISIBLE&#061;&#034;true&#034; COLUMN&#061;&#034;0&#034; ALIAS&#061;&#034;&#034; FORMAT&#061;&#034;&#034; WIDTH&#061;&#034;1840.000000&#034; TYPE&#061;&#034;&#034; VALUE&#061;&#034;true&#034; BINDING&#061;&#034;RPTG_YEAR&#034; TITLE&#061;&#034;RPTG_YEAR&#034; &#125;'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          ]]></property>
+</component>
+<component name = 'GENERAL'><property name = 'PROMPT'><![CDATA[CTRL-VERT-OFFSET='' REQUIRED='false' HIDE-LABEL='false' BOTTOM='18' BORDER='false' AUTO-GROUP='false' LABEL-POS-LEFT='10' LABEL-POS-TOP='84' CTRL-WIDTH='310' LEFT='284' CTRL-TOP='' EXCLUDE-RUNTIME='false' CTRL-HEIGHT='18' RESIZABLE='false' RIGHT='310' CTRL-HORZ-OFFSET='' LABEL-POS-HEIGHT='13' LABEL-LEFT='true' TOP='125' TRIM='true' LABEL-POS-WIDTH='22' CTRL-LEFT='' ]]></property>
+</component>
+</control>
+<control name = 'start_dt' control = '5' height = '18' width = '200' position = '3' result-type = '1' exclude = 'false'><display align = 'left'>Start Date</display>
+<description></description>
+<default>CURDATE</default>
+<component name = 'CWizDateTime'><property name = 'DATE-TIME-ATTR:00'><![CDATA[OUTPUT-FORMAT='DD-MMM-YYYY' ANCHOR-HOUR='' MONTH='' DATE-TODAY='true' DATE-LONG='true' DATE-OFFSET='0.000000' DATE-CAL='true' LINK-INPUT='' HOUR='' ANCHOR-YEAR='' DAY='' DATE-ENABLE='true' DATE-INVDATE='true' DATE-FMT='0' ENABLE-MASK='1' MINUTE='' AUTO-UPDATE='false' ANCHOR-MONTH='' YEAR='' ANCHOR-DAY='' DATE-SPIN='true' ANCHOR-MINUTE='' DATE-SRVTM='true'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   ]]></property>
+</component>
+<component name = 'GENERAL'><property name = 'PROMPT'><![CDATA[CTRL-VERT-OFFSET='' REQUIRED='false' HIDE-LABEL='false' BOTTOM='18' BORDER='false' AUTO-GROUP='false' LABEL-POS-LEFT='10' LABEL-POS-TOP='109' CTRL-WIDTH='' LEFT='284' CTRL-TOP='' EXCLUDE-RUNTIME='false' CTRL-HEIGHT='' RESIZABLE='false' RIGHT='200' CTRL-HORZ-OFFSET='' LABEL-POS-HEIGHT='13' LABEL-LEFT='true' TOP='168' TRIM='false' LABEL-POS-WIDTH='48' CTRL-LEFT='' ]]></property>
+</component>
+</control>
+<control name = 'end_dt' control = '5' height = '18' width = '200' position = '4' result-type = '1' exclude = 'false'><display align = 'left'>End Date</display>
+<description></description>
+<default>CURDATE</default>
+<component name = 'CWizDateTime'><property name = 'DATE-TIME-ATTR:00'><![CDATA[OUTPUT-FORMAT='DD-MMM-YYYY' ANCHOR-HOUR='' MONTH='' DATE-TODAY='true' DATE-LONG='true' DATE-OFFSET='0.000000' DATE-CAL='true' LINK-INPUT='' HOUR='' ANCHOR-YEAR='' DAY='' DATE-ENABLE='true' DATE-INVDATE='true' DATE-FMT='0' ENABLE-MASK='1' MINUTE='' AUTO-UPDATE='false' ANCHOR-MONTH='' YEAR='' ANCHOR-DAY='' DATE-SPIN='true' ANCHOR-MINUTE='' DATE-SRVTM='true'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   ]]></property>
+</component>
+<component name = 'GENERAL'><property name = 'PROMPT'><![CDATA[CTRL-VERT-OFFSET='' REQUIRED='false' HIDE-LABEL='false' BOTTOM='18' BORDER='false' AUTO-GROUP='false' LABEL-POS-LEFT='10' LABEL-POS-TOP='134' CTRL-WIDTH='' LEFT='284' CTRL-TOP='' EXCLUDE-RUNTIME='false' CTRL-HEIGHT='' RESIZABLE='false' RIGHT='200' CTRL-HORZ-OFFSET='' LABEL-POS-HEIGHT='13' LABEL-LEFT='true' TOP='189' TRIM='false' LABEL-POS-WIDTH='45' CTRL-LEFT='' ]]></property>
+</component>
+</control>
+<control name = 'chkSummaryOnly' control = '7' height = '40' width = '250' position = '5' result-type = '1' exclude = 'false'><display align = 'left'>Report Printing Options</display>
+<description></description>
+<default>SUM_PS</default>
+<component name = 'GENERAL'><property name = 'PROMPT'><![CDATA[CTRL-VERT-OFFSET='' REQUIRED='false' HIDE-LABEL='false' BOTTOM='40' BORDER='false' AUTO-GROUP='false' LABEL-POS-LEFT='10' LABEL-POS-TOP='159' CTRL-WIDTH='' LEFT='284' CTRL-TOP='' EXCLUDE-RUNTIME='false' CTRL-HEIGHT='' RESIZABLE='false' RIGHT='250' CTRL-HORZ-OFFSET='' LABEL-POS-HEIGHT='13' LABEL-LEFT='true' TOP='1238' TRIM='true' LABEL-POS-WIDTH='109' CTRL-LEFT='' ]]></property>
+</component>
+<component name = 'GROUPBOX'><property name = 'BUTTONS:00'><![CDATA[VALUE5='DET_PDF' VALUE0='SUM_PS' VALUE1='SUM_CSV' VALUE2='SUM_PDF' VALUE3='DET_PS' LABEL5='Run detail report (PDF)' LABEL4='Run detail report (CSV)' LABEL3='Run detail report (PS)' LABEL2='Run summary report (PDF)' LABEL1='Run summary report (CSV)' LABEL0='Run summary report only (PS)' VALUE4='DET_CSV'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         ]]></property>
+<property name = 'GROUP-SETTINGS'><![CDATA[ALIGN-VERT='false' WRAP='true' DEFAULT='SUM_PS'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         ]]></property>
+</component>
+</control>
+<control name = 'lstMeasure' control = '3' height = '400' width = '600' position = '6' result-type = '1' exclude = 'false'><display align = 'left'>Quality Measure</display>
+<description></description>
+<default></default>
+<component name = 'CWizDataSource'><property name = 'DATASRC:00'><![CDATA[INC-ANY-DISPLAY='Select All (*)' MODIFIABLE='false' SORT='false' INC-ANY='true' DUAL-LIST='false' KEEP-SELECTION='false' DB-EXE='SCRIPT' INC-ANY-KEY='ALL' LABEL-COLUMNS='false' QBE-SOURCE='DiscernQueryBuilder' MULTI-SELECT='true' SOURCE-TYPE='DATABASE' MULTI_COLUMN='false'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       ]]></property>
+<property name = 'DEFAULT-VALUES:00'><![CDATA[MULTI-DEF-COUNT='0'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     ]]></property>
+<property name = 'SETTINGS:00'><![CDATA[DEFAULT-KEY='' QUERY-STRING='SELECT
+if($BrDefMeas &#061; &#034;BR&#034; and $ReportBy not in (&#034;CPC&#034;,&#034;PCF&#034;))
+  report_name&#061;&#034;Measure selection will filter from Bedrock setup&#034;,report_mean&#061;&#034; &#034;
+  from dual
+  where 1&#061;1  
+else
+  bdr.report_name,
+  bdr.report_mean
+from
+  br_datamart_category bdc,
+  br_datamart_report bdr
+plan
+  bdc
+where
+  bdc.category_mean &#061; "MU_CQM_EC_2021"
+join
+  bdr
+where
+  bdr.br_datamart_category_id &#061; bdc.br_datamart_category_id
+  and bdr.report_seq > 0
+  and ( ($ReportBy not in (&#034;CPC&#034;,&#034;PCF&#034;) and bdr.report_mean in(
+                         &#034;MU_EC_CMS2_2021&#034;
+                        ,&#034;MU_EC_CMS50_2021&#034;
+                        ,&#034;MU_EC_CMS22_2021&#034;
+                        ,&#034;MU_EC_CMS68_2021&#034;
+                        ,&#034;MU_EC_CMS69_2021&#034;
+                        ,&#034;MU_EC_CMS74_2021&#034;
+                        ,&#034;MU_EC_CMS75_2021&#034;
+ ]]></property>
+<property name = 'SETTINGS:01'><![CDATA[                       ,&#034;MU_EC_CMS90_2021&#034;
+                        ,&#034;MU_EC_CMS117_2021&#034;
+                        ,&#034;MU_EC_CMS122_2021&#034;
+                        ,&#034;MU_EC_CMS124_2021&#034;
+                        ,&#034;MU_EC_CMS125_2021&#034;
+                        ,&#034;MU_EC_CMS127_2021&#034;
+                        ,&#034;MU_EC_CMS130_2021&#034;
+                        ,&#034;MU_EC_CMS131_2021&#034;
+                        ,&#034;MU_EC_CMS134_2021&#034;
+                        ,&#034;MU_EC_CMS135_2021&#034;
+                        ,&#034;MU_EC_CMS137_2021&#034;
+                        ,&#034;MU_EC_CMS138_2021&#034;
+                        ,&#034;MU_EC_CMS139_2021&#034;
+                        ,&#034;MU_EC_CMS144_2021&#034;
+                        ,&#034;MU_EC_CMS145_2021&#034;
+                        ,&#034;MU_EC_CMS146_2021&#034;
+                        ,&#034;MU_EC_CMS147_2021&#034;
+                        ,&#034;MU_EC_CMS149_2021&#034;
+            ]]></property>
+<property name = 'SETTINGS:02'><![CDATA[            ,&#034;MU_EC_CMS153_2021&#034;
+                        ,&#034;MU_EC_CMS154_2021&#034;
+                        ,&#034;MU_EC_CMS155_2021&#034;
+                        ,&#034;MU_EC_CMS156_2021&#034;
+                        ,&#034;MU_EC_CMS157_2021&#034;
+                        ,&#034;MU_EC_CMS159_2021&#034;
+                        ,&#034;MU_EC_CMS161_2021&#034;
+                        ,&#034;MU_EC_CMS165_2021&#034;
+                        ,&#034;MU_EC_CMS177_2021&#034;
+                        ))
+      or($ReportBy &#061; &#034;CPC&#034; and bdr.report_mean in(
+                   &#034;MU_EC_CMS165_2021&#034;
+                  ,&#034;MU_EC_CMS122_2021&#034;
+                        )) 
+      or($ReportBy &#061; &#034;PCF&#034; and bdr.report_mean in(
+                   &#034;MU_EC_CMS165_2021&#034;
+                  ,&#034;MU_EC_CMS122_2021&#034;
+                  ,&#034;MU_EC_CMS130_2021&#034;
+                  ,&#034;AVCP_MIPS47_2021&#034;
+                        )) )
+order by]]></property>
+<property name = 'SETTINGS:03'><![CDATA[
+  bdr.report_seq
+
+endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+' QUERY-OPTIONS='1067' COLUMNS='&#123;TABLE&#061;&#034;&#034; ORDINAL&#061;&#034;0&#034; VISIBLE&#061;&#034;true&#034; COLUMN&#061;&#034;0&#034; ALIAS&#061;&#034;&#034; FORMAT&#061;&#034;&#034; WIDTH&#061;&#034;102.000000&#034; TYPE&#061;&#034;&#034; VALUE&#061;&#034;false&#034; BINDING&#061;&#034;REPORT_NAME&#034; TITLE&#061;&#034;REPORT_NAME&#034; &#125;&#123;TABLE&#061;&#034;&#034; ORDINAL&#061;&#034;1&#034; VISIBLE&#061;&#034;false&#034; COLUMN&#061;&#034;1&#034; ALIAS&#061;&#034;&#034; FORMAT&#061;&#034;&#034; WIDTH&#061;&#034;2600.000000&#034; TYPE&#061;&#034;&#034; VALUE&#061;&#034;true&#034; BINDING&#061;&#034;REPORT_MEAN&#034; TITLE&#061;&#034;REPORT_MEAN&#034; &#125;'                                                                                                                                                                                                                              ]]></property>
+</component>
+<component name = 'GENERAL'><property name = 'PROMPT'><![CDATA[CTRL-VERT-OFFSET='' REQUIRED='false' HIDE-LABEL='false' BOTTOM='400' BORDER='false' AUTO-GROUP='false' LABEL-POS-LEFT='10' LABEL-POS-TOP='206' CTRL-WIDTH='600' LEFT='284' CTRL-TOP='' EXCLUDE-RUNTIME='false' CTRL-HEIGHT='' RESIZABLE='false' RIGHT='600' CTRL-HORZ-OFFSET='' LABEL-POS-HEIGHT='13' LABEL-LEFT='true' TOP='305' TRIM='true' LABEL-POS-WIDTH='76' CTRL-LEFT='' ]]></property>
+</component>
+</control>
+<control name = 'OrgFilter' control = '2' height = '25' width = '250' position = '7' result-type = '3' exclude = 'false'><display align = 'left'>Organization</display>
+<description></description>
+<default>-1</default>
+<component name = 'CWizDataSource'><property name = 'DATASRC:00'><![CDATA[INC-ANY-DISPLAY='ALL (*)' MODIFIABLE='false' SORT='false' INC-ANY='true' DUAL-LIST='false' KEEP-SELECTION='false' DB-EXE='SCRIPT' INC-ANY-KEY='-1' LABEL-COLUMNS='false' QBE-SOURCE='DiscernQueryBuilder' MULTI-SELECT='false' SOURCE-TYPE='DATABASE' MULTI_COLUMN='false'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              ]]></property>
+<property name = 'SETTINGS:00'><![CDATA[DEFAULT-KEY='-1             ' QUERY-STRING='SELECT DISTINCT
+    o.org_name
+    , o.organization_id
+FROM ORGANIZATION O, prsnl P, PRSNL_ORG_RELTN PO
+WHERE o.beg_effective_dt_tm < cnvtdatetime(curdate,curtime)
+    and o.active_ind &#061; 1
+    and p.person_id &#061; Reqinfo->Updt_id
+    and o.logical_domain_id &#061; p.logical_domain_id
+    and po.person_id &#061; p.person_id
+    and po.organization_id &#061; o.organization_id
+    and po.active_ind &#061; 1
+    and po.beg_effective_dt_tm < cnvtdatetime(curdate,curtime)
+ORDER BY O.ORG_NAME
+
+' QUERY-OPTIONS='1067' COLUMNS='&#123;TABLE&#061;&#034;&#034; ORDINAL&#061;&#034;0&#034; VISIBLE&#061;&#034;true&#034; COLUMN&#061;&#034;0&#034; ALIAS&#061;&#034;&#034; FORMAT&#061;&#034;&#034; WIDTH&#061;&#034;2060.000000&#034; TYPE&#061;&#034;&#034; VALUE&#061;&#034;false&#034; BINDING&#061;&#034;ORG_NAME&#034; TITLE&#061;&#034;ORG_NAME&#034; &#125;&#123;TABLE&#061;&#034;&#034; ORDINAL&#061;&#034;1&#034; VISIBLE&#061;&#034;false&#034; COLUMN&#061;&#0]]></property>
+<property name = 'SETTINGS:01'><![CDATA[34;1&#034; ALIAS&#061;&#034;&#034; FORMAT&#061;&#034;&#034; WIDTH&#061;&#034;2960.000000&#034; TYPE&#061;&#034;&#034; VALUE&#061;&#034;true&#034; BINDING&#061;&#034;ORGANIZATION_ID&#034; TITLE&#061;&#034;ORGANIZATION_ID&#034; &#125;'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ]]></property>
+</component>
+<component name = 'GENERAL'><property name = 'PROMPT'><![CDATA[CTRL-VERT-OFFSET='' REQUIRED='false' HIDE-LABEL='false' BOTTOM='25' BORDER='false' AUTO-GROUP='false' LABEL-POS-LEFT='10' LABEL-POS-TOP='613' CTRL-WIDTH='250' LEFT='284' CTRL-TOP='' EXCLUDE-RUNTIME='false' CTRL-HEIGHT='' RESIZABLE='false' RIGHT='250' CTRL-HORZ-OFFSET='' LABEL-POS-HEIGHT='13' LABEL-LEFT='true' TOP='708' TRIM='false' LABEL-POS-WIDTH='59' CTRL-LEFT='' ]]></property>
+</component>
+</control>
+<control name = 'EPFilter' control = '2' height = '25' width = '235' position = '8' result-type = '1' exclude = 'false'><display align = 'left'>Filter EC List</display>
+<description></description>
+<default>ALL</default>
+<component name = 'CWizDataSource'><property name = 'DATASRC:00'><![CDATA[MODIFIABLE='false' SORT='false' INC-ANY='false' DUAL-LIST='false' KEEP-SELECTION='false' LABEL-COLUMNS='false' QBE-SOURCE='' MULTI-SELECT='false' STR-DEFAULT='ALL                                                                                                ' SOURCE-TYPE='STRING' MULTI_COLUMN='false'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           ]]></property>
+<property name = 'STRING-TABLE:00'><![CDATA[{All  -1}{A - E  -6}{F - J  -5}{K - O  -4}{P - T  -3}{U - Z  -2}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        ]]></property>
+<property name = 'TABLE-HEADER:00'><![CDATA[{TABLE='' ORDINAL='0' VISIBLE='true' COLUMN='0' ALIAS='' FORMAT='' WIDTH='0.000000' TYPE='' VALUE='true' BINDING='A' TITLE='myKey' }{TABLE='' ORDINAL='1' VISIBLE='true' COLUMN='1' ALIAS='' FORMAT='' WIDTH='0.000000' TYPE='' VALUE='false' BINDING='B' TITLE='Ordering' }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            ]]></property>
+</component>
+<component name = 'GENERAL'><property name = 'PROMPT'><![CDATA[CTRL-VERT-OFFSET='' REQUIRED='false' HIDE-LABEL='false' BOTTOM='25' BORDER='false' AUTO-GROUP='false' LABEL-POS-LEFT='10' LABEL-POS-TOP='645' CTRL-WIDTH='235' LEFT='650' CTRL-TOP='' EXCLUDE-RUNTIME='false' CTRL-HEIGHT='' RESIZABLE='false' RIGHT='235' CTRL-HORZ-OFFSET='' LABEL-POS-HEIGHT='13' LABEL-LEFT='true' TOP='708' TRIM='true' LABEL-POS-WIDTH='58' CTRL-LEFT='' ]]></property>
+</component>
+</control>
+<control name = 'lstEligbleProvider' control = '3' height = '400' width = '602' position = '9' result-type = '3' exclude = 'false'><display align = 'left'>Eligible Clinician</display>
+<description></description>
+<default></default>
+<component name = 'CWizDataSource'><property name = 'DATASRC:00'><![CDATA[INC-ANY-DISPLAY='Select All (*)' MODIFIABLE='false' SORT='false' INC-ANY='true' DUAL-LIST='false' KEEP-SELECTION='false' DB-EXE='SCRIPT' INC-ANY-KEY='-1' LABEL-COLUMNS='true' QBE-SOURCE='DiscernQueryBuilder' MULTI-SELECT='true' SOURCE-TYPE='DATABASE' MULTI_COLUMN='false'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         ]]></property>
+<property name = 'DEFAULT-VALUES:00'><![CDATA[MULTI-DEF-COUNT='0'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     ]]></property>
+<property name = 'SETTINGS:00'><![CDATA[DEFAULT-KEY='' QUERY-STRING='Select
+  if($ReportBy &#061; "GPRO")
+    distinct
+      myKey &#061; gpro.BR_GPRO_ID
+    , Name &#061; gpro.BR_GPRO_NAME
+    , NPI &#061; " "
+    , TIN &#061; gpro.TAX_ID_NBR_TXT
+    FROM BR_GPRO gpro, BR_GPRO_RELTN gpro_ep_rltn, BR_ELIGIBLE_PROVIDER ep, PRSNL p2
+    WHERE gpro.BR_GPRO_ID &#061; gpro_ep_rltn.br_gpro_id 
+    and  gpro_ep_rltn.PARENT_ENTITY_NAME &#061; &#034;BR_ELIGIBLE_PROVIDER&#034;
+          and gpro_ep_rltn.PARENT_ENTITY_ID &#061; ep.BR_ELIGIBLE_PROVIDER_ID
+          and p2.person_id &#061; Reqinfo->Updt_id
+          and p2.logical_domain_id &#061; ep.logical_domain_id
+          and p2.logical_domain_id &#061; gpro.logical_domain_id
+          and gpro_ep_rltn.active_ind &#061; 1
+          and gpro_ep_rltn.beg_effective_dt_tm <&#061; cnvtdatetime(curdate,curtime)
+          and gpro_ep_rltn.end_effective_dt_tm >&#061; cnvtdatetime(curdate,curtime)
+          and gpro.active_ind &#061; 1
+          and gpro.beg_effective_dt_tm <&#061; cnvtdate]]></property>
+<property name = 'SETTINGS:01'><![CDATA[time(curdate,curtime)
+          and gpro.end_effective_dt_tm >&#061; cnvtdatetime(curdate,curtime)
+          and( ($BrDefMeas &#061; &#034;-1&#034;) 
+            or ($BrDefMeas !&#061; &#034;-1&#034; 
+                and exists(select 1
+                           from lh_cqm_meas_svc_entity_r rel, lh_cqm_meas meas
+                           where rel.parent_entity_name &#061; &#034;BR_GPRO&#034;
+                             and rel.parent_entity_id &#061; gpro.br_gpro_id
+                             and rel.active_ind &#061; 1
+                             and rel.beg_effective_dt_tm <&#061; cnvtdatetime(curdate,curtime)
+                             and rel.end_effective_dt_tm >&#061; cnvtdatetime(curdate,curtime)
+                             and meas.lh_cqm_meas_id &#061; rel.lh_cqm_meas_id
+                             and meas.meas_ident &#061; "MU_EC*2021" and meas.meas_ident not in ("*YQF*")                             
+    ))
+          )          
+      ORDER BY gpro.BR_GPRO_NAME
+
+]]></property>
+<property name = 'SETTINGS:02'><![CDATA[  elseif($ReportBy &#061; "CPC")
+      myKey &#061; bc.br_cpc_id
+    , Name &#061; bc.br_cpc_name
+    , NPI &#061; " "
+    , CPC_ID &#061; bc.cpc_site_id_txt
+    , TIN &#061; bc.tax_id_nbr_txt
+    FROM BR_CPC bc, prsnl p
+    where p.person_id &#061; Reqinfo->Updt_id
+      and p.logical_domain_id &#061; bc.logical_domain_id
+      and bc.active_ind &#061; 1
+      and textlen(trim(bc.cpc_site_id_txt)) &#061; 8
+      and bc.beg_effective_dt_tm <&#061; cnvtdatetime(curdate,curtime)
+      and bc.end_effective_dt_tm >&#061; cnvtdatetime(curdate,curtime)
+    ORDER BY bc.br_cpc_name
+
+  elseif($ReportBy &#061; "PCF")
+      myKey &#061; bc.br_cpc_id
+    , Name &#061; bc.br_cpc_name
+    , NPI &#061; " "
+    , PCF_ID &#061; bc.cpc_site_id_txt
+    , TIN &#061; bc.tax_id_nbr_txt
+    FROM BR_CPC bc, prsnl p
+    where p.person_id &#061; Reqinfo->Updt_id
+      and p.logical_domain_id &#061; bc.logical_domain_id
+      and bc.active_ind &#061; 1
+      and textlen(trim(bc.cpc_site_id_txt)) &#061; 6
+      a]]></property>
+<property name = 'SETTINGS:03'><![CDATA[nd bc.beg_effective_dt_tm <&#061; cnvtdatetime(curdate,curtime)
+      and bc.end_effective_dt_tm >&#061; cnvtdatetime(curdate,curtime)
+    ORDER BY bc.br_cpc_name
+
+  else
+      myKey &#061; B.BR_ELIGIBLE_PROVIDER_ID
+    , Name &#061; P.NAME_FULL_FORMATTED
+    , NPI &#061; B.NATIONAL_PROVIDER_NBR_TXT
+    , TIN &#061; B.TAX_ID_NBR_TXT
+    FROM BR_ELIGIBLE_PROVIDER   B
+    , PRSNL   P
+   WHERE P.PERSON_ID &#061; B.PROVIDER_ID
+      and B.BR_ELIGIBLE_PROVIDER_ID > 0.0
+      and ($BrDefMeas &#061; "-1"
+      OR ($BrDefMeas !&#061; "-1" and
+      ( EXISTS(select 1
+               from lh_cqm_meas_svc_entity_r rel, lh_cqm_meas meas
+               where b.br_eligible_provider_id &#061; rel.parent_entity_id  
+                 and b.br_eligible_provider_id !&#061; 0  ; to eliminate unqualified rows
+                 and rel.parent_entity_name &#061; &#034;BR_ELIGIBLE_PROVIDER&#034;
+                 and rel.active_ind &#061; 1
+                 and rel.beg_effective_dt_tm <&#061; cnvtdatetime(curdat]]></property>
+<property name = 'SETTINGS:04'><![CDATA[e,curtime)
+                 and rel.end_effective_dt_tm >&#061; cnvtdatetime(curdate,curtime)
+                 and meas.lh_cqm_meas_id &#061; rel.lh_cqm_meas_id
+                 and meas.meas_ident &#061; "MU_EC*2021" and meas.meas_ident not in ("*YQF*")
+              )
+      ));not -1
+    )
+ and (EXISTS(select 1 from BR_GROUP_RELTN bgr
+                     where bgr.parent_entity_name &#061; &#034;BR_ELIGIBLE_PROVIDER&#034;
+                       and b.BR_ELIGIBLE_PROVIDER_ID &#061; bgr.parent_entity_id
+                       and bgr.br_group_id &#061; $tier1)
+ 
+                       or  (-1 &#061; $tier1 and -1 &#061; $tier2) 
+                       
+                       or exists(select 1 from br_group_reltn bgr,
+                                               br_group_reltn bgr1
+                        where bgr.parent_entity_id &#061; bgr1.br_group_id
+                          and bgr1.parent_entity_name &#061; "BR_ELIGIBLE_PROVIDER"
+                          and bgr1.parent_ent]]></property>
+<property name = 'SETTINGS:05'><![CDATA[ity_id &#061; b.br_eligible_provider_id
+                          and bgr.parent_entity_name &#061; "BR_GROUP"  
+                          and bgr.br_group_id &#061;  ($tier2)) and -1 &#061; ($tier1))
+and p.beg_effective_dt_tm <&#061; cnvtdatetime(curdate,curtime)
+and EXISTS(SELECT 1 FROM PRSNL PR, PRSNL_ORG_RELTN PO, ORGANIZATION ORG
+WHERE po.person_id &#061; p.person_id
+and po.organization_id &#061; org.organization_id
+and pr.person_id &#061; Reqinfo->Updt_id
+and po.beg_effective_dt_tm <&#061;  cnvtdatetime(curdate,curtime)
+and org.beg_effective_dt_tm <&#061;   cnvtdatetime(curdate,curtime)
+and pr.beg_effective_dt_tm <&#061;  cnvtdatetime(curdate,curtime)
+and p.logical_domain_id &#061; pr.logical_domain_id
+and ((org.organization_id &#061; $OrgFilter or $OrgFilter &#061; -1)
+and EXISTS(SELECT 1
+FROM ORGANIZATION O, prsnl PNL, PRSNL_ORG_RELTN POR
+WHERE o.beg_effective_dt_tm <&#061; cnvtdatetime(curdate,curtime)
+and pnl.person_id &#061; Reqinfo->Updt_id
+and o.logical_domain_id &#061; pn]]></property>
+<property name = 'SETTINGS:06'><![CDATA[l.logical_domain_id
+and por.person_id &#061; pnl.person_id
+and por.organization_id &#061; o.organization_id
+and org.organization_id &#061; o.organization_id
+and por.beg_effective_dt_tm <&#061;  cnvtdatetime(curdate,curtime)
+)))
+and (
+      ;name in filter
+      (
+        substring(2,3,$EPFilter)&#061;notrim(" - ") and
+        substring(1,1,p.name_last_key) between substring(1,1,$EPFilter) and substring(5,1,$EPFilter)
+      )
+    OR ($EPFilter in (&#034;ALL&#034;,&#034;All&#034;,&#034;-1&#034;))
+    )
+order by p.name_full_formatted
+endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+' QUERY-OPTIONS='1067' COLUMNS='&#123;TABLE&#061;&#034;&#034; ORDINAL&#061;&#034;0&#034; VISIBLE&#061;&#034;false&#034; COLUMN&#061;&#034;0&#034; ALIAS&#061;&#034;myKey&#034; FORMAT&#061;&#034;&#034; WIDTH&#061;&#034;1360.000000&#034; TYPE&#061;&#034;&#034; VALUE&#061;&#034;true&#034; BINDING&#061;&#034;myKey&#034; TITLE&#061;&#034;myKey&#034; &#125;&#123;TABLE&#061;&#034;&#034; ORDINAL&#061;&#034;1&#034; VISIBLE&#061;&#034;true&#034; COLUM]]></property>
+<property name = 'SETTINGS:07'><![CDATA[N&#061;&#034;0&#034; ALIAS&#061;&#034;Name&#034; FORMAT&#061;&#034;&#034; WIDTH&#061;&#034;48.000000&#034; TYPE&#061;&#034;&#034; VALUE&#061;&#034;false&#034; BINDING&#061;&#034;Name&#034; TITLE&#061;&#034;Name&#034; &#125;&#123;TABLE&#061;&#034;&#034; ORDINAL&#061;&#034;2&#034; VISIBLE&#061;&#034;true&#034; COLUMN&#061;&#034;1&#034; ALIAS&#061;&#034;NPI&#034; FORMAT&#061;&#034;&#034; WIDTH&#061;&#034;38.000000&#034; TYPE&#061;&#034;&#034; VALUE&#061;&#034;false&#034; BINDING&#061;&#034;NPI&#034; TITLE&#061;&#034;NPI&#034; &#125;'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                ]]></property>
+</component>
+<component name = 'GENERAL'><property name = 'PROMPT'><![CDATA[CTRL-VERT-OFFSET='' REQUIRED='false' HIDE-LABEL='false' BOTTOM='400' BORDER='false' AUTO-GROUP='false' LABEL-POS-LEFT='10' LABEL-POS-TOP='677' CTRL-WIDTH='602' LEFT='284' CTRL-TOP='' EXCLUDE-RUNTIME='false' CTRL-HEIGHT='' RESIZABLE='false' RIGHT='602' CTRL-HORZ-OFFSET='' LABEL-POS-HEIGHT='13' LABEL-LEFT='true' TOP='842' TRIM='true' LABEL-POS-WIDTH='75' CTRL-LEFT='' ]]></property>
+</component>
+</control>
+<control name = 'BrDefMeas' control = '2' height = '25' width = '300' position = '10' result-type = '1' exclude = 'false'><display align = 'left'>Filter Measures</display>
+<description></description>
+<default>-1</default>
+<component name = 'CWizDataSource'><property name = 'DATASRC:00'><![CDATA[MODIFIABLE='false' SORT='false' INC-ANY='false' DUAL-LIST='false' KEEP-SELECTION='false' LABEL-COLUMNS='false' QBE-SOURCE='' MULTI-SELECT='false' STR-DEFAULT='-1' SOURCE-TYPE='STRING' MULTI_COLUMN='false'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            ]]></property>
+<property name = 'STRING-TABLE:00'><![CDATA[{-1	Show Measures}{BR	Use Measure Selection in Bedrock}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 ]]></property>
+<property name = 'TABLE-HEADER:00'><![CDATA[{TABLE='' ORDINAL='0' VISIBLE='false' COLUMN='0' ALIAS='' FORMAT='' WIDTH='0.000000' TYPE='' VALUE='true' BINDING='A' TITLE='A' }{TABLE='' ORDINAL='1' VISIBLE='true' COLUMN='1' ALIAS='' FORMAT='' WIDTH='0.000000' TYPE='' VALUE='false' BINDING='B' TITLE='B' }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      ]]></property>
+</component>
+<component name = 'GENERAL'><property name = 'PROMPT'><![CDATA[CTRL-VERT-OFFSET='' REQUIRED='false' HIDE-LABEL='false' BOTTOM='25' BORDER='false' AUTO-GROUP='false' LABEL-POS-LEFT='10' LABEL-POS-TOP='1084' CTRL-WIDTH='300' LEFT='284' CTRL-TOP='' EXCLUDE-RUNTIME='false' CTRL-HEIGHT='' RESIZABLE='false' RIGHT='300' CTRL-HORZ-OFFSET='' LABEL-POS-HEIGHT='13' LABEL-LEFT='true' TOP='278' TRIM='true' LABEL-POS-WIDTH='71' CTRL-LEFT='' ]]></property>
+</component>
+</control>
+<control name = 'dt_quarter_year' control = '2' height = '18' width = '310' position = '11' result-type = '1' exclude = 'false'><display align = 'left'>Quarter Start Date</display>
+<description></description>
+<default></default>
+<component name = 'CWizDataSource'><property name = 'DATASRC:00'><![CDATA[MODIFIABLE='false' SORT='false' INC-ANY='false' DUAL-LIST='false' KEEP-SELECTION='false' LABEL-COLUMNS='false' QBE-SOURCE='' MULTI-SELECT='false' STR-DEFAULT='' SOURCE-TYPE='STRING' MULTI_COLUMN='false'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              ]]></property>
+<property name = 'STRING-TABLE:00'><![CDATA[{January 1	JAN}{April 1	APR}{July 1	JUL}{October 1	OCT}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 ]]></property>
+<property name = 'TABLE-HEADER:00'><![CDATA[{TABLE='' ORDINAL='0' VISIBLE='true' COLUMN='0' ALIAS='' FORMAT='' WIDTH='0.000000' TYPE='' VALUE='false' BINDING='A' TITLE='A' }{TABLE='' ORDINAL='1' VISIBLE='false' COLUMN='1' ALIAS='' FORMAT='' WIDTH='0.000000' TYPE='' VALUE='true' BINDING='B' TITLE='B' }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      ]]></property>
+</component>
+<component name = 'GENERAL'><property name = 'PROMPT'><![CDATA[CTRL-VERT-OFFSET='' REQUIRED='false' HIDE-LABEL='false' BOTTOM='18' BORDER='false' AUTO-GROUP='false' LABEL-POS-LEFT='10' LABEL-POS-TOP='1116' CTRL-WIDTH='310' LEFT='284' CTRL-TOP='' EXCLUDE-RUNTIME='false' CTRL-HEIGHT='18' RESIZABLE='false' RIGHT='310' CTRL-HORZ-OFFSET='' LABEL-POS-HEIGHT='13' LABEL-LEFT='true' TOP='144' TRIM='true' LABEL-POS-WIDTH='86' CTRL-LEFT='' ]]></property>
+</component>
+</control>
+<control name = 'ReportBy' control = '7' height = '40' width = '350' position = '12' result-type = '1' exclude = 'false'><display align = 'left'>Report By</display>
+<description></description>
+<default>INDV</default>
+<component name = 'GENERAL'><property name = 'PROMPT'><![CDATA[CTRL-VERT-OFFSET='' REQUIRED='false' HIDE-LABEL='false' BOTTOM='40' BORDER='false' AUTO-GROUP='false' LABEL-POS-LEFT='10' LABEL-POS-TOP='1141' CTRL-WIDTH='' LEFT='284' CTRL-TOP='' EXCLUDE-RUNTIME='false' CTRL-HEIGHT='' RESIZABLE='false' RIGHT='350' CTRL-HORZ-OFFSET='' LABEL-POS-HEIGHT='13' LABEL-LEFT='true' TOP='206' TRIM='false' LABEL-POS-WIDTH='47' CTRL-LEFT='' ]]></property>
+</component>
+<component name = 'GROUPBOX'><property name = 'BUTTONS:00'><![CDATA[VALUE0='INDV' VALUE1='GPRO' VALUE2='CPC' VALUE3='PCF' LABEL3='PCF Practice Site' LABEL2='CPC Practice Site' LABEL1='Group Practice (TIN)' LABEL0='Eligible Clinician'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   ]]></property>
+<property name = 'GROUP-SETTINGS'><![CDATA[ALIGN-VERT='false' WRAP='true' DEFAULT='INDV'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           ]]></property>
+</component>
+</control>
+<control name = 'tier2' control = '3' height = '100' width = '250' position = '13' result-type = '3' exclude = 'true'><display align = 'left'>EC Practice Groups (Tier 2)</display>
+<description></description>
+<default></default>
+<component name = 'CWizDataSource'><property name = 'DATASRC:00'><![CDATA[INC-ANY-DISPLAY='Select All (Includes grouped and non-grouped EP List)' MODIFIABLE='false' SORT='false' INC-ANY='true' DUAL-LIST='false' KEEP-SELECTION='false' DB-EXE='SCRIPT' INC-ANY-KEY='-1' LABEL-COLUMNS='false' QBE-SOURCE='' MULTI-SELECT='true' SOURCE-TYPE='DATABASE' MULTI_COLUMN='false'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ]]></property>
+<property name = 'DEFAULT-VALUES:00'><![CDATA[MULTI-DEF-COUNT='0'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     ]]></property>
+<property name = 'SETTINGS:00'><![CDATA[DEFAULT-KEY='' QUERY-STRING='SELECT
+DISTINCT GROUP_ID &#061; EVALUATE2(IF(bg.BR_GROUP_ID &#061; 0.0) -2
+ELSE bg.BR_GROUP_ID
+ENDIF)
+, group_name &#061; EVALUATE2(IF(bg.BR_GROUP_ID &#061; 0.0) " "
+ELSE bg.GROUP_NAME
+ENDIF)
+from br_group bg,br_group bg2, BR_GROUP_RELTN BGR,BR_GROUP_RELTN BGR2
+where bg.BR_GROUP_ID &#061; BGR.BR_GROUP_ID
+and (BG.GROUP_TYPE_FLAG &#061; 2 or BG.BR_GROUP_ID &#061; 0.0)
+and BG2.BR_GROUP_ID &#061; BGR.parent_entity_id
+and (BG2.GROUP_TYPE_FLAG &#061; 1 or BG2.BR_GROUP_ID &#061; 0.0)
+and BG2.BR_GROUP_ID &#061; BGR2.BR_GROUP_ID
+and (exists(select 1 from BR_ELIGIBLE_PROVIDER EP, PRSNL PR 
+where PR.PERSON_ID &#061; REQINFO->UPDT_ID
+and EP.logical_domain_id &#061; PR.LOGICAL_DOMAIN_ID 
+and EP.BR_ELIGIBLE_PROVIDER_ID &#061; BGR2.PARENT_ENTITY_ID)
+OR BG2.BR_GROUP_ID &#061; 0.0)
+ORDER BY BG.GROUP_NAME
+' QUERY-OPTIONS='1067' COLUMNS='&#123;TABLE&#061;&#034;&#034; ORDINAL&#061;&#034;0&#034; VISIBLE&#061;&#034;false&#034; COLUMN&#061;&#034;0&#034; ALIAS&#061;&#034;&#034; FO]]></property>
+<property name = 'SETTINGS:01'><![CDATA[RMAT&#061;&#034;&#034; WIDTH&#061;&#034;1660.000000&#034; TYPE&#061;&#034;&#034; VALUE&#061;&#034;true&#034; BINDING&#061;&#034;GROUP_ID&#034; TITLE&#061;&#034;GROUP_ID&#034; &#125;&#123;TABLE&#061;&#034;&#034; ORDINAL&#061;&#034;1&#034; VISIBLE&#061;&#034;true&#034; COLUMN&#061;&#034;0&#034; ALIAS&#061;&#034;&#034; FORMAT&#061;&#034;&#034; WIDTH&#061;&#034;96.000000&#034; TYPE&#061;&#034;&#034; VALUE&#061;&#034;false&#034; BINDING&#061;&#034;GROUP_NAME&#034; TITLE&#061;&#034;GROUP_NAME&#034; &#125;'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ]]></property>
+</component>
+<component name = 'GENERAL'><property name = 'PROMPT'><![CDATA[CTRL-VERT-OFFSET='' REQUIRED='false' HIDE-LABEL='false' BOTTOM='100' BORDER='false' AUTO-GROUP='false' LABEL-POS-LEFT='0' LABEL-POS-TOP='0' CTRL-WIDTH='250' LEFT='284' CTRL-TOP='' EXCLUDE-RUNTIME='true' CTRL-HEIGHT='' RESIZABLE='false' RIGHT='250' CTRL-HORZ-OFFSET='' LABEL-POS-HEIGHT='0' LABEL-LEFT='true' TOP='735' TRIM='true' LABEL-POS-WIDTH='0' CTRL-LEFT='284' ]]></property>
+</component>
+</control>
+<control name = 'tier1' control = '3' height = '100' width = '250' position = '14' result-type = '3' exclude = 'true'><display align = 'left'>EC Practices(Tier 1)</display>
+<description></description>
+<default></default>
+<component name = 'CWizDataSource'><property name = 'DATASRC:00'><![CDATA[INC-ANY-DISPLAY='Select All' MODIFIABLE='false' SORT='false' INC-ANY='true' DUAL-LIST='false' KEEP-SELECTION='false' DB-EXE='SCRIPT' INC-ANY-KEY='-1' LABEL-COLUMNS='false' QBE-SOURCE='' MULTI-SELECT='true' SOURCE-TYPE='DATABASE' MULTI_COLUMN='false'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ]]></property>
+<property name = 'DEFAULT-VALUES:00'><![CDATA[MULTI-DEF-COUNT='0'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     ]]></property>
+<property name = 'SETTINGS:00'><![CDATA[DEFAULT-KEY='' QUERY-STRING='select distinct
+GROUP_NAME &#061; EVALUATE2(IF(BGR.parent_entity_name &#061; &#034;BR_GROUP&#034; AND BGR.parent_entity_id > 0) bg2.group_name
+ELSE " "
+ENDIF
+)
+, GROUP_ID &#061; EVALUATE2(IF(BGR.parent_entity_name &#061; &#034;BR_GROUP&#034; AND BGR.parent_entity_id > 0) bg2.br_group_id
+ELSE -2
+ENDIF
+)
+from BR_GROUP_RELTN bgr, br_group BG2, BR_GROUP_RELTN BGR2
+where (bgr.br_group_id in($tier2) or -1 in ($tier2))
+and bgr.parent_entity_id&#061; BG2.br_group_id
+and BG2.BR_GROUP_ID &#061; BGR2.BR_GROUP_ID
+and (exists(select 1
+from prsnl pr, br_eligible_provider ep
+where pr.person_id &#061; REQINFO->UPDT_ID
+and pr.logical_domain_id &#061; ep.logical_domain_id
+and ep.br_eligible_provider_id &#061; bgr2.parent_entity_id)
+OR BG2.br_group_id&#061; 0.0)
+order by BG2.group_name
+
+
+' QUERY-OPTIONS='1067' COLUMNS='&#123;TABLE&#061;&#034;&#034; ORDINAL&#061;&#034;0&#034; VISIBLE&#061;&#034;true&#034; COLUMN&#061;&#034;0&#034; ALIAS&#061;&#034;&#034; FORMAT&#061;&#034;&#03]]></property>
+<property name = 'SETTINGS:01'><![CDATA[4; WIDTH&#061;&#034;96.000000&#034; TYPE&#061;&#034;&#034; VALUE&#061;&#034;false&#034; BINDING&#061;&#034;GROUP_NAME&#034; TITLE&#061;&#034;GROUP_NAME&#034; &#125;&#123;TABLE&#061;&#034;&#034; ORDINAL&#061;&#034;1&#034; VISIBLE&#061;&#034;false&#034; COLUMN&#061;&#034;1&#034; ALIAS&#061;&#034;&#034; FORMAT&#061;&#034;&#034; WIDTH&#061;&#034;1660.000000&#034; TYPE&#061;&#034;&#034; VALUE&#061;&#034;true&#034; BINDING&#061;&#034;GROUP_ID&#034; TITLE&#061;&#034;GROUP_ID&#034; &#125;'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  ]]></property>
+</component>
+<component name = 'GENERAL'><property name = 'PROMPT'><![CDATA[CTRL-VERT-OFFSET='' REQUIRED='false' HIDE-LABEL='false' BOTTOM='100' BORDER='false' AUTO-GROUP='false' LABEL-POS-LEFT='0' LABEL-POS-TOP='0' CTRL-WIDTH='250' LEFT='645' CTRL-TOP='' EXCLUDE-RUNTIME='true' CTRL-HEIGHT='' RESIZABLE='false' RIGHT='250' CTRL-HORZ-OFFSET='' LABEL-POS-HEIGHT='0' LABEL-LEFT='true' TOP='735' TRIM='true' LABEL-POS-WIDTH='0' CTRL-LEFT='' ]]></property>
+</component>
+</control>
+</prompt-def>

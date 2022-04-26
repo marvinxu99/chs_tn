@@ -141,50 +141,8 @@ record t_rec
 	 2 filename				= vc
 	 2 merge_command		= vc
 	 2 remove_command		= vc
-)
+) with protect
 
-RECORD params (
-    1 outdev = vc
-    1 epfilter = vc
-    1 orgfilter = i4
-    1 optinitiative = vc
-    1 year = vc
-    1 start_dt = dq8
-    1 end_dt = dq8
-    1 quarter_year_month = vc
-    1 brdefmeas = vc
-    1 chksummaryonly = vc
-    1 payerfilter = vc
-    1 qrdamode = vc
-    1 measure_cnt = i4
-    1 measure_string = vc
-    1 report_by = vc
-    1 measures [* ]
-      2 mean = vc
-    1 grp_cnt = i4
-    1 grps [* ]
-      2 br_gpro_id = f8
-      2 name = vc
-      2 tax_id_nbr_txt = vc
-      2 logical_domain_id = f8
-      2 measure_cnt = i4
-      2 measure_string = vc
-      2 measures [* ]
-        3 mean = vc
-    1 ep_cnt = i4
-    1 eps [* ]
-      2 br_eligible_provider_id = f8
-      2 provider_id = f8
-      2 npi_nbr_txt = vc
-      2 tax_id_nbr_txt = vc
-      2 include_ind = i2
-      2 name = vc
-      2 logical_domain_id = f8
-      2 measure_cnt = i4
-      2 measure_string = vc
-      2 measures [* ]
-        3 mean = vc
-  ) WITH public
   
 call addEmailLog("chad.cummings@covhlth.com")
 ;call addEmailLog("kswallow@CovHlth.com")
@@ -197,20 +155,20 @@ call writeLog(build2("**********************************************************
 call writeLog(build2("************************************************************"))
 call writeLog(build2("* START Build Parameters ***********************************"))
 
-set t_rec->batch_size				= 300
+set t_rec->batch_size				= 400
 
-set t_rec->report_program 			= ^LH_EC2021_REPORT^
+set t_rec->report_program 			= ^cov_lh_ec2021_report^
 ;set t_rec->param_program			= ^lh_ec2020_ops_params^
 
 
-set t_rec->1_outdev					= ^MINE^
-set t_rec->2_optinitiative			= ^CUSTTF^
+set t_rec->1_outdev					= ^cmc_test_file1.csv^
+set t_rec->2_optinitiative			= ^QTR_YEAR^	;^CUSTTF^
 set t_rec->3_year					= ^^
 set t_rec->4_start_dt				= ^25-APR-2022^
-;set t_rec->4_start_dt				= format(datetimefind(cnvtdatetime(CURDATE-14, 0),'D','B','B'),"DD-MMM-YYYY;;q")
-set t_rec->5_end_dt				= ^26-APR-2022^
-;set t_rec->5_end_dt					= format(datetimefind(cnvtdatetime(CURDATE-1, 0),'D','B','E'),"DD-MMM-YYYY;;q")
-set t_rec->6_chksummaryonly			= ^SUM_CSV^
+set t_rec->4_start_dt				= format(datetimefind(cnvtdatetime(CURDATE-14, 0),'D','B','B'),"DD-MMM-YYYY;;q")
+set t_rec->5_end_dt					= ^26-APR-2022^
+set t_rec->5_end_dt					= format(datetimefind(cnvtdatetime(CURDATE-1, 0),'D','B','E'),"DD-MMM-YYYY;;q")
+set t_rec->6_chksummaryonly			= ^DET_CSV^
 set t_rec->7_lstmeasure				= concat(^value(^,
 											^"MU_EC_CMS2_2021",^,
 											^"MU_EC_CMS22_2021",^,
@@ -232,13 +190,13 @@ set t_rec->7_lstmeasure				= concat(^value(^,
 											^"MU_EC_CMS147_2021",^,
 											^"MU_EC_CMS149_2021",^,
 											^"MU_EC_CMS154_2021",^,
-											^"MU_EC_CMS156_2021",^,
+											^"MU_EC_CMS156_2021"^,
 											^)^)
 set t_rec->8_orgfilter				= -1
 set t_rec->9_epfilter				= ^All  -1^
 set t_rec->10_lsteligbleprovider	= concat(^value(^,cnvtstring(-1),^)^)
 set t_rec->11_brdefmeas				= ^-1^
-set t_rec->12_dt_quarter_year		= ^^
+set t_rec->12_dt_quarter_year		= ^JAN^	;^^
 set t_rec->13_reportby				= ^INDV^
 
 set t_rec->merged.filename 		= concat("cov_ec2021_ops_" ,format(cnvtdatetime(curdate,curtime3),"MMDDYYYY_HHMMSS;;q"),".csv")
@@ -251,7 +209,7 @@ call writeLog(build2("**********************************************************
 call writeLog(build2("************************************************************"))
 call writeLog(build2("* START Adding Providers ***********************************"))
 
-Select
+Select into "nl:"
       myKey = B.BR_ELIGIBLE_PROVIDER_ID
     , Name = P.NAME_FULL_FORMATTED
     , NPI = B.NATIONAL_PROVIDER_NBR_TXT
@@ -319,15 +277,15 @@ and (
     )
 order by
 	 p.name_full_formatted
-	,bep.br_eligible_provider_id
+	,b.br_eligible_provider_id
 head report
 	cnt = 0
-head bep.br_eligible_provider_id
+head b.br_eligible_provider_id
 	t_rec->prov_cnt = (t_rec->prov_cnt + 1)
 	stat = alterlist(t_rec->prov_qual,t_rec->prov_cnt)
-	t_rec->prov_qual[t_rec->prov_cnt].br_eligible_provider_id = bep.br_eligible_provider_id
-	t_rec->prov_qual[t_rec->prov_cnt].npi = bep.national_provider_nbr_txt
-	t_rec->prov_qual[t_rec->prov_cnt].tax = bep.tax_id_nbr_txt
+	t_rec->prov_qual[t_rec->prov_cnt].br_eligible_provider_id = b.br_eligible_provider_id
+	t_rec->prov_qual[t_rec->prov_cnt].npi = b.national_provider_nbr_txt
+	t_rec->prov_qual[t_rec->prov_cnt].tax = b.tax_id_nbr_txt
 	t_rec->prov_qual[t_rec->prov_cnt].person_id = p.person_id
 foot report
 	cnt = 0
@@ -379,8 +337,7 @@ for (i=1 to t_rec->batch_cnt)
  endfor
  set t_rec->10_lsteligbleprovider	= concat(t_rec->10_lsteligbleprovider,^)^)
  set t_rec->parser_param = concat(
-						 			"execute "
-									,trim(t_rec->param_program),					" "
+						 			trim(t_rec->report_program),					" "
 									,"^",trim(t_rec->1_outdev),"^",					","
 									,"^",trim(t_rec->2_optinitiative),"^",			","
 									,"^",trim(t_rec->3_year),"^",					","
@@ -393,23 +350,21 @@ for (i=1 to t_rec->batch_cnt)
 									,trim(t_rec->10_lsteligbleprovider),			","
 									,"^",trim(t_rec->11_brdefmeas),"^",				","					
 									,"^",trim(t_rec->12_dt_quarter_year),"^",		","
-									,"^",trim(t_rec->13_reportby),"^",				","			
-									," go"
+									,"^",trim(t_rec->13_reportby),"^"
 								)
  ;set trace server 1 
  call writeLog(build2("running-->",t_rec->parser_param))
- ;call parser(t_rec->parser_param)
+ call parser(concat("execute ",t_rec->parser_param," go"))
 	
  ;set stat = initrec(params)
  ;call parser(concat("execute ",t_rec->report_program," go"))
  ;set trace server 2
 	
- call writeLog(build2("-->",cnvtrectojson(params))) 
-	
+ 
  set t_rec->file_cnt = (t_rec->file_cnt + 1)
  set stat = alterlist(t_rec->file_qual,t_rec->file_cnt)
- set t_rec->file_qual[t_rec->file_cnt].filename = params->outdev
- call addAttachment(program_log->files.ccluserdir,params->outdev)
+ set t_rec->file_qual[t_rec->file_cnt].filename = "cmc_test_file1.csv"
+ call addAttachment(program_log->files.ccluserdir,t_rec->file_qual[t_rec->file_cnt].filename)
 
 endfor
 
@@ -447,6 +402,7 @@ call writeLog(build2("* START Custom   *****************************************
 call writeLog(build2("* END   Custom   *******************************************"))
 call writeLog(build2("************************************************************"))
 
+/*
 if (validate(t_rec))
 	call writeLog(build2(cnvtrectojson(t_rec))) 
 endif
@@ -462,6 +418,7 @@ endif
 if (validate(program_log))
 	call writeLog(build2(cnvtrectojson(program_log)))
 endif
+*/
 
 #exit_script
 call exitScript(null)
