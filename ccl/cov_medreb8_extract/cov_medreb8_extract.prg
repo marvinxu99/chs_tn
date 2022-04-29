@@ -948,7 +948,7 @@ with nocounter
 ;--------------------------------------------------------------------------------------------------------------
 ;Get item_id for all Pharmacy orders & Scanned floor orders
 call echo("*** Get item_id for all Pharmacy orders & Scanned floor orders ***")
-/*
+
 select distinct into 'nl:' ; into $outdev
  
      mair.event_id, mai.item_id, mai.med_product_id
@@ -995,9 +995,9 @@ Head mair.event_id
 	endwhile
 Foot mair.event_id
 	null
- 
+ 	call echo(build2("mai.item_id=",mai.item_id))
 With nocounter
-*/
+
 ;------------------------------------------------------------------------------------------
 ;Dispense Qty
 call echo("*** Dispense Qty ***")
@@ -1129,14 +1129,14 @@ plan d
  
 join mi where mi.item_id = med_admin->mlist[d.seq].item_id
     and mi.primary_ind = 1
-    and mi.med_product_id = 0
+    and mi.med_product_id =  med_admin->mlist[d.seq].med_product_id
     and mi.med_identifier_type_cd in(ndc_var) ;brandname_var, chargenumber_var , genericname_var)
     and mi.active_ind = 1
  
 order by mi.item_id, mi.med_identifier_type_cd
  
 detail
-med_admin->mlist[idx].ndc = mi.value
+med_admin->mlist[d.seq].ndc = mi.value
  
 With nocounter ,expand = 1
  
@@ -1279,17 +1279,22 @@ if(iOpsInd = 1) ;Ops
 	;, QUAL_DISPENSES = OUTPUT->qual[D1.SEQ].dispenses
 	*/
 			file_header_var = build(
-				 wrap3("Pharmacy ID")
-				,wrap3("Date of Service")
-				,wrap3("Prescriber ID Number")
-				,wrap3("NDC Number")
-				,wrap3("Quantity Dispensed")
-				,wrap3("Unit of Measure")
-				,wrap3("Ingredient Cost")
-				,wrap3("Encounter ID")
-				,wrap3("Patient Gender Code")
-				,wrap3("Patient State")
-				,wrap3("Relationship Code"))
+				 wrap2("Pharmacy ID")
+				,wrap2("Date of Service")
+				,wrap2("Prescriber ID Number")
+				,wrap2("NDC Number")
+				,wrap2("Quantity Dispensed")
+				,wrap2("Unit of Measure")
+				,wrap2("Ingredient Cost")
+				,wrap2("Encounter ID")
+				,wrap2("Patient Gender Code")
+				,wrap2("Patient State")
+				,wrap2("Relationship Code")
+				,wrap2("encntr_id")
+				,wrap2("order_id")
+				,wrap2("item_id")
+				
+				)
  
 		col 0 file_header_var
 		row + 1
@@ -1297,18 +1302,22 @@ if(iOpsInd = 1) ;Ops
 		Head d.seq
 			output_orders = ""
 			output_orders = build(output_orders
-				,wrap3(med_admin->mlist[d.seq].strata_facility_cd)
-				,wrap3(med_admin->mlist[d.seq].med_admin_dt)
-				,wrap3(med_admin->mlist[d.seq].ordering_phys_number)
-				,wrap3(med_admin->mlist[d.seq].ndc)
+				,wrap2(med_admin->mlist[d.seq].strata_facility_cd)
+				,wrap2(med_admin->mlist[d.seq].med_admin_dt)
+				,wrap2(med_admin->mlist[d.seq].ordering_phys_number)
+				,wrap2(med_admin->mlist[d.seq].ndc)
  
-				,wrap3(cnvtstring(med_admin->mlist[d.seq].admin_dose,11,3))
-				,wrap3(med_admin->mlist[d.seq].admin_dose_unit)
-				,wrap3(cnvtstring(med_admin->mlist[d.seq].cost,11,3))
-				,wrap3(cnvtstring(med_admin->mlist[d.seq].encntrid,11,2))
-				,wrap3(cnvtstring(med_admin->mlist[d.seq].gender,1,1))
-				,wrap3(med_admin->mlist[d.seq].state)
-				,wrap3(cnvtstring(med_admin->mlist[d.seq].relationship_code,1,1)))
+				,wrap2(cnvtstring(med_admin->mlist[d.seq].admin_dose,11,3))
+				,wrap2(med_admin->mlist[d.seq].admin_dose_unit)
+				,wrap2(cnvtstring(med_admin->mlist[d.seq].cost,11,3))
+				,wrap2(cnvtstring(med_admin->mlist[d.seq].encntrid,11,2))
+				,wrap2(cnvtstring(med_admin->mlist[d.seq].gender,1,1))
+				,wrap2(med_admin->mlist[d.seq].state)
+				,wrap2(cnvtstring(med_admin->mlist[d.seq].relationship_code,1,1))
+				,wrap2(cnvtstring(med_admin->mlist[d.seq].encntrid,12,2))
+				,wrap2(cnvtstring(med_admin->mlist[d.seq].orderid,12,2))
+				,wrap2(cnvtstring(med_admin->mlist[d.seq].item_id,12,2))
+			)
  
 	 		output_orders = trim(output_orders, 3)
  
