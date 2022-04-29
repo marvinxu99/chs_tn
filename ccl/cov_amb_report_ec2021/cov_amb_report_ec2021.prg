@@ -107,6 +107,7 @@ record t_rec
 	 2 short_path			= vc
 	 2 filename				= vc
 	 2 command				= vc
+	 2 astream				= vc
 	1 param_program			= vc
 	1 report_program		= vc
 	1 parser_param			= vc
@@ -161,8 +162,8 @@ set t_rec->report_program 			= ^cov_lh_ec2021_report^
 ;set t_rec->param_program			= ^lh_ec2020_ops_params^
 
 
-set t_rec->1_outdev					= ^cmc_test_file1.csv^
-set t_rec->2_optinitiative			= ^QTR_YEAR^	;^CUSTTF^
+set t_rec->1_outdev					= ^MINE^
+set t_rec->2_optinitiative			= ^CUSTTF^; ^QTR_YEAR^	;^CUSTTF^
 set t_rec->3_year					= ^^
 set t_rec->4_start_dt				= ^25-APR-2022^
 set t_rec->4_start_dt				= format(datetimefind(cnvtdatetime(CURDATE-14, 0),'D','B','B'),"DD-MMM-YYYY;;q")
@@ -196,12 +197,13 @@ set t_rec->8_orgfilter				= -1
 set t_rec->9_epfilter				= ^All  -1^
 set t_rec->10_lsteligbleprovider	= concat(^value(^,cnvtstring(-1),^)^)
 set t_rec->11_brdefmeas				= ^-1^
-set t_rec->12_dt_quarter_year		= ^JAN^	;^^
+set t_rec->12_dt_quarter_year		= ^^	;^JAN^	;^^
 set t_rec->13_reportby				= ^INDV^
 
 set t_rec->merged.filename 		= concat("cov_ec2021_ops_" ,format(cnvtdatetime(curdate,curtime3),"MMDDYYYY_HHMMSS;;q"),".csv")
 set t_rec->merged.full_path 	= program_log->files.file_path
 set t_rec->merged.short_path 	= "cclscratch:"
+;set t_rec->merged.astream 		= build("/nfs/middle_fs/to_client_site/",trim(cnvtlower(curdomain)),"/CernerCCL/")
        
 call writeLog(build2("* END   Build Parameters ***********************************"))
 call writeLog(build2("************************************************************"))
@@ -336,6 +338,18 @@ for (i=1 to t_rec->batch_cnt)
   endif
  endfor
  set t_rec->10_lsteligbleprovider	= concat(t_rec->10_lsteligbleprovider,^)^)
+ 
+ set t_rec->file_cnt = (t_rec->file_cnt + 1)
+ set stat = alterlist(t_rec->file_qual,t_rec->file_cnt)
+ set t_rec->file_qual[t_rec->file_cnt].filename = concat(
+ 								"tempcovec2021ops_"
+ 								,trim(cnvtstring(t_rec->file_cnt,2,0))
+ 								,"_"
+ 								,format(cnvtdatetime(curdate,curtime3),"MMDDYYYY_HHMMSS;;q")
+ 								,".csv")
+ 
+ set t_rec->1_outdev = t_rec->file_qual[t_rec->file_cnt].filename
+ 
  set t_rec->parser_param = concat(
 						 			trim(t_rec->report_program),					" "
 									,"^",trim(t_rec->1_outdev),"^",					","
@@ -352,6 +366,8 @@ for (i=1 to t_rec->batch_cnt)
 									,"^",trim(t_rec->12_dt_quarter_year),"^",		","
 									,"^",trim(t_rec->13_reportby),"^"
 								)
+ 
+
  ;set trace server 1 
  call writeLog(build2("running-->",t_rec->parser_param))
  call parser(concat("execute ",t_rec->parser_param," go"))
@@ -360,11 +376,7 @@ for (i=1 to t_rec->batch_cnt)
  ;call parser(concat("execute ",t_rec->report_program," go"))
  ;set trace server 2
 	
- 
- set t_rec->file_cnt = (t_rec->file_cnt + 1)
- set stat = alterlist(t_rec->file_qual,t_rec->file_cnt)
- set t_rec->file_qual[t_rec->file_cnt].filename = "cmc_test_file1.csv"
- call addAttachment(program_log->files.ccluserdir,t_rec->file_qual[t_rec->file_cnt].filename)
+ ;call addAttachment(program_log->files.ccluserdir,t_rec->file_qual[t_rec->file_cnt].filename)
 
 endfor
 
@@ -392,7 +404,8 @@ if (t_rec->file_cnt > 0)
 		;call dcl(t_rec->file_qual[i].remove_command,size(trim(t_rec->file_qual[i].remove_command)),stat)
 	 endif
 	endfor
-	call addAttachment(t_rec->merged.full_path,t_rec->merged.filename)
+	;call addAttachment(t_rec->merged.full_path,t_rec->merged.filename)
+	execute cov_astream_file_transfer "cclscratch",t_rec->merged.filename,"","MP"
 endif	
 call writeLog(build2("* END   Merging Files **************************************"))
 call writeLog(build2("************************************************************"))
@@ -423,13 +436,15 @@ endif
 #exit_script
 call exitScript(null)
 
+
 for (i=1 to t_rec->file_cnt)
  if (t_rec->file_qual[i].filename > " ")
 	call dcl(t_rec->file_qual[i].remove_command,size(trim(t_rec->file_qual[i].remove_command)),stat)
  endif
 endfor
 
-;call echorecord(t_rec)
+
+call echorecord(t_rec->file_qual)
 ;call echorecord(code_values)
 ;call echorecord(program_log)
 
