@@ -89,7 +89,7 @@ join apc
 	where apc.parent_entity_id = o.order_id
 join pc
 	where pc.pathway_catalog_id = o.pathway_catalog_id
-	and   pc.description = "BH Adult Agitation Orders - DRAFT"
+	and   pc.description = "BH Adult Agitation Orders*"
 	;and   pc.description = "HOS Syncope Admission"
 join p
 	where p.pathway_id = apc.pathway_id
