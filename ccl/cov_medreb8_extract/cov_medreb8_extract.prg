@@ -967,32 +967,36 @@ plan d
 join mair where mair.event_id = med_admin->mlist[d.seq].event_id
  
 join mai where mai.ce_med_admin_ident_id = outerjoin(mair.ce_med_admin_ident_id)
- 
+head report
+	item_id = 0.0
 Head mair.event_id
 	cnt = 0
 	idx = 0
-	idx = locateval(cnt,1,size(med_admin->mlist,5), mair.event_id, med_admin->mlist[cnt].event_id)
-	while(idx > 0)
-		if(med_admin->mlist[idx].item_id = 0)
+	item_id = 0.0
+	item_id = mair.event_id
+detail
+	;idx = locateval(cnt,1,size(med_admin->mlist,5), mair.event_id, med_admin->mlist[cnt].event_id)
+	;while(idx > 0)
+		if(med_admin->mlist[d.seq].item_id = 0)
 			if(mai.item_id != 0)
-				med_admin->mlist[idx].item_id = mai.item_id
-				if(med_admin->mlist[idx].quantity = 0)
-					med_admin->mlist[idx].quantity = mai.scan_qty
+				med_admin->mlist[d.seq].item_id = mai.item_id
+				if(med_admin->mlist[d.seq].quantity = 0)
+					med_admin->mlist[d.seq].quantity = mai.scan_qty
 				endif
-				med_admin->mlist[idx].med_product_id = mai.med_product_id
-				med_admin->mlist[idx].med_admin_barcode = admin_barcode
-				med_admin->mlist[idx].admin_barcode_source = barcode_source
+				med_admin->mlist[d.seq].med_product_id = mai.med_product_id
+				med_admin->mlist[d.seq].med_admin_barcode = admin_barcode
+				med_admin->mlist[d.seq].admin_barcode_source = barcode_source
 			endif
-		elseif(med_admin->mlist[idx].item_id != 0)
-			if(med_admin->mlist[idx].quantity = 0)
-				med_admin->mlist[idx].quantity = mai.scan_qty
+		elseif(med_admin->mlist[d.seq].item_id != 0)
+			if(med_admin->mlist[d.seq].quantity = 0)
+				med_admin->mlist[d.seq].quantity = mai.scan_qty
 			endif
-			med_admin->mlist[idx].med_product_id = mai.med_product_id
-			med_admin->mlist[idx].med_admin_barcode = admin_barcode
-			med_admin->mlist[idx].admin_barcode_source = barcode_source
+			med_admin->mlist[d.seq].med_product_id = mai.med_product_id
+			med_admin->mlist[d.seq].med_admin_barcode = admin_barcode
+			med_admin->mlist[d.seq].admin_barcode_source = barcode_source
 		endif
-		idx = locateval(cnt,(idx+1),size(med_admin->mlist,5),mair.event_id, med_admin->mlist[cnt].event_id)
-	endwhile
+		;idx = locateval(cnt,(idx+1),size(med_admin->mlist,5),mair.event_id, med_admin->mlist[cnt].event_id)
+	;endwhile
 Foot mair.event_id
 	null
  	call echo(build2("mai.item_id=",mai.item_id))
