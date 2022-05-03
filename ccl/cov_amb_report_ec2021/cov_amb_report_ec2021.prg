@@ -28,10 +28,11 @@ Mod 	Mod Date	  Developer				      Comment
 drop program cov_amb_report_ec2021:dba go
 create program cov_amb_report_ec2021:dba
 
-prompt
-	"Output to File/Printer/MINE" = "MINE"   ;* Enter or select the printer or file name to send this report to.
+prompt 
+	"Output to File/Printer/MINE" = "MINE"
+	, "Report Type" = 1 
 
-with OUTDEV
+with OUTDEV, REPORT_TYPE
 
 
 call echo(build("loading script:",curprog))
@@ -98,6 +99,9 @@ record t_rec
 	1 cnt					= i4
 	1 custom_code_set		= i4
 	1 code_value_cnt		= i2
+	1 prompts
+	 2 outdev				= vc
+	 2 report_type			= i2
 	1 code_value_qual[*]
 	 2 code_value			= f8
 	 2 npi					= vc
@@ -161,6 +165,8 @@ set t_rec->batch_size				= 400
 set t_rec->report_program 			= ^cov_lh_ec2021_report^
 ;set t_rec->param_program			= ^lh_ec2020_ops_params^
 
+set t_rec->prompts.outdev			= $OUTDEV
+set t_rec->prompts.report_type		= $REPORT_TYPE
 
 set t_rec->1_outdev					= ^MINE^
 set t_rec->2_optinitiative			= ^CUSTTF^; ^QTR_YEAR^	;^CUSTTF^
@@ -169,7 +175,7 @@ set t_rec->4_start_dt				= ^25-APR-2022^
 set t_rec->4_start_dt				= format(datetimefind(cnvtdatetime(CURDATE-14, 0),'D','B','B'),"DD-MMM-YYYY;;q")
 set t_rec->5_end_dt					= ^26-APR-2022^
 set t_rec->5_end_dt					= format(datetimefind(cnvtdatetime(CURDATE-1, 0),'D','B','E'),"DD-MMM-YYYY;;q")
-set t_rec->6_chksummaryonly			= ^DET_CSV^
+set t_rec->6_chksummaryonly			= ^SUM_CSV^
 set t_rec->7_lstmeasure				= concat(^value(^,
 											^"MU_EC_CMS2_2021",^,
 											^"MU_EC_CMS22_2021",^,
@@ -200,10 +206,18 @@ set t_rec->11_brdefmeas				= ^-1^
 set t_rec->12_dt_quarter_year		= ^^	;^JAN^	;^^
 set t_rec->13_reportby				= ^INDV^
 
-set t_rec->merged.filename 		= concat("cov_ec2021_ops_" ,format(cnvtdatetime(curdate,curtime3),"MMDDYYYY_HHMMSS;;q"),".csv")
+set t_rec->merged.filename 		= concat("cov_ec2021_ops_TYPE_" ,format(cnvtdatetime(curdate,curtime3),"MMDDYYYY_HHMMSS;;q"),".csv")
 set t_rec->merged.full_path 	= program_log->files.file_path
 set t_rec->merged.short_path 	= "cclscratch:"
 ;set t_rec->merged.astream 		= build("/nfs/middle_fs/to_client_site/",trim(cnvtlower(curdomain)),"/CernerCCL/")
+
+if (t_rec->prompts.report_type = 1)
+	set t_rec->6_chksummaryonly = "DET_CSV"
+else
+	set t_rec->6_chksummaryonly = "SUM_CSV"
+endif
+
+set t_rec->merged.filename = cnvtlower(replace(t_rec->merged.filename,"TYPE",t_rec->6_chksummaryonly))
        
 call writeLog(build2("* END   Build Parameters ***********************************"))
 call writeLog(build2("************************************************************"))
