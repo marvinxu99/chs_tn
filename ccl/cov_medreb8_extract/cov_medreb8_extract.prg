@@ -339,7 +339,7 @@ Detail
 	med_admin->mlist[mcnt].template_ord_id = o.template_order_id
 	med_admin->mlist[mcnt].admin_dose = cmr.admin_dosage
 	med_admin->mlist[mcnt].admin_dose_unit = uar_get_code_display(cmr.dosage_unit_cd)
- 
+	 med_admin->mlist[mcnt].ordered_mnemonic = o.ordered_as_mnemonic
 	if(med_admin->mlist[mcnt].template_ord_flag = 4);child orders
 		if(o.template_order_id != 0)
 			med_admin->mlist[mcnt].orderid = o.template_order_id
@@ -525,7 +525,7 @@ With nocounter ,expand = 1
 ;get Patient Demographic
 call echo("*** get Patient Demographic ***")
  
-select distinct into 'NL:'
+select into 'NL:'
  
 from
 	(dummyt d WITH seq = value(size(med_admin->mlist,5)))
@@ -573,8 +573,8 @@ With nocounter
 ;-------------------------------------------------------------------------------------------------------------
 ;get prsnl id and CKI from orders
 call echo("*** get prsnl id and CKI from orders ***")
-/*
-select distinct into 'NL:'
+
+select into 'NL:'
  
 from
 	(dummyt d WITH seq = value(size(med_admin->mlist,5)))
@@ -587,24 +587,12 @@ join o where o.order_id = med_admin->mlist[d.seq].orderid
  
 order by o.order_id
  
-Head o.order_id
-	cnt = 0
-	idx = 0
-    idx = locateval(cnt,1,size(med_admin->mlist,5),o.order_id, med_admin->mlist[cnt].orderid)
-    cki_pos = findstring("!" ,o.cki)
-    cki_len = textlen(o.cki)
-	cki_val = trim(substring((cki_pos + 1) ,cki_len ,o.cki))
+detail
+		med_admin->mlist[d.seq].order_cki = cki_val
+		med_admin->mlist[d.seq].ordered_mnemonic = trim(o.ordered_as_mnemonic,3)
  
-    while(idx > 0)
-		med_admin->mlist[idx].order_cki = cki_val
-		med_admin->mlist[idx].ordered_mnemonic = trim(o.ordered_as_mnemonic,3)
- 		idx = locateval(cnt,(idx+1),size(med_admin->mlist,5),o.order_id, med_admin->mlist[cnt].orderid)
-	endwhile
- 
-Foot o.order_id
-	null
 With nocounter
-*/
+
 ;--------------------------------------------------------------------------------------------------------------
 ; get Attending-prsnl info
 call echo("*** get Attending-prsnl info ***")
@@ -949,7 +937,7 @@ with nocounter
 ;Get item_id for all Pharmacy orders & Scanned floor orders
 call echo("*** Get item_id for all Pharmacy orders & Scanned floor orders ***")
 
-select distinct into 'nl:' ; into $outdev
+select into 'nl:' ; into $outdev
  
      mair.event_id, mai.item_id, mai.med_product_id
     ,admin_barcode = trim(mai.med_admin_barcode)
@@ -999,14 +987,14 @@ detail
 	;endwhile
 Foot mair.event_id
 	null
- 	call echo(build2("mai.item_id=",mai.item_id))
+ 	;call echo(build2("mai.item_id=",mai.item_id))
 With nocounter
 
 ;------------------------------------------------------------------------------------------
 ;Dispense Qty
 call echo("*** Dispense Qty ***")
-/*
-select distinct into 'NL:'
+
+select  into 'NL:'
  
 	op.order_id, mpt.dispense_qty, dispn_unit = uar_get_code_display(mpt.base_uom_cd)
  
@@ -1031,26 +1019,17 @@ join mpt where mpt.med_package_type_id = mdf.med_package_type_id
  
 order by op.order_id
  
-Head op.order_id
-	idx = 0
-	cnt = 0
-	idx = locateval(cnt,1,size(med_admin->mlist,5),op.order_id, med_admin->mlist[cnt].orderid)
-	while(idx > 0)
-		if(med_admin->mlist[idx].item_id = 0)
-			med_admin->mlist[idx].item_id = op.item_id
+detail
+		if(med_admin->mlist[d.seq].item_id = 0)
+			med_admin->mlist[d.seq].item_id = op.item_id
 		endif
-		if(med_admin->mlist[idx].quantity = 0)
-			med_admin->mlist[idx].quantity = mpt.dispense_qty
-			med_admin->mlist[idx].quantity_unit = dispn_unit
+		if(med_admin->mlist[d.seq].quantity = 0)
+			med_admin->mlist[d.seq].quantity = mpt.dispense_qty
+			med_admin->mlist[d.seq].quantity_unit = dispn_unit
 		endif
-		idx = locateval(cnt,(idx+1),size(med_admin->mlist,5),op.order_id, med_admin->mlist[cnt].orderid)
-	endwhile
- 
-Foot op.order_id
-	null
- 
+		
 With nocounter
-*/
+
  
 ;----------------------------------------------------------------------------------------------------
 ;Drug Class data
@@ -1123,7 +1102,7 @@ With nocounter ,expand = 1
 ;Get Drug brand and RX numbers
 call echo("*** Get NDCs ***")
  
-select distinct into 'NL:'
+select into 'NL:'
  
 from
 	(dummyt d WITH seq = value(size(med_admin->mlist,5)))
@@ -1140,6 +1119,7 @@ join mi where mi.item_id = med_admin->mlist[d.seq].item_id
 order by mi.item_id, mi.med_identifier_type_cd
  
 detail
+
 med_admin->mlist[d.seq].ndc = mi.value
  
 With nocounter ,expand = 1
@@ -1296,8 +1276,10 @@ if(iOpsInd = 1) ;Ops
 				,wrap2("Relationship Code")
 				,wrap2("encntr_id")
 				,wrap2("order_id")
+				,wrap2("event_id")
 				,wrap2("item_id")
-				
+				,wrap2("med_product_id")
+				,wrap2("order_mnemonic")
 				)
  
 		col 0 file_header_var
@@ -1320,7 +1302,10 @@ if(iOpsInd = 1) ;Ops
 				,wrap2(cnvtstring(med_admin->mlist[d.seq].relationship_code,1,1))
 				,wrap2(cnvtstring(med_admin->mlist[d.seq].encntrid,12,2))
 				,wrap2(cnvtstring(med_admin->mlist[d.seq].orderid,12,2))
+				,wrap2(cnvtstring(med_admin->mlist[d.seq].event_id,12,2))
 				,wrap2(cnvtstring(med_admin->mlist[d.seq].item_id,12,2))
+				,wrap2(cnvtstring(med_admin->mlist[d.seq].med_product_id,12,2))
+				,wrap2((med_admin->mlist[d.seq].ordered_mnemonic))
 			)
  
 	 		output_orders = trim(output_orders, 3)
