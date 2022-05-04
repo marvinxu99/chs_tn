@@ -496,8 +496,7 @@ CREATE PROGRAM cov_resolve_merged_pregnancies :dba
    SET probrequest->problem[1 ].life_cycle_status_cd = resolved_action_cd
    SET probrequest->problem[1 ].problem_action_ind = 2
    SET probrequest->skip_fsi_trigger = 1
-   EXECUTE kia_ens_problem WITH replace ("REQUEST" ,probrequest ) ,
-   replace ("REPLY" ,probreply )
+   ;EXECUTE kia_ens_problem WITH replace ("REQUEST" ,probrequest ) ,replace ("REPLY" ,probreply )
    IF ((probreply->status_data.status = "F" ) )
     IF ((validate (debug_ind ,0 ) > 0 ) )
      CALL echo ("*Failed - problem ensure*" )
@@ -680,8 +679,7 @@ CREATE PROGRAM cov_resolve_merged_pregnancies :dba
       CALL echo ("ResolveClosedPregnancyProblemsAction_probrequest" )
       CALL echorecord (probrequest )
      ENDIF
-     EXECUTE kia_ens_problem WITH replace ("REQUEST" ,probrequest ) ,
-     replace ("REPLY" ,probreply )
+    ; EXECUTE kia_ens_problem WITH replace ("REQUEST" ,probrequest ) , replace ("REPLY" ,probreply )
      IF ((validate (debug_ind ,0 ) > 0 ) )
       CALL echo ("ResolveClosedPregnancyProblemsAction_probreply" )
       CALL echorecord (probreply )
@@ -857,8 +855,7 @@ CREATE PROGRAM cov_resolve_merged_pregnancies :dba
        CALL echo ("ResolveActivePregnancyProblems_probrequest" )
        CALL echorecord (probrequest )
       ENDIF
-      EXECUTE kia_ens_problem WITH replace ("REQUEST" ,probrequest ) ,
-      replace ("REPLY" ,probreply )
+      ;EXECUTE kia_ens_problem WITH replace ("REQUEST" ,probrequest ) , replace ("REPLY" ,probreply )
       IF ((validate (debug_ind ,0 ) > 0 ) )
        CALL echo ("ResolveActivePregnancyProblems_probreply" )
        CALL echorecord (probreply )
@@ -1038,8 +1035,7 @@ CREATE PROGRAM cov_resolve_merged_pregnancies :dba
      CALL echo ("ResolveHistoricalPregnancyProblemsAction_probrequest" )
      CALL echorecord (probrequest )
     ENDIF
-    EXECUTE kia_ens_problem WITH replace ("REQUEST" ,probrequest ) ,
-    replace ("REPLY" ,probreply )
+    ;EXECUTE kia_ens_problem WITH replace ("REQUEST" ,probrequest ) , replace ("REPLY" ,probreply )
     IF ((validate (debug_ind ,0 ) > 0 ) )
      CALL echo ("ResolveHistoricalPregnancyProblemsAction_probreply" )
      CALL echorecord (probreply )
