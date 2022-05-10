@@ -32,3 +32,6 @@ Included CRs and Hotfixes
 
 ### 9231 New Notifications to WH IT Team & End Users if Proper Add Pregnancy Workflow Not Followed2
 2022-04-20: Release of Notification
+
+### 12606 - BH New Violence Risk Assessment and Agitation Powerplan
+2022-05-10: Release to Prod
