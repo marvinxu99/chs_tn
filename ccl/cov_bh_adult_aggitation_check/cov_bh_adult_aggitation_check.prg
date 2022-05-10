@@ -94,7 +94,7 @@ join pc
 join p
 	where p.pathway_id = apc.pathway_id
 	and   p.pw_status_cd = value(uar_get_code_by("MEANING",16769,"INITIATED"))
-	and   p.start_dt_tm <= cnvtlookbehind("5,MIN",cnvtdatetime(sysdate))
+	and   p.start_dt_tm <= cnvtlookbehind("40,H",cnvtdatetime(sysdate))
 order by
 	 e.encntr_id
 	,p.start_dt_tm
