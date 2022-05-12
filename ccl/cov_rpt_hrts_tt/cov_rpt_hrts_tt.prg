@@ -4587,7 +4587,7 @@ head ea.encntr_id
 foot ea.encntr_id
 	if (t_rec->admit_qual[k].encntr_qual[j].diagnosis_cnt > 0)
 		if (t_rec->admit_qual[k].encntr_qual[j].positive_ind = 0)
-			t_rec->admit_qual[k].encntr_qual[j].positive_ind = 2
+			t_rec->admit_qual[k].encntr_qual[j].positive_ind = 0
 			call writeLog(build2("-->POSITIVE DX encntr_id=",trim(cnvtstring(ea.encntr_id))," at position=",trim(cnvtstring(j))))
 		endif
 	endif
@@ -4804,8 +4804,8 @@ for (i=1 to t_rec->patient_cnt)
 				set t_rec->patient_qual[i].suspected_onset_dt_tm = t_rec->patient_qual[i].diagnosis_qual[j].daig_dt_tm ;;THIS MAY
 				;NEED TO BE REVISITED WHICH TIME TAKES PECIDENT
 			else
-				set t_output->qual[t_output->cnt].positive_ind = 1
-				set t_rec->patient_qual[i].positive_onset_dt_tm = t_rec->patient_qual[i].diagnosis_qual[j].daig_dt_tm
+				set t_output->qual[t_output->cnt].positive_ind = 0
+				;set t_rec->patient_qual[i].positive_onset_dt_tm = t_rec->patient_qual[i].diagnosis_qual[j].daig_dt_tm
 			endif
 		endfor
 	endif
@@ -5326,11 +5326,11 @@ for (i=1 to t_rec->patient_cnt)
 				set t_rec->patient_qual[i].suspected_onset_dt_tm = t_rec->patient_qual[i].diagnosis_qual[j].daig_dt_tm ;;REVISIT
 				;THIS NEED TO BE REVISITED WHICH TIME TAKES PECIDENT
 			else
-				set t2_output->qual[t2_output->cnt].positive_ind = 1
-				set t2_output->qual[t2_output->cnt].diagnosis_confirmed_dttm = t_rec->patient_qual[i].diagnosis_qual[j].daig_dt_tm
-				set t2_output->qual[t2_output->cnt].diagnosis_confirmed_dt =
-											format(t2_output->qual[t2_output->cnt].diagnosis_confirmed_dttm,"mm-dd-yy hh:mm;;d")
-				set t_rec->patient_qual[i].positive_onset_dt_tm = t_rec->patient_qual[i].diagnosis_qual[j].daig_dt_tm ;;REVISIT
+				set t2_output->qual[t2_output->cnt].positive_ind = 0
+				;set t2_output->qual[t2_output->cnt].diagnosis_confirmed_dttm = t_rec->patient_qual[i].diagnosis_qual[j].daig_dt_tm
+				;set t2_output->qual[t2_output->cnt].diagnosis_confirmed_dt =
+				;							format(t2_output->qual[t2_output->cnt].diagnosis_confirmed_dttm,"mm-dd-yy hh:mm;;d")
+				;set t_rec->patient_qual[i].positive_onset_dt_tm = t_rec->patient_qual[i].diagnosis_qual[j].daig_dt_tm ;;REVISIT
 			endif
 		endfor
 	endif
