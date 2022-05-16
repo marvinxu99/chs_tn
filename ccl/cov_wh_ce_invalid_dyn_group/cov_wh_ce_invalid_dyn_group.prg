@@ -42,6 +42,9 @@ record t_rec
 	 2 order_id = f8
 	 2 clinical_event_id = f8
 	 2 label = vc
+	1 ce_cnt = i4
+	1 ce_qual[*]
+	 2 clinical_event_id = f8
 	1 retval = i2
 	1 log_message =  vc
 	1 log_misc1 = vc
@@ -54,6 +57,20 @@ set t_rec->patient.encntr_id 				= link_encntrid
 set t_rec->patient.person_id				= link_personid
 
 set t_rec->patient.clinical_event_id		= request->clin_detail_list[1].clinical_event_id
+
+set t_rec->ce_cnt = size(request->clin_detail_list,5)
+
+select into "nl:"
+from
+	(dummyt d1 with seq=t_rec->ce_cnt)
+plan d1
+head report
+	i = 0
+detail
+	i += 1
+	stat = alterlist(t_rec->ce_qual,i)
+	t_rec->ce_qual[i].clinical_event_id = request->clin_detail_list[i].clinical_event_id
+with nocounter
 
 if (t_rec->patient.encntr_id <= 0.0)
 	set t_rec->log_message = concat("link_encntrid not found")
@@ -82,8 +99,10 @@ select into "nl:"
 		 clinical_event ce3
 		,ce_dynamic_label cdl
 		,prsnl p
-	plan ce3
-	where ce3.clinical_event_id = t_rec->patient.clinical_event_id
+		,(dummyt d1 with seq=t_rec->ce_cnt)
+	plan d1
+	join ce3
+	where ce3.clinical_event_id = t_rec->ce_qual[d1.seq].clinical_event_id
 	and	  ce3.encntr_id > 0.0
 	and	  ce3.valid_until_dt_tm >= cnvtdatetime(curdate,curtime3)
 	and   ce3.valid_from_dt_tm <= cnvtdatetime(curdate,curtime3)
