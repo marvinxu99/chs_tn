@@ -15,6 +15,9 @@
 ### 11831 - Rule to cancel CBC w/ automated diff when activated with CD4/CD8 lab order
 2022-03-30: Added GL_CANCEL_CBC_CD4 to EKS
 
+### 12882 - Break/Fix: Correct WH_CE_INVALID_DYN_GROUP rule and script to look at entire request
+2022-05-16: Released
+
 ## Change Requests
 ### 12206 - Add Action script to Discern Dev for Add Reminder
 2022-04-01: Initial Messaging Script

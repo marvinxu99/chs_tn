@@ -1,5 +1,6 @@
 DROP PROGRAM cov_resolve_merged_pregnancies :dba GO
 CREATE PROGRAM cov_resolve_merged_pregnancies :dba
+
  FREE RECORD probrequest
  RECORD probrequest (
    1 person_id = f8
@@ -80,6 +81,8 @@ CREATE PROGRAM cov_resolve_merged_pregnancies :dba
      2 show_in_pm_history_ind = i2
    1 skip_fsi_trigger = i2
  )
+ 
+ 
  DECLARE getpregnancypreferences (null ) = null
  DECLARE findnomenclature (null ) = null
  DECLARE getmergedpregnancydetails (null ) = null
@@ -95,12 +98,9 @@ CREATE PROGRAM cov_resolve_merged_pregnancies :dba
  DECLARE nomen_id = f8 WITH protect ,noconstant (0.0 )
  DECLARE snomenvocabmean = vc WITH protect ,noconstant ("" )
  DECLARE failed = i2 WITH public ,noconstant (0 )
- DECLARE canceled_action_cd = f8 WITH protect ,constant (uar_get_code_by ("MEANING" ,12030 ,
-   "CANCELED" ) )
- DECLARE resolved_action_cd = f8 WITH protect ,constant (uar_get_code_by ("MEANING" ,12030 ,
-   "RESOLVED" ) )
- DECLARE active_action_cd = f8 WITH protect ,constant (uar_get_code_by ("MEANING" ,12030 ,"ACTIVE" )
-  )
+ DECLARE canceled_action_cd = f8 WITH protect ,constant (uar_get_code_by ("MEANING" ,12030 ,"CANCELED" ) )
+ DECLARE resolved_action_cd = f8 WITH protect ,constant (uar_get_code_by ("MEANING" ,12030 ,"RESOLVED" ) )
+ DECLARE active_action_cd = f8 WITH protect ,constant (uar_get_code_by ("MEANING" ,12030 ,"ACTIVE" ))
  DECLARE pregnancy_flag = i4 WITH protect ,constant (2 )
  DECLARE master_pregnancy_id = f8 WITH protect ,noconstant (0.0 )
  DECLARE new_preg_inst_id = f8 WITH protect ,noconstant (0.0 )
@@ -114,6 +114,7 @@ CREATE PROGRAM cov_resolve_merged_pregnancies :dba
  DECLARE patient_index = i4 WITH protect ,noconstant (0 )
  DECLARE preg_index = i4 WITH protect ,noconstant (0 )
  DECLARE newproblemid = f8 WITH protect ,noconstant (0.0 )
+
  FREE RECORD patients
  RECORD patients (
    1 qual [* ]
@@ -125,6 +126,7 @@ CREATE PROGRAM cov_resolve_merged_pregnancies :dba
        3 historical_ind = i2
        3 pregnancy_end_dt_tm = dq8
  )
+
  FREE RECORD problemsdetails
  RECORD problemsdetails (
    1 qual [* ]
@@ -141,10 +143,26 @@ CREATE PROGRAM cov_resolve_merged_pregnancies :dba
        3 classification_cd = f8
        3 confirmation_status_cd = f8
  )
+
  CALL getpregnancypreferences (null )
+
  CALL findnomenclature (null )
+
  CALL validatepregnancyproblems (null )
+
  CALL getmergedproblempatientscount (null )
+
+ CALL resolveactivepregnantproblems (null )
+
+ CALL getmergedpregnancydetails (null )
+
+ CALL resolveactivepregnancyproblems (null )
+
+ CALL resolveclosedpregnancyproblems (null )
+
+ CALL resolvehistoricalpregnancyproblems (null )
+
+
  SUBROUTINE  validatepregnancyproblems (null )
   SELECT INTO "nl:"
    FROM (problem p )
@@ -163,6 +181,12 @@ CREATE PROGRAM cov_resolve_merged_pregnancies :dba
    ENDIF
   ENDIF
  END ;Subroutine
+
+
+
+
+
+
  SUBROUTINE  getmergedproblempatientscount (null )
   SELECT DISTINCT INTO "nl:"
    pi.person_id
@@ -197,11 +221,13 @@ CREATE PROGRAM cov_resolve_merged_pregnancies :dba
    CALL echorecord (patients )
   ENDIF
  END ;Subroutine
- CALL resolveactivepregnantproblems (null )
- CALL getmergedpregnancydetails (null )
- CALL resolveactivepregnancyproblems (null )
- CALL resolveclosedpregnancyproblems (null )
- CALL resolvehistoricalpregnancyproblems (null )
+
+
+
+
+
+
+
  SUBROUTINE  getpregnancypreferences (null )
   FREE RECORD prefs
   RECORD prefs (
@@ -292,6 +318,11 @@ CREATE PROGRAM cov_resolve_merged_pregnancies :dba
   CALL uar_prefdestroyinstance (hpref )
   FREE RECORD prefs
  END ;Subroutine
+ 
+ 
+ 
+ 
+ 
  SUBROUTINE  findnomenclature (null )
   DECLARE nomen_vocab_cd = f8 WITH protect ,constant (uar_get_code_by ("MEANING" ,400 ,nullterm (
      snomenvocabmean ) ) )
@@ -353,6 +384,11 @@ CREATE PROGRAM cov_resolve_merged_pregnancies :dba
    ;end select
   ENDFOR
  END ;Subroutine
+ 
+ 
+ 
+ 
+ 
  SUBROUTINE  resolveactivepregnantproblems (null )
   DECLARE qual_index = i4 WITH protect ,noconstant (0 )
   SELECT INTO "nl:"
@@ -477,22 +513,15 @@ CREATE PROGRAM cov_resolve_merged_pregnancies :dba
    SET probrequest->person_id = problemsdetails->qual[idx ].patient_id
    SET istat = alterlist (probrequest->problem ,1 )
    SET probrequest->problem[1 ].problem_id = problemsdetails->qual[idx ].problem[1 ].problem_id
-   SET probrequest->problem[1 ].problem_instance_id = problemsdetails->qual[idx ].problem[1 ].
-   problem_instance_id
-   SET probrequest->problem[1 ].nomenclature_id = problemsdetails->qual[idx ].problem[1 ].
-   nomenclature_id
-   SET probrequest->problem[1 ].annotated_display = problemsdetails->qual[idx ].problem[1 ].
-   annotated_display
-   SET probrequest->problem[1 ].classification_cd = problemsdetails->qual[idx ].problem[1 ].
-   classification_cd
+   SET probrequest->problem[1 ].problem_instance_id = problemsdetails->qual[idx ].problem[1 ].problem_instance_id
+   SET probrequest->problem[1 ].nomenclature_id = problemsdetails->qual[idx ].problem[1 ].nomenclature_id
+   SET probrequest->problem[1 ].annotated_display = problemsdetails->qual[idx ].problem[1 ].annotated_display
+   SET probrequest->problem[1 ].classification_cd = problemsdetails->qual[idx ].problem[1 ].classification_cd
    SET probrequest->problem[1 ].onset_dt_tm = problemsdetails->qual[idx ].problem[1 ].onset_dt_tm
    SET probrequest->problem[1 ].onset_tz = problemsdetails->qual[idx ].problem[1 ].onset_tz
-   SET probrequest->problem[1 ].organization_id = problemsdetails->qual[idx ].problem[1 ].
-   organization_id
-   SET probrequest->problem[1 ].originating_nomenclature_id = problemsdetails->qual[idx ].problem[1 ]
-   .originating_nomenclature_id
-   SET probrequest->problem[1 ].confirmation_status_cd = problemsdetails->qual[idx ].problem[1 ].
-   confirmation_status_cd
+   SET probrequest->problem[1 ].organization_id = problemsdetails->qual[idx ].problem[1 ].organization_id
+   SET probrequest->problem[1 ].originating_nomenclature_id = problemsdetails->qual[idx ].problem[1 ].originating_nomenclature_id
+   SET probrequest->problem[1 ].confirmation_status_cd = problemsdetails->qual[idx ].problem[1 ].confirmation_status_cd
    SET probrequest->problem[1 ].life_cycle_status_cd = resolved_action_cd
    SET probrequest->problem[1 ].problem_action_ind = 2
    SET probrequest->skip_fsi_trigger = 1
@@ -508,6 +537,9 @@ CREATE PROGRAM cov_resolve_merged_pregnancies :dba
    ENDIF
   ENDFOR
  END ;Subroutine
+ 
+ 
+ 
  SUBROUTINE  resolveclosedpregnancyproblems (null )
   SET patientscnt = size (patients->qual ,5 )
   SET patient_index = 0
@@ -515,6 +547,9 @@ CREATE PROGRAM cov_resolve_merged_pregnancies :dba
    CALL resolveclosedpregnancyproblemsaction (patient_index )
   ENDFOR
  END ;Subroutine
+ 
+ 
+ 
  SUBROUTINE  resolveclosedpregnancyproblemsaction (patient_index )
   SET leastgestage = 0
   SET cnt = 0
@@ -605,8 +640,7 @@ CREATE PROGRAM cov_resolve_merged_pregnancies :dba
    )
    SET master_pregnancy_id = 0.0
    IF ((patients->qual[patient_index ].pregnancies[preg_index ].historical_ind = 0 )
-   AND (patients->qual[patient_index ].pregnancies[preg_index ].pregnancy_end_dt_tm != cnvtdatetime (
-    "31-DEC-2100 00:00:00.00" ) ) )
+   AND (patients->qual[patient_index ].pregnancies[preg_index ].pregnancy_end_dt_tm != cnvtdatetime ("31-DEC-2100 00:00:00.00" ) ) )
     SELECT INTO "nl:"
      FROM (pregnancy_instance pi ),
       (pregnancy_child pc )
@@ -695,6 +729,8 @@ CREATE PROGRAM cov_resolve_merged_pregnancies :dba
        CALL echo ("Pregnancy Problem Ensured" )
       ENDIF
      ENDIF
+     
+     /*
      UPDATE FROM (pregnancy_instance pi )
       SET pi.problem_id = newproblemid ,
        pi.updt_id = reqinfo->updt_id ,
@@ -706,10 +742,14 @@ CREATE PROGRAM cov_resolve_merged_pregnancies :dba
       AND (pi.pregnancy_instance_id = master_preg_inst_id )
       WITH nocounter
      ;end update
+     */
     ENDIF
    ENDIF
   ENDFOR
  END ;Subroutine
+ 
+ 
+ 
  SUBROUTINE  resolveactivepregnancyproblems (null )
   SET patientscnt = size (patients->qual ,5 )
   SET newproblemid = 0.0
@@ -799,8 +839,7 @@ CREATE PROGRAM cov_resolve_merged_pregnancies :dba
       1 skip_fsi_trigger = i2
     )
     IF ((patients->qual[patient_index ].pregnancies[preg_index ].historical_ind = 0 )
-    AND (patients->qual[patient_index ].pregnancies[preg_index ].pregnancy_end_dt_tm = cnvtdatetime (
-     "31-DEC-2100 00:00:00.00" ) ) )
+    AND (patients->qual[patient_index ].pregnancies[preg_index ].pregnancy_end_dt_tm = cnvtdatetime ("31-DEC-2100 00:00:00.00" ) ) )
      SELECT INTO "nl:"
       FROM (pregnancy_instance pi ),
        (problem p )
@@ -870,6 +909,8 @@ CREATE PROGRAM cov_resolve_merged_pregnancies :dba
        SET newproblemid = probreply->problem_list[2 ].problem_id
       ENDIF
       SET master_prob_id = newproblemid
+      
+      /*
       UPDATE FROM (pregnancy_instance pi )
        SET pi.problem_id = newproblemid ,
         pi.updt_id = reqinfo->updt_id ,
@@ -881,11 +922,16 @@ CREATE PROGRAM cov_resolve_merged_pregnancies :dba
        AND (pi.pregnancy_instance_id = master_preg_inst_id )
        WITH nocounter
       ;end update
+      */
+      
      ENDIF
     ENDIF
    ENDFOR
   ENDFOR
  END ;Subroutine
+ 
+ 
+ 
  SUBROUTINE  resolvehistoricalpregnancyproblems (null )
   SET patientscnt = size (patients->qual ,5 )
   FOR (patient_index = 1 TO patientscnt )
@@ -1054,10 +1100,13 @@ CREATE PROGRAM cov_resolve_merged_pregnancies :dba
    ENDIF
   ENDFOR
  END ;Subroutine
+ 
+ 
 #exit_script
  IF ((failed = false ) )
   CALL echo ("Script executed successfully." )
-  COMMIT
+  ;COMMIT
+  ROLLBACK
  ELSE
   CALL echo ("Script execution terminated as there were some issue encountered in between." )
   ROLLBACK
