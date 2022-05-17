@@ -270,13 +270,7 @@ call writeLog(build2("**********************************************************
 
 call writeLog(build2("************************************************************"))
 call writeLog(build2("* START Set Department Status for Return *******************"))
-/*
-if (t_rec->dept_status in("Exam Completed","Completed"))
-	set t_rec->memory_reply_string = "Release"
-else
-	set t_rec->memory_reply_string = t_rec->dept_status
-endif
-*/
+
 set t_rec->memory_reply_string = t_rec->dept_status
 
 call writeLog(build2("* END   Set Department Status for Return *******************"))
@@ -290,17 +284,6 @@ endif
 
 subroutine sendNotification(null)
 	call echo("sendNotification")
-	/*
-	set 3011001Request->Module_Dir = "cust_script:" 
-	set 3011001Request->Module_Name = "cov_eks_alert_wrong_order.html" 
-	set 3011001Request->bAsBlob = 1 
-	
-	execute eks_get_source with replace ("REQUEST" ,3011001Request ) , replace ("REPLY" ,3011001Reply ) 
-	set html_output = 3011001Reply->data_blob 
-	
-	set html_output = replace(html_output,"@MESSAGE:[PATIENTDATA]",cnvtrectojson(patientdata))
-	set html_output = replace(html_output,"@MESSAGE:[ORDERDATA]",cnvtrectojson(orderdata))
-	*/
 	
 	if (t_rec->send_notification_ind = 1)
 		set 3051004Request->Subject = "Incomplete Exam"
@@ -312,7 +295,7 @@ subroutine sendNotification(null)
 	endif
 
 	for (i=1 to t_rec->page_cnt)
-		if (t_rec->page_qual[i].facility = t_rec->facility)
+		if ((t_rec->page_qual[i].facility = t_rec->facility) and (t_rec->page_qual[i].viewpoint = t_rec->viewpoint_ind))
 			call writeLog(build2("sending notification to ",t_rec->page_qual[i].address," for ",t_rec->page_qual[i].facility))
 			set t_rec->page_sent_ind = 1
 			call uar_send_mail (NullTerm(t_rec->page_qual[i].address),
