@@ -219,8 +219,8 @@ call writeLog(build2("**********************************************************
 
 call writeLog(build2("************************************************************"))
 call writeLog(build2("* START Setting up Distribution ****************************"))
-/*
-set t_rec->page_cnt = 21
+
+set t_rec->page_cnt = 39
 set stat = alterlist(t_rec->page_qual,t_rec->page_cnt)
 set t_rec->page_qual[1].address   = "lcrowe@CovHlth.com"
 set t_rec->page_qual[1].facility  = "FSR FSW Diagn"
@@ -264,7 +264,69 @@ set t_rec->page_qual[20].address  = "8655971788@usamobility.net"
 set t_rec->page_qual[20].facility = "RMC"
 set t_rec->page_qual[21].address  = "Abuck@CovHlth.com"
 set t_rec->page_qual[21].facility = "RMC"
+
+set t_rec->page_qual[22].address  = "dwalker8@covhlth.com"
+set t_rec->page_qual[22].facility = "RMC"
+set t_rec->page_qual[22].viewpoint = 1
+set t_rec->page_qual[23].address  = "8658501791@usamobility.net"
+set t_rec->page_qual[23].facility = "RMC"
+set t_rec->page_qual[23].viewpoint = 1
+set t_rec->page_qual[24].address  = "sdoughty@covhlth.com"
+set t_rec->page_qual[24].facility = "MMC"
+set t_rec->page_qual[24].viewpoint = 1
+set t_rec->page_qual[25].address  = "8655678331@usamobility.net"
+set t_rec->page_qual[25].facility = "MMC"
+set t_rec->page_qual[25].viewpoint = 1
+set t_rec->page_qual[26].address  = "sriddley@CovHlth.com"
+set t_rec->page_qual[26].facility = "PW"
+set t_rec->page_qual[26].viewpoint = 1
+set t_rec->page_qual[27].address  = "cwindham@covhlth.com"
+set t_rec->page_qual[27].facility = "PW"
+set t_rec->page_qual[27].viewpoint = 1
+set t_rec->page_qual[28].address  = "wshock@CovHlth.com"
+set t_rec->page_qual[28].facility = "PW"
+set t_rec->page_qual[28].viewpoint = 1
+set t_rec->page_qual[29].address  = "8655972035@usamobility.net"
+set t_rec->page_qual[29].facility = "PW"
+set t_rec->page_qual[29].viewpoint = 1
+set t_rec->page_qual[30].address  = "jjohns14@CovHlth.com"
+set t_rec->page_qual[30].facility = "FSR"
+set t_rec->page_qual[30].viewpoint = 1
+set t_rec->page_qual[31].address  = "rbrown21@CovHlth.com"
+set t_rec->page_qual[31].facility = "FSR"
+set t_rec->page_qual[31].viewpoint = 1
+set t_rec->page_qual[32].address  = "8657480089@usamobility.net"
+set t_rec->page_qual[32].facility = "FSR"
+set t_rec->page_qual[32].viewpoint = 1
+set t_rec->page_qual[33].address  = "rbolin@CovHlth.com"
+set t_rec->page_qual[33].facility = "FLMC"
+set t_rec->page_qual[33].viewpoint = 1
+set t_rec->page_qual[34].address  = "8655972640@usamobility.net"
+set t_rec->page_qual[34].facility = "FLMC"
+set t_rec->page_qual[34].viewpoint = 1
+set t_rec->page_qual[35].address  = "edavidso@CovHlth.com"
+set t_rec->page_qual[35].facility = "LCMC"
+set t_rec->page_qual[35].viewpoint = 1
+set t_rec->page_qual[36].address  = "thusky@covhlth.com"
+set t_rec->page_qual[36].facility = "LCMC"
+set t_rec->page_qual[36].viewpoint = 1
+set t_rec->page_qual[37].address  = "8652163275@usamobility.net"
+set t_rec->page_qual[37].facility = "LCMC"
+set t_rec->page_qual[37].viewpoint = 1
+set t_rec->page_qual[38].address  = "bhensle4@CovHlth.com"
+set t_rec->page_qual[38].facility = "MHHS"
+set t_rec->page_qual[38].viewpoint = 1
+set t_rec->page_qual[39].address  = "4239733316@@usamobility.net"
+set t_rec->page_qual[39].facility = "MHHS"
+set t_rec->page_qual[39].viewpoint = 1
+
+/*
+set t_rec->page_qual[].address  = ""
+set t_rec->page_qual[].facility = ""
+set t_rec->page_qual[].viewpoint = 1
 */
+
+
 call writeLog(build2("* END   Setting up Distribution ****************************"))
 call writeLog(build2("************************************************************"))
 
