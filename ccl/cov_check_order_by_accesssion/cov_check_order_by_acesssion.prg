@@ -76,6 +76,7 @@ record t_rec
 	1 order_status			= vc
 	1 dept_status			= vc
 	1 accession				= vc
+	1 viewpoint_ind			= i2
 	1 order_mnemonic		= vc
 	1 send_notification_ind	= i2
 	1 memory_reply_string	= vc
@@ -84,6 +85,7 @@ record t_rec
 	1 page_qual[*]
 	  2 address				= vc
 	  2 facility			= vc
+	  2 viewpoint			= i2
 )
 
 free record 3051004Request 
@@ -156,6 +158,9 @@ head o.order_id
 	t_rec->order_mnemonic	= o.order_mnemonic
 	t_rec->accession		= cnvtacc(a.accession)
 	t_rec->encntr_id		= o.encntr_id
+	if (t_rec->accession = "*-CA-*")
+		t_rec->viewpoint_ind = 1
+	endif
 with nocounter
 
 if (t_rec->order_id = 0.0)
@@ -214,8 +219,8 @@ call writeLog(build2("**********************************************************
 
 call writeLog(build2("************************************************************"))
 call writeLog(build2("* START Setting up Distribution ****************************"))
-/*
-set t_rec->page_cnt = 21
+
+set t_rec->page_cnt = 39
 set stat = alterlist(t_rec->page_qual,t_rec->page_cnt)
 set t_rec->page_qual[1].address   = "lcrowe@CovHlth.com"
 set t_rec->page_qual[1].facility  = "FSR FSW Diagn"
@@ -259,19 +264,75 @@ set t_rec->page_qual[20].address  = "8655971788@usamobility.net"
 set t_rec->page_qual[20].facility = "RMC"
 set t_rec->page_qual[21].address  = "Abuck@CovHlth.com"
 set t_rec->page_qual[21].facility = "RMC"
+
+set t_rec->page_qual[22].address  = "dwalker8@covhlth.com"
+set t_rec->page_qual[22].facility = "RMC"
+set t_rec->page_qual[22].viewpoint = 1
+set t_rec->page_qual[23].address  = "8658501791@usamobility.net"
+set t_rec->page_qual[23].facility = "RMC"
+set t_rec->page_qual[23].viewpoint = 1
+set t_rec->page_qual[24].address  = "sdoughty@covhlth.com"
+set t_rec->page_qual[24].facility = "MMC"
+set t_rec->page_qual[24].viewpoint = 1
+set t_rec->page_qual[25].address  = "8655678331@usamobility.net"
+set t_rec->page_qual[25].facility = "MMC"
+set t_rec->page_qual[25].viewpoint = 1
+set t_rec->page_qual[26].address  = "sriddley@CovHlth.com"
+set t_rec->page_qual[26].facility = "PW"
+set t_rec->page_qual[26].viewpoint = 1
+set t_rec->page_qual[27].address  = "cwindham@covhlth.com"
+set t_rec->page_qual[27].facility = "PW"
+set t_rec->page_qual[27].viewpoint = 1
+set t_rec->page_qual[28].address  = "wshock@CovHlth.com"
+set t_rec->page_qual[28].facility = "PW"
+set t_rec->page_qual[28].viewpoint = 1
+set t_rec->page_qual[29].address  = "8655972035@usamobility.net"
+set t_rec->page_qual[29].facility = "PW"
+set t_rec->page_qual[29].viewpoint = 1
+set t_rec->page_qual[30].address  = "jjohns14@CovHlth.com"
+set t_rec->page_qual[30].facility = "FSR"
+set t_rec->page_qual[30].viewpoint = 1
+set t_rec->page_qual[31].address  = "rbrown21@CovHlth.com"
+set t_rec->page_qual[31].facility = "FSR"
+set t_rec->page_qual[31].viewpoint = 1
+set t_rec->page_qual[32].address  = "8657480089@usamobility.net"
+set t_rec->page_qual[32].facility = "FSR"
+set t_rec->page_qual[32].viewpoint = 1
+set t_rec->page_qual[33].address  = "rbolin@CovHlth.com"
+set t_rec->page_qual[33].facility = "FLMC"
+set t_rec->page_qual[33].viewpoint = 1
+set t_rec->page_qual[34].address  = "8655972640@usamobility.net"
+set t_rec->page_qual[34].facility = "FLMC"
+set t_rec->page_qual[34].viewpoint = 1
+set t_rec->page_qual[35].address  = "edavidso@CovHlth.com"
+set t_rec->page_qual[35].facility = "LCMC"
+set t_rec->page_qual[35].viewpoint = 1
+set t_rec->page_qual[36].address  = "thusky@covhlth.com"
+set t_rec->page_qual[36].facility = "LCMC"
+set t_rec->page_qual[36].viewpoint = 1
+set t_rec->page_qual[37].address  = "8652163275@usamobility.net"
+set t_rec->page_qual[37].facility = "LCMC"
+set t_rec->page_qual[37].viewpoint = 1
+set t_rec->page_qual[38].address  = "bhensle4@CovHlth.com"
+set t_rec->page_qual[38].facility = "MHHS"
+set t_rec->page_qual[38].viewpoint = 1
+set t_rec->page_qual[39].address  = "4239733316@@usamobility.net"
+set t_rec->page_qual[39].facility = "MHHS"
+set t_rec->page_qual[39].viewpoint = 1
+
+/*
+set t_rec->page_qual[].address  = ""
+set t_rec->page_qual[].facility = ""
+set t_rec->page_qual[].viewpoint = 1
 */
+
+
 call writeLog(build2("* END   Setting up Distribution ****************************"))
 call writeLog(build2("************************************************************"))
 
 call writeLog(build2("************************************************************"))
 call writeLog(build2("* START Set Department Status for Return *******************"))
-/*
-if (t_rec->dept_status in("Exam Completed","Completed"))
-	set t_rec->memory_reply_string = "Release"
-else
-	set t_rec->memory_reply_string = t_rec->dept_status
-endif
-*/
+
 set t_rec->memory_reply_string = t_rec->dept_status
 
 call writeLog(build2("* END   Set Department Status for Return *******************"))
@@ -285,17 +346,6 @@ endif
 
 subroutine sendNotification(null)
 	call echo("sendNotification")
-	/*
-	set 3011001Request->Module_Dir = "cust_script:" 
-	set 3011001Request->Module_Name = "cov_eks_alert_wrong_order.html" 
-	set 3011001Request->bAsBlob = 1 
-	
-	execute eks_get_source with replace ("REQUEST" ,3011001Request ) , replace ("REPLY" ,3011001Reply ) 
-	set html_output = 3011001Reply->data_blob 
-	
-	set html_output = replace(html_output,"@MESSAGE:[PATIENTDATA]",cnvtrectojson(patientdata))
-	set html_output = replace(html_output,"@MESSAGE:[ORDERDATA]",cnvtrectojson(orderdata))
-	*/
 	
 	if (t_rec->send_notification_ind = 1)
 		set 3051004Request->Subject = "Incomplete Exam"
@@ -305,9 +355,9 @@ subroutine sendNotification(null)
 		set 3051004Request->Subject = "Report failure"
 		set 3051004Request->MsgText = concat("(",t_rec->accession,") report failed not completed within timeframe.")
 	endif
-	
+
 	for (i=1 to t_rec->page_cnt)
-		if (t_rec->page_qual[i].facility = t_rec->facility)
+		if ((t_rec->page_qual[i].facility = t_rec->facility) and (t_rec->page_qual[i].viewpoint = t_rec->viewpoint_ind))
 			call writeLog(build2("sending notification to ",t_rec->page_qual[i].address," for ",t_rec->page_qual[i].facility))
 			set t_rec->page_sent_ind = 1
 			call uar_send_mail (NullTerm(t_rec->page_qual[i].address),
@@ -320,6 +370,15 @@ subroutine sendNotification(null)
             
 		endif
 	endfor
+
+	if (t_rec->viewpoint_ind = 1)
+		set 3051004Request->Subject = concat(3051004Request->Subject,"->ViewPoint Specific Message")
+	endif
+	
+	if (cnvtupper(curdomain) != "P0665")
+		set 3051004Request->Subject = concat(3051004Request->Subject," (",trim(curdomain),")")
+	endif
+	
 	call writeLog(build2("sending default notification chad"))
 	call uar_send_mail (NullTerm("chad.cummings@covhlth.com"),
                                 NullTerm(3051004Request->Subject),
@@ -327,6 +386,7 @@ subroutine sendNotification(null)
                                 NullTerm("eCare@covhlth.net"),
                                 5,
                                 "IPM.Note")
+	
 	call writeLog(build2("sending default notification paula"))
 	call uar_send_mail (NullTerm("pfische1@CovHlth.com"),
                                 NullTerm(3051004Request->Subject),
@@ -334,6 +394,14 @@ subroutine sendNotification(null)
                                 NullTerm("eCare@covhlth.net"),
                                 5,
                                 "IPM.Note")
+    call writeLog(build2("sending default notification carlos"))
+	call uar_send_mail (NullTerm("ccarrasq@CovHlth.com"),
+                                NullTerm(3051004Request->Subject),
+                                NullTerm(3051004Request->MsgText),
+                                NullTerm("eCare@covhlth.net"),
+                                5,
+                                "IPM.Note")
+							
 	;set t_rec->return_value = "TRUE"
 end ;sendNotification
 
