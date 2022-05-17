@@ -38,3 +38,6 @@ Included CRs and Hotfixes
 
 ### 12606 - BH New Violence Risk Assessment and Agitation Powerplan
 2022-05-10: Release to Prod
+
+### 12738 - Uncompleted Exam Report for Viewpoint
+2022-05-17: Updated Release
