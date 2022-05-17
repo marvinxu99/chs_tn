@@ -172,9 +172,9 @@ set t_rec->1_outdev					= ^MINE^
 set t_rec->2_optinitiative			= ^CUSTTF^; ^QTR_YEAR^	;^CUSTTF^
 set t_rec->3_year					= ^^
 set t_rec->4_start_dt				= ^25-APR-2022^
-set t_rec->4_start_dt				= format(datetimefind(cnvtdatetime("01-JUN-2021 00:00:00"),'M','B','B'),"DD-MMM-YYYY;;q")
+set t_rec->4_start_dt				= format(datetimefind(cnvtdatetime("01-JUL-2021 00:00:00"),'M','B','B'),"DD-MMM-YYYY;;q")
 set t_rec->5_end_dt					= ^26-APR-2022^
-set t_rec->5_end_dt					= format(datetimefind(cnvtdatetime("01-JUN-2021 00:00:00"),'M','E','E'),"DD-MMM-YYYY;;q")
+set t_rec->5_end_dt					= format(datetimefind(cnvtdatetime("01-JUL-2021 00:00:00"),'M','E','E'),"DD-MMM-YYYY;;q")
 set t_rec->6_chksummaryonly			= ^SUM_CSV^
 set t_rec->7_lstmeasure				= concat(^value(^,
 											^"MU_EC_CMS2_2021",^,
