@@ -18,6 +18,9 @@
 ### 12882 - Break/Fix: Correct WH_CE_INVALID_DYN_GROUP rule and script to look at entire request
 2022-05-16: Released
 
+### 12867 - Update COVID Reporting to no longer include Dx as a positive indicator
+2022-05-23: Released
+
 ## Change Requests
 ### 12206 - Add Action script to Discern Dev for Add Reminder
 2022-04-01: Initial Messaging Script
