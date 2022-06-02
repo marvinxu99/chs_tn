@@ -6,8 +6,8 @@
 	Author:				Chad Cummings
 	Date Written:		
 	Solution:			
-	Source file name:	ccl_template.prg
-	Object name:		ccl_template
+	Source file name:	cov_imo_add_dx_audit.prg
+	Object name:		cov_imo_add_dx_audit
 	Request #:
 
 	Program purpose:
@@ -28,10 +28,12 @@ Mod 	Mod Date	  Developer				      Comment
 drop program ccl_template:dba go
 create program ccl_template:dba
 
-prompt
-	"Output to File/Printer/MINE" = "MINE"   ;* Enter or select the printer or file name to send this report to.
+prompt 
+	"Output to File/Printer/MINE" = "MINE"
+	, "Start Date and Time" = "SYSDATE"
+	, "End Date and Time" = "SYSDATE" 
 
-with OUTDEV
+with OUTDEV, START_DT_TM, END_DT_TM
 
 
 call echo(build("loading script:",curprog))
@@ -65,6 +67,8 @@ record t_rec
 	1 cnt			= i4
 	1 prompts
 	 2 outdev		= vc
+	 2 start_dt_tm	= vc
+	 2 end_dt_tm	= vc
 	1 files
 	 2 records_attachment		= vc
 	1 dminfo
@@ -75,11 +79,21 @@ record t_rec
 	1 dates
 	 2 start_dt_tm	= dq8
 	 2 end_dt_tm	= dq8
+	1 qual[*]
+	 2 person_id	= f8
+	 2 encntr_id	= f8
+	 2 mrn			= vc
+	 2 fin			= vc
+	 2 name_full_formatted = vc
 )
 
-call addEmailLog("chad.cummings@covhlth.com")
+;call addEmailLog("chad.cummings@covhlth.com")
 
 set t_rec->files.records_attachment = concat(trim(cnvtlower(curprog)),"_rec_",trim(format(sysdate,"yyyy_mm_dd_hh_mm_ss;;d")),".dat")
+
+set t_rec->prompts.outdev = $OUTDEV
+set t_rec->prompts.start_dt_tm = $START_DT_TM
+set t_rec->prompts.end_dt_tm = $END_DT_TM
 
 set t_rec->dminfo.info_domain	= "COV_DEV_OPS"
 set t_rec->dminfo.info_name		= concat(trim(cnvtupper(curprog)),":","start_dt_tm")
@@ -91,13 +105,49 @@ if (t_rec->dates.start_dt_tm = 0.0)
 	set t_rec->dates.start_dt_tm = cnvtdatetime(curdate,curtime3)
 endif
 
+set t_rec->cons.run_dt_tm 		= cnvtdatetime(curdate,curtime3)
+
 call writeLog(build2("* END   Custom Section  ************************************"))
 call writeLog(build2("************************************************************"))
 
 
 call writeLog(build2("************************************************************"))
-call writeLog(build2("* START Custom   *******************************************"))
-call writeLog(build2("* END   Custom   *******************************************"))
+call writeLog(build2("* START Finding Diagnosis   *******************************************"))
+
+select into "nl:"
+from
+	 diagnosis d
+	,nomenclature n
+	,cmt_cross_map ccm
+	,nomenclature n2
+plan d
+	where d.updt_dt_tm between cnvtdatetime(t_rec->dates.start_dt_tm) and cnvtdatetime(t_rec->dates.end_dt_tm)
+SELECT INTO "nl:"
+   FROM (diagnosis diag ),
+    (nomenclature n ),
+    (cmt_cross_map ccm ),
+    (nomenclature n2 )
+   PLAN (diag
+    WHERE (diag.diagnosis_id = incoming_diag_rec->diagnosis_id ) )
+    JOIN (n
+    WHERE (n.nomenclature_id = diag.originating_nomenclature_id )
+    AND (n.source_vocabulary_cd = 400_imo_cd )
+    AND (n.active_ind = 1 )
+    AND (n.end_effective_dt_tm > cnvtdatetime (curdate ,curtime ) ) )
+    JOIN (ccm
+    WHERE (ccm.concept_cki = n.concept_cki )
+    AND (ccm.end_effective_dt_tm > cnvtdatetime (curdate ,curtime ) )
+    AND (ccm.map_type_cd = 29223_imo_plus_icd10_cd ) )
+    JOIN (n2
+    WHERE (n2.concept_cki = ccm.target_concept_cki )
+    AND (n2.active_ind = 1 )
+    AND (n2.end_effective_dt_tm > cnvtdatetime (curdate ,curtime ) ) )
+   ORDER BY ccm.map_type_cd ,
+    n.source_string ,
+    n.source_string
+    
+    
+call writeLog(build2("* END   Finding Diagnosis   *******************************************"))
 call writeLog(build2("************************************************************"))
 
 call writeLog(build2("************************************************************"))
@@ -111,6 +161,7 @@ call writeLog(build2("* START Custom   *****************************************
 call writeLog(build2("* END   Custom   *******************************************"))
 call writeLog(build2("************************************************************"))
 
+/*
 call writeLog(build2("************************************************************"))
 call writeLog(build2("* START Creating Audit *************************************"))
 	call writeAudit(build2(
@@ -126,6 +177,7 @@ for (i=1 to t_rec->cnt)
 endfor
 call writeLog(build2("* END   Creating Audit *************************************"))
 call writeLog(build2("************************************************************"))
+*/
 
 #exit_script
 

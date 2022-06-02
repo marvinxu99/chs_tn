@@ -90,7 +90,7 @@ join ep where
 
 join p where
    p.person_id = ep.person_id
-  ; and p.deceased_cd not in( value(uar_get_code_by("MEANING",268,"YES")))
+    and p.deceased_cd not in( value(uar_get_code_by("MEANING",268,"YES")))
 join aa
 	where  aa.parent_entity_id = p.person_id
 	and    aa.address_type_cd =         756.00	;Home

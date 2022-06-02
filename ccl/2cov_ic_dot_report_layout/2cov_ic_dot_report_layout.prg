@@ -140,6 +140,8 @@ set html_output = 3011001Reply->data_blob
  		 value(uar_get_code_by(^DISPLAY^,71,^Inpatient^))
 		,value(uar_get_code_by(^DISPLAY^,71,^Newborn^))
 		,value(uar_get_code_by(^DISPLAY^,71,^Observation^))
+		,value(uar_get_code_by(^DISPLAY^,71,^Rehab Inpatient^))
+		,value(uar_get_code_by(^DISPLAY^,71,^Behavioral Health^))
 		,value(uar_get_code_by(^DISPLAY^,71,^Outpatient Monitoring^))
 		,value(uar_get_code_by(^DISPLAY^,71,^Outpatient in a Bed^))
 )
@@ -153,6 +155,8 @@ detail
 	 of ^Inpatient^: encntr_types->qual[i].inpatient_ind 	= 1
 	 of ^Newborn^: encntr_types->qual[i].inpatient_ind		= 1
 	 of ^Observation^: encntr_types->qual[i].inpatient_ind	= 1
+	 of ^Rehab Inpatient^: encntr_types->qual[i].inpatient_ind	= 1
+	 of ^Behavioral Health^: encntr_types->qual[i].inpatient_ind	= 1
 	endcase
 foot report
 	encntr_Types->cnt = i
