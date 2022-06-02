@@ -114,6 +114,8 @@ record t_rec (
   1 alg_exclude_qual [*]  
     2 identifier = vc   
     2 name = vc
+    2 class = vc
+    2 class_type = vc
   1 exclude_collection_cnt = i2   
   1 exclude_collection_qual [*]  
     2 colleciton_group = vc   
@@ -271,6 +273,8 @@ detail
 	stat = alterlist(t_rec->alg_exclude_qual,t_rec->alg_exclude_cnt)
 	t_rec->alg_exclude_qual[t_rec->alg_exclude_cnt].identifier = mcdx.drug_identifier
 	t_rec->alg_exclude_qual[t_rec->alg_exclude_cnt].name = n.source_string
+	t_rec->alg_exclude_qual[t_rec->alg_exclude_cnt].class = mdc.category_name
+	t_rec->alg_exclude_qual[t_rec->alg_exclude_cnt].class_type = "Drug Category"
 foot report
 	call echo(build2("leaving category_name query"))
 with nocounter, nullreport
@@ -299,6 +303,8 @@ detail
 	stat = alterlist(t_rec->alg_exclude_qual,t_rec->alg_exclude_cnt)
 	t_rec->alg_exclude_qual[t_rec->alg_exclude_cnt].identifier = n.source_identifier
 	t_rec->alg_exclude_qual[t_rec->alg_exclude_cnt].name = n.source_string
+	t_rec->alg_exclude_qual[t_rec->alg_exclude_cnt].class = mac.category_description
+	t_rec->alg_exclude_qual[t_rec->alg_exclude_cnt].class_type = "Allergy Category"
 foot report
 	call echo(build2("leaving category_description query"))
 with nocounter, nullreport
@@ -370,7 +376,9 @@ call writeLog(build2("**********************************************************
 
 if ($AUDIT_TYPE = 1)
  select into $OUTDEV
- 	identifier=substring(1,50,t_rec->alg_exclude_qual[d1.seq].identifier)
+ 	 class_type=substring(1,50,t_rec->alg_exclude_qual[d1.seq].class_type)
+ 	,classification=substring(1,50,t_rec->alg_exclude_qual[d1.seq].class)
+ 	,identifier=substring(1,50,t_rec->alg_exclude_qual[d1.seq].identifier)
  	,name = substring(1,100,t_rec->alg_exclude_qual[d1.seq].name)
  from
  	(dummyt d1 with seq=t_rec->alg_exclude_cnt)
@@ -379,6 +387,18 @@ if ($AUDIT_TYPE = 1)
  	name
  with nocounter,format,separator= ""
  
+elseif ($AUDIT_TYPE = 2)
+ select distinct into $OUTDEV
+ 	 side_effect_coded=substring(1,100,t_rec->allergies.nomenclature_qual[d2.seq].source_string)
+ 	,side_effect_ft=substring(1,100,t_rec->allergies.freetext_qual[d1.seq].allergies_ftdesc)
+ from
+ 	(dummyt d1 with seq=t_rec->allergies.freetext_cnt)
+ 	,(dummyt d2 with seq=t_rec->allergies.nomenclature_cnt)
+ plan d1 and d2
+ order by
+ 	side_effect_coded
+ 	,side_effect_ft
+ with nocounter,format,separator= ""
 else
  select into $OUTDEV
  	 collection= substring(1,50,t_rec->exclude_collection_qual[d1.seq].colleciton_group)
