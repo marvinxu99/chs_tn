@@ -6,8 +6,8 @@
 	Author:				Chad Cummings
 	Date Written:
 	Solution:
-	Source file name:	cov_wh_invalid_dyn_group.prg
-	Object name:		cov_wh_invalid_dyn_group
+	Source file name:	cov_imo_add_dx_audit.prg
+	Object name:		cov_imo_add_dx_audit
 	Request #:
  
 	Program purpose:
@@ -25,18 +25,20 @@ Mod 	Mod Date	  Developer				      Comment
 000 	08/12/2021  Chad Cummings			Initial Release
 ******************************************************************************/
  
-drop program cov_wh_invalid_dyn_group:dba go
-create program cov_wh_invalid_dyn_group:dba
+drop program cov_imo_add_dx_audit:dba go
+create program cov_imo_add_dx_audit:dba
  
 prompt
-	"Output to File/Printer/MINE" = "MINE"   ;* Enter or select the printer or file name to send this report to.
+	"Output to File/Printer/MINE" = "MINE"
+	, "Start Date and Time" = "SYSDATE"
+	, "End Date and Time" = "SYSDATE"
  
-with OUTDEV
+with OUTDEV, START_DT_TM, END_DT_TM
  
  
 call echo(build("loading script:",curprog))
-set nologvar = 1	;do not create log = 1		, create log = 0
-set noaudvar = 1	;do not create audit = 1	, create audit = 0
+set nologvar = 0	;do not create log = 1		, create log = 0
+set noaudvar = 0	;do not create audit = 1	, create audit = 0
 %i ccluserdir:cov_custom_ccl_common.inc
  
 call writeLog(build2("************************************************************"))
@@ -65,6 +67,8 @@ record t_rec
 	1 cnt			= i4
 	1 prompts
 	 2 outdev		= vc
+	 2 start_dt_tm	= vc
+	 2 end_dt_tm	= vc
 	1 files
 	 2 records_attachment		= vc
 	1 dminfo
@@ -76,20 +80,23 @@ record t_rec
 	 2 start_dt_tm	= dq8
 	 2 end_dt_tm	= dq8
 	1 qual[*]
-	 2 encntr_id = f8
-	 2 person_id = f8
-	 2 fin = vc
-	 2 mrn = vc
-	 2 label_name = vc
-	 2 event_end_dt_tm = dq8
-	 2 valid_from_dt_tm = dq8
-	 2 prsnl = vc
-	 2 position = vc
+	 2 person_id	= f8
+	 2 encntr_id	= f8
+	 2 mrn			= vc
+	 2 fin			= vc
+	 2 name_full_formatted = vc
+	 2 diag_cnt		= i2
+	 2 diag_qual[*]
+	  3 diagnosis_id = f8
 )
  
 ;call addEmailLog("chad.cummings@covhlth.com")
  
 set t_rec->files.records_attachment = concat(trim(cnvtlower(curprog)),"_rec_",trim(format(sysdate,"yyyy_mm_dd_hh_mm_ss;;d")),".dat")
+ 
+set t_rec->prompts.outdev = $OUTDEV
+set t_rec->prompts.start_dt_tm = $START_DT_TM
+set t_rec->prompts.end_dt_tm = $END_DT_TM
  
 set t_rec->dminfo.info_domain	= "COV_DEV_OPS"
 set t_rec->dminfo.info_name		= concat(trim(cnvtupper(curprog)),":","start_dt_tm")
@@ -98,115 +105,91 @@ set t_rec->dates.end_dt_tm 		= cnvtdatetime(curdate,curtime3)
  
 if (t_rec->dates.start_dt_tm = 0.0)
 	call writeLog(build2("->No start date and time found, setting to go live date"))
-	set t_rec->dates.start_dt_tm = cnvtdatetime("01-JAN-2022 00:00:00")
+	set t_rec->dates.start_dt_tm = cnvtdatetime(curdate,curtime3)
 endif
+ 
+set t_rec->cons.run_dt_tm 		= cnvtdatetime(curdate,curtime3)
  
 call writeLog(build2("* END   Custom Section  ************************************"))
 call writeLog(build2("************************************************************"))
  
  
 call writeLog(build2("************************************************************"))
-call writeLog(build2("* START Custom   *******************************************"))
-call writeLog(build2("* END   Custom   *******************************************"))
-call writeLog(build2("************************************************************"))
- 
-call writeLog(build2("************************************************************"))
-call writeLog(build2("* START Custom   *******************************************"))
-call writeLog(build2("* END   Custom   *******************************************"))
-call writeLog(build2("************************************************************"))
- 
- 
-call writeLog(build2("************************************************************"))
-call writeLog(build2("* START Custom   *******************************************"))
- 
-call echorecord(t_rec->dates)
+call writeLog(build2("* START Finding Diagnosis   *******************************************"))
  
 select into "nl:"
-	from
-		 clinical_Event ce3
-		,ce_dynamic_label cdl
-		,prsnl p
-	plan ce3
-	where
-			;ce3.encntr_id in(select encntr_id from encntr_alias where alias ="5131900094")
-		  ce3.valid_from_dt_tm >= cnvtdatetime(t_rec->dates.start_dt_tm)
-	and   ce3.valid_from_dt_tm <= cnvtdatetime(curdate,curtime3)
-	and	  ce3.result_status_cd in(
-									  value(uar_get_code_by("MEANING",8,"AUTH"))
-									 ,value(uar_get_code_by("MEANING",8,"MODIFIED"))
-									 ,value(uar_get_code_by("MEANING",8,"ALTERED"))
-								)
-	and   ce3.valid_until_dt_tm >= cnvtdatetime(curdate, curtime3)
-	and   ce3.event_tag        != "Date\Time Correction"
-	and   ce3.person_id not in(select person_id from problem where nomenclature_id =      7777483.00
-								and active_ind = 1 and cnvtdatetime(curdate,curtime3) between
-								beg_effective_dt_tm and end_effective_dt_tm)
-	join cdl
-		where cdl.ce_dynamic_label_id = ce3.ce_dynamic_label_id
-		and   cdl.label_name = "Baby*"
-	join p
-		where p.person_id = ce3.verified_prsnl_id
+from
+	 diagnosis d
+	,nomenclature n
+	,dummyt d1
+	,cmt_cross_map ccm
+	,nomenclature n2
+plan d
+	where d.updt_dt_tm between cnvtdatetime(t_rec->dates.start_dt_tm) and cnvtdatetime(t_rec->dates.end_dt_tm)
+join n	
+	where n.nomenclature_id = d.originating_nomenclature_id
+	and   n.active_ind = 1
+	and   n.end_effective_dt_tm >= cnvtdatetime(sysdate)
+	and   n.source_vocabulary_cd = value(uar_get_code_by("MEANING",400,"IMO"))
+join d1
+join ccm
+	where ccm.concept_cki = n.concept_cki
+	and   ccm.end_effective_dt_tm >= cnvtdatetime(sysdate)
+	and   ccm.map_type_cd = value(uar_get_code_by("MEANING",29223,"IMO+ICD10CM"))
+join n2
+	where n2.concept_cki = ccm.target_concept_cki
+	and   n2.active_ind = 1
+	and   n2.end_effective_dt_tm >= cnvtdatetime(sysdate)
 order by
-	 ce3.encntr_id
-	,cdl.label_name
-	,ce3.valid_from_dt_tm
+	d.encntr_id
+	,d.diagnosis_id
 head report
 	i = 0
-head ce3.encntr_id
-	null
-head cdl.label_name
-	i = (i + 1)
-	stat = alterlist(t_rec->qual,i)
-	t_rec->qual[i].label_name = cdl.label_name
-	t_rec->qual[i].encntr_id = ce3.encntr_id
-	t_rec->qual[i].person_id = ce3.person_id
-	t_rec->qual[i].event_end_dt_tm = ce3.event_end_dt_tm
-	t_rec->qual[i].valid_from_dt_tm = ce3.valid_from_dt_tm
-	t_rec->qual[i].prsnl = p.name_full_formatted
-	t_rec->qual[i].position = uar_get_code_display(p.position_cd)
-foot report
-	t_rec->cnt = i
+head d.encntr_id
+	t_rec->cnt += 1
+	stat = alterlist(t_rec->qual,t_rec->cnt)
+	t_rec->qual[t_rec->cnt].encntr_id = d.encntr_id
+	t_rec->qual[t_rec->cnt].person_id = d.person_id 
+ 	i = 0
+head d.diagnosis_id
+	i += 1
+	stat = alterlist(t_rec->qual[t_rec->cnt].diag_qual,i)
+	t_rec->qual[t_rec->cnt].diag_qual[i].diagnosis_id = d.diagnosis_id
 with nocounter
+	
+call writeLog(build2("* END   Finding Diagnosis   *******************************************"))
+call writeLog(build2("************************************************************"))
  
+call writeLog(build2("************************************************************"))
+call writeLog(build2("* START Custom   *******************************************"))
+call writeLog(build2("* END   Custom   *******************************************"))
+call writeLog(build2("************************************************************"))
+
+call get_mrn(null)
+call get_fin(null) 
+ 
+call writeLog(build2("************************************************************"))
+call writeLog(build2("* START Custom   *******************************************"))
 call writeLog(build2("* END   Custom   *******************************************"))
 call writeLog(build2("************************************************************"))
  
-call get_mrn(null)
-call get_fin(null)
- 
+/*
 call writeLog(build2("************************************************************"))
 call writeLog(build2("* START Creating Audit *************************************"))
 	call writeAudit(build2(
-							char(34),^MRN^,			char(34),char(44),
-							char(34),^FIN^,			char(34),char(44),
-							char(34),^IVIEW DATE^,	char(34),char(44),
-							char(34),^ENTERED DATE^,	char(34),char(44),
-							char(34),^LABEL^,		char(34),char(44),
-							char(34),^PRSNL^,		char(34),char(44),
-							char(34),^POSITION^,	char(34)
+							char(34),^ITEM^,char(34),char(44),
+							char(34),^DESC^,char(34)
 						))
 for (i=1 to t_rec->cnt)
 		call writeAudit(build2(
-							char(34),t_rec->qual[i].mrn													,char(34),char(44),
-							char(34),t_rec->qual[i].fin													,char(34),char(44),
-							char(34),format(t_rec->qual[i].event_end_dt_tm,"dd-mmm-yyyy hh:mm:ss;;q")	,char(34),char(44),
-							char(34),format(t_rec->qual[i].valid_from_dt_tm,"dd-mmm-yyyy hh:mm:ss;;q")	,char(34),char(44),
-							char(34),t_rec->qual[i].label_name											,char(34),char(44),
-							char(34),t_rec->qual[i].prsnl												,char(34),char(44),
-							char(34),t_rec->qual[i].position											,char(34)
+							char(34),t_rec->qual[i].a											,char(34),char(44),
+							char(34),t_rec->qual[i].b											,char(34)
 						))
  
 endfor
- 
-if (t_rec->cnt > 0)
-	set reply->status_data.status = "S"
-else
-	set reply->status_data.status = "Z"
-	set stat = alterlist(program_log->email->qual,0)
-endif
- 
 call writeLog(build2("* END   Creating Audit *************************************"))
 call writeLog(build2("************************************************************"))
+*/
  
 #exit_script
  
@@ -230,4 +213,3 @@ call echorecord(t_rec)
  
 end
 go
- 
