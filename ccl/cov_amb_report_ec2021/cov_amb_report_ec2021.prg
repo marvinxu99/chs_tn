@@ -30,9 +30,10 @@ create program cov_amb_report_ec2021:dba
 
 prompt 
 	"Output to File/Printer/MINE" = "MINE"
-	, "Report Type" = 1 
+	, "Report Type" = 1
+	, "Year" = "" 
 
-with OUTDEV, REPORT_TYPE
+with OUTDEV, REPORT_TYPE, PROMPT_YEAR
 
 
 call echo(build("loading script:",curprog))
@@ -102,6 +103,12 @@ record t_rec
 	1 prompts
 	 2 outdev				= vc
 	 2 report_type			= i2
+	 2 prompt_year			= vc
+	1 constants
+	 2 year 				= i2
+	 2 year_beg_dt_tm		= dq8
+	 2 year_end_dt_tm		= dq8
+	 2 check_dt_tm			= dq8
 	1 code_value_qual[*]
 	 2 code_value			= f8
 	 2 npi					= vc
@@ -133,6 +140,8 @@ record t_rec
 	1 batch_qual[*]
 	 2 batch_num			= i2
 	 2 prov_cnt				= i2
+	 2 4_start_dt			= vc
+	 2 5_end_dt				= vc
 	 2 prov_qual[*]
 	  3 br_eligible_provider_id = f8
 	1 prov_cnt				= i2
@@ -167,18 +176,37 @@ set t_rec->report_program 			= ^cov_lh_ec2021_report^
 
 set t_rec->prompts.outdev			= $OUTDEV
 set t_rec->prompts.report_type		= $REPORT_TYPE
+set t_rec->prompts.prompt_year		= $PROMPT_YEAR
+
+set t_rec->constants.year			= cnvtint(t_rec->prompts.prompt_year)
+
+if (t_rec->constants.year > 0)
+	set t_rec->constants.year_beg_dt_tm = datetimefind(
+											cnvtdatetime(
+															concat("01-JAN-",cnvtstring(t_rec->constants.year)," 00:00:00")
+														)
+													,'Y','B','B')
+	set t_rec->constants.year_end_dt_tm = datetimefind(
+											cnvtdatetime(
+															concat("01-JAN-",cnvtstring(t_rec->constants.year)," 00:00:00")
+														)
+													,'Y','E','E')
+	;set t_rec->constants.check_dt_tm = datetimeadd(t_rec->constants.year_beg_dt_tm,1)
+endif
 
 set t_rec->1_outdev					= ^MINE^
 set t_rec->2_optinitiative			= ^CUSTTF^; ^QTR_YEAR^	;^CUSTTF^
 set t_rec->3_year					= ^^
-set t_rec->4_start_dt				= ^25-APR-2022^
-set t_rec->4_start_dt				= format(datetimefind(cnvtdatetime("01-JAN-2022 00:00:00"),'M','B','B'),"DD-MMM-YYYY;;q")
 
-set t_rec->5_end_dt					= ^26-APR-2022^
-set t_rec->5_end_dt					= format(datetimefind(cnvtdatetime("30-APR-2022 00:00:00"),'M','E','E'),"DD-MMM-YYYY;;q")
+;set t_rec->4_start_dt				= ^25-APR-2022^
+;set t_rec->4_start_dt				= format(datetimefind(cnvtdatetime("01-JAN-2022 00:00:00"),'M','B','B'),"DD-MMM-YYYY;;q")
+
+;set t_rec->5_end_dt					= ^26-APR-2022^
+;set t_rec->5_end_dt					= format(datetimefind(cnvtdatetime("30-APR-2022 00:00:00"),'M','E','E'),"DD-MMM-YYYY;;q")
+
 set t_rec->6_chksummaryonly			= ^SUM_CSV^
 set t_rec->7_lstmeasure				= concat(^value(^,
-											^"MU_EC_CMS2_2021",^,
+											/*^"MU_EC_CMS2_2021",^,
 											^"MU_EC_CMS22_2021",^,
 											^"MU_EC_CMS50_2021",^,
 											^"MU_EC_CMS68_2021",^,
@@ -194,11 +222,12 @@ set t_rec->7_lstmeasure				= concat(^value(^,
 											^"MU_EC_CMS139_2021",^,
 											^"MU_EC_CMS144_2021",^,
 											^"MU_EC_CMS145_2021",^,
-											^"MU_EC_CMS146_2021",^,
+											^"MU_EC_CMS146_2021",^,*/
 											^"MU_EC_CMS147_2021",^,
 											^"MU_EC_CMS149_2021",^,
 											^"MU_EC_CMS154_2021",^,
-											^"MU_EC_CMS156_2021"^,
+											^"MU_EC_CMS156_2021",^,
+											^"MU_EC_CMS165_2021"^,
 											^)^)
 set t_rec->8_orgfilter				= -1
 set t_rec->9_epfilter				= ^All  -1^
@@ -207,7 +236,8 @@ set t_rec->11_brdefmeas				= ^-1^
 set t_rec->12_dt_quarter_year		= ^^	;^JAN^	;^^
 set t_rec->13_reportby				= ^INDV^
 
-set t_rec->merged.filename 		= concat("cov_ec2021_ops_TYPE_" ,format(cnvtdatetime(curdate,curtime3),"MMDDYYYY_HHMMSS;;q"),".csv")
+set t_rec->merged.filename 		= concat("cov_ec2021_ops_TYPE_RANGEBEG_RANGEEND_" 
+	,format(cnvtdatetime(curdate,curtime3),"MMDDYYYY_HHMMSS;;q"),".csv")
 set t_rec->merged.full_path 	= program_log->files.file_path
 set t_rec->merged.short_path 	= "cclscratch:"
 ;set t_rec->merged.astream 		= build("/nfs/middle_fs/to_client_site/",trim(cnvtlower(curdomain)),"/CernerCCL/")
@@ -218,8 +248,8 @@ else
 	set t_rec->6_chksummaryonly = "SUM_CSV"
 endif
 
-set t_rec->merged.filename = cnvtlower(replace(t_rec->merged.filename,"TYPE",t_rec->6_chksummaryonly))
-       
+set t_rec->merged.filename = replace(t_rec->merged.filename,"TYPE",t_rec->6_chksummaryonly)
+
 call writeLog(build2("* END   Build Parameters ***********************************"))
 call writeLog(build2("************************************************************"))
 
@@ -306,6 +336,10 @@ head b.br_eligible_provider_id
 	t_rec->prov_qual[t_rec->prov_cnt].person_id = p.person_id
 foot report
 	cnt = 0
+	/*REMOVE AFTER TESTING THIS WILL LIMIT TO JUST X providers PROVIDER*/
+	t_rec->prov_cnt = (5)
+	stat = alterlist(t_rec->prov_qual,t_rec->prov_cnt)
+	/*REMOVE ABOVE*/
 with nocounter
 
 call writeLog(build2("* END   Adding Providers ***********************************"))
@@ -314,32 +348,48 @@ call writeLog(build2("**********************************************************
 call writeLog(build2("************************************************************"))
 call writeLog(build2("* START Build Batches **************************************"))
 
-if (t_rec->batch_cnt = 0)
-	set t_rec->batch_cnt = (t_rec->batch_cnt + 1)
-	set stat = alterlist(t_rec->batch_qual,t_rec->batch_cnt)
-endif
-	
-for (i=1 to t_rec->prov_cnt)
-	set t_rec->batch_qual[t_rec->batch_cnt].prov_cnt = (t_rec->batch_qual[t_rec->batch_cnt].prov_cnt + 1)
-	if (t_rec->batch_qual[t_rec->batch_cnt].prov_cnt > t_rec->batch_size)
-		set t_rec->batch_qual[t_rec->batch_cnt].prov_cnt = t_rec->batch_size
+if (t_rec->constants.year > 0)
+	set t_rec->constants.check_dt_tm = t_rec->constants.year_beg_dt_tm
+	while (
+				(t_rec->constants.check_dt_tm < t_rec->constants.year_end_dt_tm)
+			and (datetimefind(t_rec->constants.check_dt_tm,'M','E','E') < cnvtdatetime(sysdate))
+		  )
 		set t_rec->batch_cnt = (t_rec->batch_cnt + 1)
 		set stat = alterlist(t_rec->batch_qual,t_rec->batch_cnt)
-		set t_rec->batch_qual[t_rec->batch_cnt].prov_cnt = 1
-	endif
-	set stat = alterlist(t_rec->batch_qual[t_rec->batch_cnt].prov_qual,t_rec->batch_qual[t_rec->batch_cnt].prov_cnt)
-	set t_rec->batch_qual[t_rec->batch_cnt].prov_qual[t_rec->batch_qual[t_rec->batch_cnt].prov_cnt].br_eligible_provider_id 
-		= t_rec->prov_qual[i].br_eligible_provider_id
+		set t_rec->batch_qual[t_rec->batch_cnt].4_start_dt 
+				= format(datetimefind(t_rec->constants.check_dt_tm,'M','B','B'),"DD-MMM-YYYY;;q")
+		set t_rec->batch_qual[t_rec->batch_cnt].5_end_dt 
+				= format(datetimefind(t_rec->constants.check_dt_tm,'M','E','E'),"DD-MMM-YYYY;;q")		
+		set t_rec->constants.check_dt_tm = datetimeadd(datetimefind(t_rec->constants.check_dt_tm,'M','E','E'),1)
+	endwhile
+else
+	set t_rec->constants.check_dt_tm = cnvtdatetime(sysdate)
+	set t_rec->batch_cnt = (t_rec->batch_cnt + 1)
+	set stat = alterlist(t_rec->batch_qual,t_rec->batch_cnt)
+	set t_rec->batch_qual[t_rec->batch_cnt].4_start_dt 
+				= format(datetimefind(t_rec->constants.check_dt_tm,'M','B','B'),"DD-MMM-YYYY;;q")
+	set t_rec->batch_qual[t_rec->batch_cnt].5_end_dt 
+				= format(datetimefind(t_rec->constants.check_dt_tm,'M','E','E'),"DD-MMM-YYYY;;q")
+endif
+
+for (j=1 to t_rec->batch_cnt)	
+	for (i=1 to t_rec->prov_cnt)
+		set t_rec->batch_qual[j].prov_cnt = (t_rec->batch_qual[j].prov_cnt + 1)
+		set stat = alterlist(t_rec->batch_qual[j].prov_qual,t_rec->batch_qual[j].prov_cnt)
+		set t_rec->batch_qual[j].prov_qual[t_rec->batch_qual[j].prov_cnt].br_eligible_provider_id 
+			= t_rec->prov_qual[i].br_eligible_provider_id
+	endfor
 endfor
 
 call writeLog(build2("* START Build Batches **************************************"))
 call writeLog(build2("************************************************************"))
 
+
 call writeLog(build2("************************************************************"))
 call writeLog(build2("* START Running Reports ************************************"))
 
 for (i=1 to t_rec->batch_cnt)
- 
+
  set t_rec->10_lsteligbleprovider	= concat(^value(^)
  for (j=1 to t_rec->batch_qual[i].prov_cnt)
   if (t_rec->batch_qual[i].prov_qual[j].br_eligible_provider_id > 0.0)
@@ -353,6 +403,9 @@ for (i=1 to t_rec->batch_cnt)
   endif
  endfor
  set t_rec->10_lsteligbleprovider	= concat(t_rec->10_lsteligbleprovider,^)^)
+ 
+ set t_rec->4_start_dt	= t_rec->batch_qual[i].4_start_dt
+ set t_rec->5_end_dt	= t_rec->batch_qual[i].5_end_dt
  
  set t_rec->file_cnt = (t_rec->file_cnt + 1)
  set stat = alterlist(t_rec->file_qual,t_rec->file_cnt)
@@ -393,6 +446,13 @@ for (i=1 to t_rec->batch_cnt)
 	
  ;call addAttachment(program_log->files.ccluserdir,t_rec->file_qual[t_rec->file_cnt].filename)
 
+ if (i=1)
+	set t_rec->merged.filename = replace(t_rec->merged.filename,"RANGEBEG",t_rec->4_start_dt)
+ endif
+ if (i=t_rec->batch_cnt)
+	set t_rec->merged.filename = replace(t_rec->merged.filename,"RANGEEND",t_rec->5_end_dt)
+ endif
+ 
 endfor
 
 
@@ -401,15 +461,26 @@ call writeLog(build2("**********************************************************
 
 call writeLog(build2("************************************************************"))
 call writeLog(build2("* START Merging Files **************************************"))
+
+set t_rec->merged.filename = cnvtlower(t_rec->merged.filename)
+
 if (t_rec->file_cnt > 0)
 	for (i=1 to t_rec->file_cnt)
 	 if (t_rec->file_qual[i].filename > " ")
 		call writeLog(build2("->adding file:",t_rec->file_qual[i].filename))
-		set t_rec->file_qual[i].merge_command = concat(
+		if (i=1)
+			set t_rec->file_qual[i].merge_command = concat(
 				^cat ^	,trim(program_log->files.ccluserdir),trim(t_rec->file_qual[i].filename)
 						,^ >> ^
 						,trim(t_rec->merged.full_path),trim(t_rec->merged.filename)
 				)
+		else
+			set t_rec->file_qual[i].merge_command = concat(
+				"cat "	,trim(program_log->files.ccluserdir),trim(t_rec->file_qual[i].filename)
+						," | grep -v '^PROVIDER_NAME' >> "
+						,trim(t_rec->merged.full_path),trim(t_rec->merged.filename)
+				)
+		endif
 		set t_rec->file_qual[i].remove_command = concat(
 				^rm ^	,trim(program_log->files.ccluserdir),trim(t_rec->file_qual[i].filename)
 				)
@@ -459,7 +530,7 @@ for (i=1 to t_rec->file_cnt)
 endfor
 
 
-call echorecord(t_rec->file_qual)
+call echorecord(t_rec)
 ;call echorecord(code_values)
 ;call echorecord(program_log)
 
