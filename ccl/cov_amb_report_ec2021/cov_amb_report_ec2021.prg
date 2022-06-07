@@ -102,9 +102,10 @@ record t_rec
 	1 code_value_cnt		= i2
 	1 prompts
 	 2 outdev				= vc
-	 2 report_type			= i2
+	 2 report_type			= vc
 	 2 prompt_year			= vc
 	1 constants
+	 2 report_type			= i2
 	 2 year 				= i2
 	 2 year_beg_dt_tm		= dq8
 	 2 year_end_dt_tm		= dq8
@@ -179,6 +180,7 @@ set t_rec->prompts.report_type		= $REPORT_TYPE
 set t_rec->prompts.prompt_year		= $PROMPT_YEAR
 
 set t_rec->constants.year			= cnvtint(t_rec->prompts.prompt_year)
+set t_rec->constants.report_type	= cnvtint(t_rec->prompts.report_type)
 
 if (t_rec->constants.year > 0)
 	set t_rec->constants.year_beg_dt_tm = datetimefind(
@@ -206,7 +208,7 @@ set t_rec->3_year					= ^^
 
 set t_rec->6_chksummaryonly			= ^SUM_CSV^
 set t_rec->7_lstmeasure				= concat(^value(^,
-											/*^"MU_EC_CMS2_2021",^,
+											^"MU_EC_CMS2_2021",^,
 											^"MU_EC_CMS22_2021",^,
 											^"MU_EC_CMS50_2021",^,
 											^"MU_EC_CMS68_2021",^,
@@ -222,7 +224,7 @@ set t_rec->7_lstmeasure				= concat(^value(^,
 											^"MU_EC_CMS139_2021",^,
 											^"MU_EC_CMS144_2021",^,
 											^"MU_EC_CMS145_2021",^,
-											^"MU_EC_CMS146_2021",^,*/
+											^"MU_EC_CMS146_2021",^,
 											^"MU_EC_CMS147_2021",^,
 											^"MU_EC_CMS149_2021",^,
 											^"MU_EC_CMS154_2021",^,
@@ -242,7 +244,7 @@ set t_rec->merged.full_path 	= program_log->files.file_path
 set t_rec->merged.short_path 	= "cclscratch:"
 ;set t_rec->merged.astream 		= build("/nfs/middle_fs/to_client_site/",trim(cnvtlower(curdomain)),"/CernerCCL/")
 
-if (t_rec->prompts.report_type = 1)
+if (t_rec->constants.report_type = 1)
 	set t_rec->6_chksummaryonly = "DET_CSV"
 else
 	set t_rec->6_chksummaryonly = "SUM_CSV"
@@ -336,7 +338,7 @@ head b.br_eligible_provider_id
 	t_rec->prov_qual[t_rec->prov_cnt].person_id = p.person_id
 foot report
 	cnt = 0
-	/*REMOVE AFTER TESTING THIS WILL LIMIT TO JUST X providers PROVIDER*/
+	/*REMOVE AFTER TESTING THIS WILL LIMIT TO JUST X providers PROVIDER
 	t_rec->prov_cnt = (5)
 	stat = alterlist(t_rec->prov_qual,t_rec->prov_cnt)
 	/*REMOVE ABOVE*/

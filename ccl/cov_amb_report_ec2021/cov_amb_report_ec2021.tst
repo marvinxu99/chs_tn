@@ -16,10 +16,10 @@ record 4903reply
 ) go
  
  
-set 4903request->batch_selection = concat(^cov_amb_report_ec2021 NOFORMS^) go
+set 4903request->batch_selection = concat(^cov_amb_report_ec2021 NOFORMS,0,2021^) go
 set 4903request->output_dist = concat(^chad.cummings@covhlth.com^) go
 set stat = tdbexecute(4600,4801,4903,"REC",4903request,"REC",4903reply) go
  
 call echorecord(4903reply) go
  
-;execute cov_amb_report_ec2021 ^MINE^ go
+;execute cov_amb_report_ec2021 ^MINE^,0,"2021" go
