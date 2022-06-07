@@ -473,8 +473,8 @@ join cv2
 	and   cv2.begin_effective_dt_tm <= cnvtdatetime(curdate,curtime3)
 	and   cv2.end_effective_dt_tm 	>= cnvtdatetime(curdate,curtime3)
 	and   cv2.cdf_meaning			in(
-										 "REACTION_KEY"
-										,"REACTION_FT"
+										 "ALLERGY_KEY"
+										,"ALLERGY_FT"
 										)
 order by
 	 cv1.code_value
@@ -487,14 +487,14 @@ head cv1.code_value
 	t_rec->exclude_collection_qual[t_rec->exclude_collection_cnt].colleciton_group = cv1.display
 	;call echo(build2("->added collection group=",cv1.display))
 head cv2.code_value
-	if (cv2.cdf_meaning = "REACTION_FT")
+	if (cv2.cdf_meaning = "ALLERGY_FT")
 		t_rec->exclude_collection_qual[t_rec->exclude_collection_cnt].freetext_cnt += 1
 		stat = alterlist(t_rec->exclude_collection_qual[t_rec->exclude_collection_cnt].freetext_qual,
 			t_rec->exclude_collection_qual[t_rec->exclude_collection_cnt].freetext_cnt)
 			
 		t_rec->exclude_collection_qual[t_rec->exclude_collection_cnt].
 			freetext_qual[t_rec->exclude_collection_qual[t_rec->exclude_collection_cnt].freetext_cnt].reaction_ftdesc = cv2.display
-	elseif (cv2.cdf_meaning = "REACTION_KEY")
+	elseif (cv2.cdf_meaning = "ALLERGY_KEY")
 		t_rec->exclude_collection_qual[t_rec->exclude_collection_cnt].nomenclature_cnt += 1
 		stat = alterlist(t_rec->exclude_collection_qual[t_rec->exclude_collection_cnt].nomenclature_qual,
 			t_rec->exclude_collection_qual[t_rec->exclude_collection_cnt].nomenclature_cnt)
@@ -1059,6 +1059,7 @@ endif
 ;call echorecord(t_rec->alg_ex_class_qual)
 call echorecord(t_rec->alg_exclude_qual)
 call echorecord(t_rec->exclude_collection_qual)
+call echorecord(t_rec->reactions)
 
 end
 go
