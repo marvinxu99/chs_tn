@@ -516,6 +516,71 @@ call SubroutineLog(build2('start sGetPatientDemo(',vPersonID,',',vEncntrID,')'))
  	return (cnvtrectojson(patient_info))
 end 
 
+
+/**********************************************************************************************************************
+** Function sGetCMGLocations()
+** ---------------------------------------------------------------------------------------
+** Returns a JSON object of the CMG locations grouped by aliases 
+**********************************************************************************************************************/
+declare sGetCMGLocations(null) = vc  with copy, persist
+subroutine sGetCMGLocations(null)
+
+	call SubroutineLog(build2('start sGetCMGLocations(null)'))
+ 	
+	free record cmg_locations
+	record cmg_locations
+	(
+		1 cnt = i4
+		1 qual[*]
+			2 group 		= vc
+			2 display 		= vc
+			2 description 	= vc
+			2 location_cd 	= f8
+	)
+
+	select into "nl:"
+	from
+	     location l
+	    ,organization o
+	    ,org_set os
+	    ,org_set_org_r osr
+	    ,code_value_outbound cvo
+	plan l 
+	    where l.location_type_cd = value(uar_get_code_by("MEANING",222,"FACILITY") )
+	    and l.active_ind = 1
+	join o 
+	    where o.organization_id = l.organization_id
+	join osr 
+	    where osr.organization_id = o.organization_id
+	    and osr.active_ind = 1
+	join os 
+	    where os.org_set_id = osr.org_set_id and os.name like '*CMG*'
+	join cvo
+	    where cvo.code_value = l.location_cd
+	    and   cvo.contributor_source_cd = value(uar_get_code_by("DISPLAY",73,"COVDEV1"))
+	    and   cvo.code_set = 220
+	    and   cvo.alias_type_meaning in("FACILITY")
+	order by
+	    cvo.alias
+	    ,uar_get_code_display(l.location_cd)
+	    ,l.location_cd
+	head report
+		i = 0
+	head l.location_cd
+		i = (i + 1)
+		stat = alterlist(cmg_locations->qual,i)
+		cmg_locations->qual[i].group			= cvo.alias
+		cmg_locations->qual[i].display			= uar_get_code_display(l.location_cd)
+		cmg_locations->qual[i].description		= uar_get_code_description(l.location_cd)
+		cmg_locations->qual[i].location_cd		= l.location_cd	
+	with nocounter
+	
+	call SubroutineLog("cmg_locations","record")
+	call SubroutineLog(build2('end sGetCMGLocations(null)'))
+	
+	return	(cnvtrectojson(cmg_locations))
+	
+end
  
 call echo(build2("finishing ",trim(cnvtlower(curprog))))
  
