@@ -35,7 +35,7 @@ create program cov_medreb8_extract_ops:dba
 declare start_date = f8
 declare end_date   = f8
  
-set start_date = cnvtlookbehind("2,M")
+set start_date = cnvtlookbehind("1,M")
 set start_date = datetimefind(start_date,"M","B","B")
 ;set end_date   = cnvtlookahead("2,D",start_date)
 ;set end_date   = cnvtlookbehind("1,SEC", end_date)

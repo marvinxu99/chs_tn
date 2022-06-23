@@ -113,10 +113,10 @@ declare ccl_filepath_var = vc WITH noconstant(CONCAT('$cer_temp/pha_medreb8_meda
 
 
 declare filename_var = vc WITH noconstant(CONCAT('cer_temp:'
-	,TRIM(cnvtlower(uar_get_displaykey($facility_list))),'_pha_scorecard_medadmin.txt')), PROTECT
+	,TRIM(cnvtlower(uar_get_displaykey($facility_list))),'_pha_medreb8_medadmin.txt')), PROTECT
  
 declare ccl_filepath_var = vc WITH noconstant(CONCAT('$cer_temp/'
-	,TRIM(cnvtlower(uar_get_displaykey($facility_list))),'_pha_scorecard_medadmin.txt')), PROTECT
+	,TRIM(cnvtlower(uar_get_displaykey($facility_list))),'_pha_medreb8_medadmin.txt')), PROTECT
 
 declare astream_filepath_var = vc with noconstant(
 				build("/nfs/middle_fs/to_client_site/",trim(cnvtlower(curdomain)),"/CernerCCL/"))
