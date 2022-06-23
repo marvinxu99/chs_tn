@@ -105,13 +105,26 @@ declare iOpsInd				= i2 with protect, noconstant (0)
 ;=================
 ;PROD
 ;=================
-declare filename_var = vc WITH noconstant(CONCAT('cer_temp:pha_medreb8_medadmin.txt')), PROTECT
- 
+;declare filename_var = vc WITH noconstant(CONCAT('cer_temp:pha_medreb8_medadmin.txt')), PROTECT
+ ;
 declare ccl_filepath_var = vc WITH noconstant(CONCAT('$cer_temp/pha_medreb8_medadmin.txt')), PROTECT
  
+
+
+
+declare filename_var = vc WITH noconstant(CONCAT('cer_temp:'
+	,TRIM(cnvtlower(uar_get_displaykey($facility_list))),'_pha_scorecard_medadmin.txt')), PROTECT
+ 
+declare ccl_filepath_var = vc WITH noconstant(CONCAT('$cer_temp/'
+	,TRIM(cnvtlower(uar_get_displaykey($facility_list))),'_pha_scorecard_medadmin.txt')), PROTECT
+
 declare astream_filepath_var = vc with noconstant(
 				build("/nfs/middle_fs/to_client_site/",trim(cnvtlower(curdomain)),"/CernerCCL/"))
 			;build("/nfs/middle_fs/to_client_site/",trim(cnvtlower(curdomain)),"/CernerCCL/")
+/* 
+declare astream_filepath_var = vc with noconstant(
+				"/cerner/w_custom/p0665_cust/to_client_site/CernerCCL/")
+*/
  
 ;request from Ops?
 if(validate(request->batch_selection) = 1)
@@ -222,6 +235,7 @@ select distinct into 'nl:'
  
 from
 	 encounter e
+	 ,person p
 	,clinical_event ce
 	,med_admin_event mae
 	,ce_med_result cmr
@@ -230,11 +244,13 @@ from
 plan e where e.loc_facility_cd = $facility_list
 	and e.encntr_id != 0.00
 	and (
-		( e.encntr_type_cd =      309308.00)
-	 or ( e.financial_class_cd = 684153.00)					;Self Pay	SELFPAY
+			( e.encntr_type_cd =      309308.00)
+		 or ( e.financial_class_cd = 684153.00)					;Self Pay	SELFPAY
 	 	)
  
- 
+join p
+	where p.person_id = e.person_id
+	and   p.name_last_key not in("ZZZTEST*","FFFF*")
 join ce where ce.person_id = e.person_id
 	and ce.encntr_id = e.encntr_id
 ;	and e.encntr_id =   117886908.00 ;for testing
