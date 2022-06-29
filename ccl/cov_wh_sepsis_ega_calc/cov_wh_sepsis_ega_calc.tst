@@ -16,7 +16,7 @@ from  encounter e
 	 ,encntr_alias ea
 	 ,person p
 plan ea
-	where ea.alias = "5213100034"
+	where ea.alias = "5217801980"
 join e
 	where e.encntr_id = ea.encntr_id
 join p
