@@ -78,8 +78,10 @@ record t_rec
 	 2 loc_display  = vc
 	 2 patient_name = vc
 	 2 reg_dt_tm	= dq8
+	 2 disch_dt_tm  = dq8
 	 2 encntr_type 	= vc
 	 2 attending_prov = vc
+	 2 MOAS_qual 	= i2
 	 2 MOAS_score	= vc
 	 2 MOAS_dt_tm	= vc
 	 2 Broset_score = vc
@@ -139,6 +141,9 @@ set t_rec->cons.adulocent_psych_var = uar_get_code_by("DISPLAY", 71, 'Hospital A
 set t_rec->cons.moas_score = uar_get_code_by("DISPLAY",72,"Total Weighted Score")
 set t_rec->cons.broset_score = uar_get_code_by("DISPLAY",72,"Broset Sum")
 
+set t_rec->dates.start_dt_tm = cnvtdatetime($start_datetime)
+set t_rec->dates.end_dt_tm = cnvtdatetime($end_datetime)
+
 call writeLog(build2("* END   Custom Section  ************************************"))
 call writeLog(build2("************************************************************"))
 
@@ -150,10 +155,18 @@ select into "nl:"
 from
 	encounter e
 	,person p
-plan e where e.reg_dt_tm between cnvtdatetime($start_datetime) and cnvtdatetime($end_datetime)
-	and e.loc_facility_cd = $facility_list
+plan e where e.loc_facility_cd = $facility_list
 	and e.encntr_type_cd in (t_rec->cons.adulocent_psych_var,t_rec->cons.adult_psych_var,t_rec->cons.behavior_hlth_var)
 	and e.active_ind = 1
+	and (
+				(e.disch_dt_tm between cnvtdatetime(t_rec->dates.start_dt_tm) and cnvtdatetime(t_rec->dates.end_dt_tm))
+				 or
+				(e.reg_dt_tm between cnvtdatetime(t_rec->dates.start_dt_tm) and cnvtdatetime(t_rec->dates.end_dt_tm))
+				 or
+				(e.reg_dt_tm < cnvtdatetime(t_rec->dates.start_dt_tm) and e.disch_dt_tm > cnvtdatetime(t_rec->dates.end_dt_tm))
+				or
+				(e.reg_dt_tm < cnvtdatetime(t_rec->dates.start_dt_tm) and e.disch_dt_tm is null)
+			)
 join p
 	where p.person_id = e.person_id
 order by
@@ -172,7 +185,7 @@ head e.encntr_id
 	t_rec->qual[i].loc_room = uar_get_code_display(e.loc_room_cd)
 	t_rec->qual[i].loc_bed = uar_get_code_display(e.loc_bed_cd)
 	t_rec->qual[i].encntr_type = uar_get_code_display(e.encntr_type_cd)
-	
+	t_rec->qual[i].disch_dt_tm = e.disch_dt_tm
 	t_rec->qual[i].loc_display = build2(
 											 trim(t_rec->qual[i].loc_unit)
 										," ",trim(t_rec->qual[i].loc_room)
@@ -207,6 +220,7 @@ join ce
 order by
 	 ce.encntr_id
 	,ce.event_end_dt_tm desc
+	;,ce.event_end_dt_tm
 	,ce.event_id
 head report
 	i = 0
@@ -214,6 +228,7 @@ head ce.encntr_id
 	t_rec->qual[d1.seq].MOAS_score = ce.result_val
 	;t_rec->qual[d1.seq].MOAS_dt_tm = format(ce.event_end_dt_tm,"dd-mmm-yyyy hh:mm:ss zzz;;q")
 	t_rec->qual[d1.seq].MOAS_dt_tm = datetimezoneformat(ce.event_end_dt_tm,ce.event_end_tz,"dd-mmm-yyyy hh:mm:ss zzz;;q")
+	t_rec->qual[d1.seq].MOAS_qual = 1
 with nocounter
 
 call writeLog(build2("* END   Finding MOAS Score *********************************"))
@@ -242,7 +257,8 @@ join ce
 	and   ce.order_id = 0.0
 order by
 	 ce.encntr_id
-	,ce.event_end_dt_tm desc
+	;,ce.event_end_dt_tm desc
+	,ce.event_end_dt_tm
 	,ce.event_id
 head report
 	i = 0
@@ -263,7 +279,8 @@ from
 	(dummyt d1 with seq = t_rec->cnt)
 	,clinical_event ce
 	,orders o
-	,order_catalog oc
+	;,order_catalog oc
+	,pathway_catalog pc
 plan d1
 join ce
 	where ce.encntr_id = t_rec->qual[d1.seq].encntr_id
@@ -278,11 +295,16 @@ join ce
 	and   ce.event_class_cd = value(uar_get_code_by("MEANING",53,"MED"))
 join o
 	where o.order_id = ce.order_id
+join pc 
+	where pc.pathway_catalog_id = o.pathway_catalog_id
+	and   pc.description in("BH Adult Ag*")
+/*
 join oc
 	where oc.catalog_cd = o.catalog_cd
 	and   oc.primary_mnemonic in(
 									"chlorproMAZINE"
 								)
+*/
 order by
 	 ce.encntr_id
 	,ce.event_end_dt_tm
@@ -323,7 +345,7 @@ join ce
 	where ce.encntr_id = t_rec->qual[d1.seq].encntr_id
 	and   ce.valid_from_dt_tm <= cnvtdatetime(curdate,curtime3)
 	and   ce.event_end_dt_tm >= cnvtdatetime(t_rec->qual[d1.seq].meds_qual[d2.seq].admin_dt_tm)
-	and   ce.order_id = t_rec->qual[d1.seq].meds_qual[d2.seq].order_id
+;	and   ce.order_id = t_rec->qual[d1.seq].meds_qual[d2.seq].order_id
 	and	  ce.result_status_cd in(
 									  value(uar_get_code_by("MEANING",8,"AUTH"))
 									 ,value(uar_get_code_by("MEANING",8,"MODIFIED"))
@@ -339,19 +361,53 @@ order by
 	,ce.event_end_dt_tm 	
 head med_admin_id
 	call writeLog(build2("ce.event_id=",ce.event_id))
-	call writeLog(build2("ce.post_med_broset_dt_tm=",t_rec->qual[d1.seq].meds_qual[i].post_med_broset_dt_tm))
+	call writeLog(build2("ce.post_med_broset_dt_tm=",t_rec->qual[d1.seq].meds_qual[d2.seq].post_med_broset_dt_tm))
+	
 	t_rec->qual[d1.seq].meds_qual[d2.seq].post_med_broset = ce.result_val
-	t_rec->qual[d1.seq].meds_qual[i].post_med_broset_dt_tm = 
+	t_rec->qual[d1.seq].meds_qual[d2.seq].post_med_broset_dt_tm = 
 		datetimezoneformat(ce.event_end_dt_tm,ce.event_end_tz,"dd-mmm-yyyy hh:mm:ss zzz;;q")
+	
 	call writeLog(build2("ce.event_id=",ce.event_id))
-	call writeLog(build2("admin_dt_tm_vc=",t_rec->qual[d1.seq].meds_qual[i].admin_dt_tm_vc))
-	call writeLog(build2("ce.post_med_broset=",t_rec->qual[d1.seq].meds_qual[i].post_med_broset))
-	call writeLog(build2("ce.post_med_broset_dt_tm=",t_rec->qual[d1.seq].meds_qual[i].post_med_broset_dt_tm))
+	call writeLog(build2("admin_dt_tm_vc=",t_rec->qual[d1.seq].meds_qual[d2.seq].admin_dt_tm_vc))
+	call writeLog(build2("ce.post_med_broset=",t_rec->qual[d1.seq].meds_qual[d2.seq].post_med_broset))
+	call writeLog(build2("ce.post_med_broset_dt_tm=",t_rec->qual[d1.seq].meds_qual[d2.seq].post_med_broset_dt_tm))
 with nocounter
 
 
 call writeLog(build2("* END   Finding Broset Score After Meds ********************"))
 call writeLog(build2("************************************************************"))
+
+
+call writeLog(build2("* START Attending Selection ************************************"))
+
+select into "nl:"
+	d1seq=d1.seq
+from
+	 (dummyt d1 with seq=t_rec->cnt)
+	,encntr_prsnl_reltn epr
+	,prsnl p
+plan d1
+join epr
+	where epr.encntr_id 		= t_rec->qual[d1.seq].encntr_id
+	and   epr.encntr_prsnl_r_cd = code_values->cv.cs_333.attenddoc_cd
+	and   (		(epr.active_ind 		= 1)
+			or 
+				(epr.expiration_ind     = 1)
+		   )
+	and   epr.end_effective_dt_tm >= cnvtdatetime(curdate,curtime3)
+	and   epr.beg_effective_dt_tm <= cnvtdatetime(curdate,curtime3)
+join p
+	where p.person_id = epr.prsnl_person_id
+order by
+	 d1seq
+	,epr.encntr_id
+	,epr.active_ind desc
+	,epr.beg_effective_dt_tm desc
+head d1.seq
+	call writeLog(build2("---->e.encntr_id=",trim(cnvtstring(epr.encntr_id)),":",trim(uar_get_code_display(epr.encntr_prsnl_r_cd)),
+		":prsnl_id=",trim(cnvtstring(epr.prsnl_person_id))))
+	t_rec->qual[d1.seq].attending_prov = p.name_full_formatted
+with nocounter 
 
 call writeLog(build2("************************************************************"))
 call writeLog(build2("* START Custom   *******************************************"))
@@ -365,15 +421,18 @@ call writeLog(build2("**********************************************************
 call writeLog(build2("* START Custom   *******************************************"))
 
 select into t_rec->cons.outdev
-	 patient = t_rec->qual[d1.seq].patient_name
-	,location = t_rec->qual[d1.seq].loc_display
-	,fin = t_rec->qual[d1.seq].fin
+	 patient = substring(1,100,t_rec->qual[d1.seq].patient_name)
+	,location = substring(1,25,t_rec->qual[d1.seq].loc_display)
+	,fin = substring(1,20,t_rec->qual[d1.seq].fin)
 	,reg_dt_tm = substring(1,24,format(t_rec->qual[d1.seq].reg_dt_tm,"dd-mmm-yyyy hh:mm:ss zzz;;q"))
+	,disch_dt_tm = substring(1,24,format(t_rec->qual[d1.seq].disch_dt_tm,"dd-mmm-yyyy hh:mm:ss zzz;;q"))
 	,attending = t_rec->qual[d1.seq].attending_prov
-	,moas_score	= t_rec->qual[d1.seq].MOAS_score
-	,moas_dt_tm	= substring(1,24,t_rec->qual[d1.seq].MOAS_dt_tm)
 	,Broset_score	= t_rec->qual[d1.seq].Broset_score
 	,Broset_dt_tm	= t_rec->qual[d1.seq].Broset_dt_tm
+	
+	,moas_score	= t_rec->qual[d1.seq].MOAS_score
+	,moas_dt_tm	= substring(1,24,t_rec->qual[d1.seq].MOAS_dt_tm)
+	
 	,agitation_meds	= t_rec->qual[d1.seq].meds_qual[d2.seq].admin_med
 	,agitation_meds_dt_tm = t_rec->qual[d1.seq].meds_qual[d2.seq].admin_dt_tm_vc
 	,post_meds_broset	= t_rec->qual[d1.seq].meds_qual[d2.seq].post_med_broset
@@ -385,6 +444,7 @@ from
 	,(dummyt d3)
 plan d1
 	where maxrec(d2,t_rec->qual[d1.seq].meds_cnt)
+	and t_rec->qual[d1.seq].MOAS_qual = 1
 join d3
 join d2
 order by
