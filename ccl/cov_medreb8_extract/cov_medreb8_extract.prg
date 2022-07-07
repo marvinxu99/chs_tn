@@ -109,9 +109,9 @@ declare iOpsInd				= i2 with protect, noconstant (0)
  ;
 declare ccl_filepath_var = vc WITH noconstant(CONCAT('$cer_temp/pha_medreb8_medadmin.txt')), PROTECT
  
+declare filename_var = vc WITH noconstant($outdev)
 
-
-
+/*
 declare filename_var = vc WITH noconstant(CONCAT('cer_temp:'
 	,TRIM(cnvtlower(uar_get_displaykey($facility_list))),'_pha_medreb8_medadmin.txt')), PROTECT
  
@@ -121,6 +121,7 @@ declare ccl_filepath_var = vc WITH noconstant(CONCAT('$cer_temp/'
 declare astream_filepath_var = vc with noconstant(
 				build("/nfs/middle_fs/to_client_site/",trim(cnvtlower(curdomain)),"/CernerCCL/"))
 			;build("/nfs/middle_fs/to_client_site/",trim(cnvtlower(curdomain)),"/CernerCCL/")
+*/
 /* 
 declare astream_filepath_var = vc with noconstant(
 				"/cerner/w_custom/p0665_cust/to_client_site/CernerCCL/")
@@ -130,7 +131,8 @@ declare astream_filepath_var = vc with noconstant(
 if(validate(request->batch_selection) = 1)
  	set iOpsInd = 1
 endif
- 
+
+set iOpsInd = 1 
  
 /***************************************************************************
 	RECORD STRUCTURE
@@ -1254,7 +1256,8 @@ if(iOpsInd = 1) ;Ops
  
 	if($to_file = 0)  ;To File
  		call echo("**** creating output***")
- 
+ 		call echo(build2("filename_var=",filename_var))
+ 		
 	   	Select into value(filename_var)
  
 		from (dummyt d WITH seq = value(size(med_admin->mlist,5)))
@@ -1334,10 +1337,10 @@ if(iOpsInd = 1) ;Ops
  
 		;Move file to Astream folder
 	;	set cmd = build2("cp ", ccl_filepath_var, " ", astream_filepath_var) ;copy file TESTING
-	  	set cmd = build2("mv ", ccl_filepath_var, " ", astream_filepath_var) ;move file
-		set len = size(trim(cmd))
-	 	call dcl(cmd, len, stat)
-		call echo(build2(cmd, " : ", stat))
+	  	;set cmd = build2("mv ", ccl_filepath_var, " ", astream_filepath_var) ;move file
+		;set len = size(trim(cmd))
+	 	;call dcl(cmd, len, stat)
+		;call echo(build2(cmd, " : ", stat))
  
 	endif ;To File
  
