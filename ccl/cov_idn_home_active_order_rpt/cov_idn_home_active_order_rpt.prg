@@ -36,7 +36,9 @@ prompt
 with OUTDEV, FACILITY, UNIT, MED_STR, START_DT_TM, END_DT_TM
  
 DECLARE fac_cnt 		= i4
-DECLARE med_qual_str	= cvc
+DECLARE med_qual_str	= vc
+declare days_range 		= i4
+
  
 SET med_qual_str 	= cnvtupper(trim( $MED_STR))
 SET cpharm 			= uar_get_code_by("MEANING" ,6000 ,"PHARMACY")
@@ -46,9 +48,23 @@ SET cprimary 		= uar_get_code_by("MEANING" ,6011 ,"PRIMARY")
 SET cordered 		= uar_get_code_by("MEANING" ,6004 ,"ORDERED")
 SET cpending 		= uar_get_code_by("MEANING" ,6004 ,"PENDING")
 SET cactivencntr 	= uar_get_code_by("MEANING" ,261 ,"ACTIVE")
-SET cpreadmitencntr	= uar_get_code_by("MEANING" ,261 ,"PREADMIT")
- 
- 
+SET cpreadmitencntr	= uar_get_code_by("MEANING" ,261 ,"PREADMIT") 
+
+
+set days_range		= datetimediff(cnvtdatetime($END_DT_TM),cnvtdatetime($START_DT_TM))
+
+if (days_range > 31)
+
+	select into $OUTDEV
+	from dummyt 
+	head report
+	col 0 "Please select a date range that is less than or equal to 30 days."	
+	
+	with nocounter 
+	go to exit_script
+endif
+
+
 FREE RECORD fac
 RECORD fac (
 	1 fac [*]
@@ -150,7 +166,7 @@ HEAD o.order_id
  
 	ord->ord[cnt].order_id = o.order_id
  
-WITH nullreport,expand =1
+WITH nullreport,expand =1,orahintcbo("XIE1ORDERS")
  ;end select
  
  
@@ -264,5 +280,7 @@ ORDER BY
  
 WITH outerjoin = d3 ,format ,separator = " "
  ;end select
+
+#exit_script 
  
 END GO
