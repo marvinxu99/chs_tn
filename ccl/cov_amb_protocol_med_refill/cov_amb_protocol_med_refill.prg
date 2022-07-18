@@ -124,6 +124,10 @@ set reply->text =  build2(reply->text,rtf_definitions->st.reol)
 
 
 set stat = cnvtjsontorec(sGetAppts_ByPersonID(t_rec->person_id,365,"PAST"))
+;Take appointment location->find group
+;take group->find all other locations
+;match all other locations
+;need group record structure to hold facility and unit and check below. 
 
 if (stat = TRUE)
 	for (i=1 to appointment_list->cnt)
