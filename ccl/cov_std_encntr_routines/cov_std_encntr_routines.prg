@@ -536,25 +536,40 @@ subroutine sGetCMGLocations(null)
 			2 display 		= vc
 			2 description 	= vc
 			2 location_cd 	= f8
+			2 unit			= vc
 	)
 
 	select into "nl:"
 	from
 	     location l
+	    ,location l2
+	    ,location_group lg1
+	    ,location_group lg2
 	    ,organization o
 	    ,org_set os
 	    ,org_set_org_r osr
 	    ,code_value_outbound cvo
-	plan l 
+	plan l
 	    where l.location_type_cd = value(uar_get_code_by("MEANING",222,"FACILITY") )
 	    and l.active_ind = 1
-	join o 
+	join o
 	    where o.organization_id = l.organization_id
-	join osr 
+	join osr
 	    where osr.organization_id = o.organization_id
 	    and osr.active_ind = 1
-	join os 
+	join os
 	    where os.org_set_id = osr.org_set_id and os.name like '*CMG*'
+	join lg1
+		where lg1.parent_loc_cd = l.location_cd
+		and   lg1.active_ind = 1
+		and   cnvtdatetime(sysdate) between lg1.beg_effective_dt_tm and lg1.end_effective_dt_tm
+	join lg2
+		where lg2.parent_loc_cd = lg1.child_loc_cd
+		and   lg2.active_ind = 1
+		and   cnvtdatetime(sysdate) between lg2.beg_effective_dt_tm and lg2.end_effective_dt_tm
+	join l2
+		where l2.location_cd = lg2.child_loc_cd
+		and   l2.location_type_cd = value(uar_get_code_by("MEANING",222,"AMBULATORY"))
 	join cvo
 	    where cvo.code_value = l.location_cd
 	    and   cvo.contributor_source_cd = value(uar_get_code_by("DISPLAY",73,"COVDEV1"))
@@ -573,6 +588,9 @@ subroutine sGetCMGLocations(null)
 		cmg_locations->qual[i].display			= uar_get_code_display(l.location_cd)
 		cmg_locations->qual[i].description		= uar_get_code_description(l.location_cd)
 		cmg_locations->qual[i].location_cd		= l.location_cd	
+		cmg_locations->qual[i].unit				= uar_get_code_display(l2.location_cd)
+	foot report
+		cmg_locations->cnt = i
 	with nocounter
 	
 	call SubroutineLog("cmg_locations","record")
