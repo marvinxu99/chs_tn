@@ -156,11 +156,14 @@ endfor
 
 if (stat = TRUE)
 	for (i=1 to appointment_list->cnt)
+	 call writeLog(build2("check appointment_list->qual[i].location=",appointment_list->qual[i].location))
 	 set idx = 0
 	 set idx = locateval(j,1,t_rec->cmg_cnt,appointment_list->qual[i].location,t_rec->cmg_qual[j].facility)
+	 call writeLog(build2("facility idx=",idx))
 	 if (idx = 0)
 	 	set idx = locateval(j,1,t_rec->cmg_cnt,appointment_list->qual[i].location,t_rec->cmg_qual[j].unit)
 	 endif
+	 call writeLog(build2("unit idx=",idx))
 	 if (idx > 0)
 	 ;if ((appointment_list->qual[i].location = t_rec->facility) or (appointment_list->qual[i].location = t_rec->unit))
 		call writeLog(build2("appointment_list_i=",i))
@@ -203,7 +206,16 @@ call writeLog(build2("stat=",stat))
 
 if (stat = TRUE)
 	for (i=1 to appointment_list->cnt)
-	 if ((appointment_list->qual[i].location = t_rec->facility) or (appointment_list->qual[i].location = t_rec->unit))
+	 call writeLog(build2("check appointment_list->qual[i].location=",appointment_list->qual[i].location))
+	 set idx = 0
+	 set idx = locateval(j,1,t_rec->cmg_cnt,appointment_list->qual[i].location,t_rec->cmg_qual[j].facility)
+	 call writeLog(build2("facility idx=",idx))
+	 if (idx = 0)
+	 	set idx = locateval(j,1,t_rec->cmg_cnt,appointment_list->qual[i].location,t_rec->cmg_qual[j].unit)
+	 endif
+	 call writeLog(build2("unit idx=",idx))
+	 if (idx > 0)
+	; if ((appointment_list->qual[i].location = t_rec->facility) or (appointment_list->qual[i].location = t_rec->unit))
 		call writeLog(build2("appointment_list_i=",i))
 		call writeLog(build2("appointment_list->qual[i].scheventid=",appointment_list->qual[i].scheventid))
 		set reply->text =  build2(reply->text," \trowd\cellx2000\cellx4000\cellx6000\cellx10000\cellx12000 ")
