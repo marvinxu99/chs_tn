@@ -365,7 +365,7 @@ if (t_rec->constants.year > 0)
 		set t_rec->constants.check_dt_tm = datetimeadd(datetimefind(t_rec->constants.check_dt_tm,'M','E','E'),1)
 	endwhile
 else
-	set t_rec->constants.check_dt_tm = cnvtdatetime("01-MAY-2022 00:00:00")
+	set t_rec->constants.check_dt_tm = cnvtdatetime("01-JUN-2022 00:00:00")
 	set t_rec->batch_cnt = (t_rec->batch_cnt + 1)
 	set stat = alterlist(t_rec->batch_qual,t_rec->batch_cnt)
 	set t_rec->batch_qual[t_rec->batch_cnt].4_start_dt 
