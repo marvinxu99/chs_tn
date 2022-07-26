@@ -29,9 +29,10 @@ drop program cov_him_auth_by_event:dba go
 create program cov_him_auth_by_event:dba
 
 prompt 
-	"EVENT_ID" = 0 
+	"Output to File/Printer/MINE" = "MINE"   ;* Enter or select the printer or file name to send this report to.
+	, "EVENT_ID" = "0" 
 
-with EVENT_ID
+with OUTDEV, EVENT_ID
 
 
 call echo(build("loading script:",curprog))
