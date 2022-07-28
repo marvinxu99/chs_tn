@@ -76,6 +76,7 @@ record t_rec
 	1 filename_h		= vc
 	1 filename_i		= vc
 	1 filename_j		= vc
+	1 filename_k		= vc
 	1 audit_cnt 		= i4
 	1 audit[*]
 	 2 section = vc
@@ -133,7 +134,7 @@ set t_rec->filename_g = concat("cclscratch:eks_ekssub_",trim(format(sysdate,"yyy
 set t_rec->filename_h = concat("cclscratch:eks_ordrequest_",trim(format(sysdate,"yyyy_mm_dd_hh_mm_ss;;d")),".dat")
 set t_rec->filename_i = concat("cclscratch:eks_ordreply_",trim(format(sysdate,"yyyy_mm_dd_hh_mm_ss;;d")),".dat")
 set t_rec->filename_j = concat("cclscratch:eks_cerequest_",trim(format(sysdate,"yyyy_mm_dd_hh_mm_ss;;d")),".dat")
- 
+ set t_rec->filename_k = concat("cclscratch:eks_event_",trim(format(sysdate,"yyyy_mm_dd_hh_mm_ss;;d")),".dat")
 /*
 record eksdata(
 1 tqual[4] ;data, evoke, logic and action
@@ -230,6 +231,12 @@ if (validate(cerequest))
 	call echojson(cerequest, t_rec->filename , 1)
 	call writeLog(build2(cnvtrectojson(cerequest)))
 	call addAttachment(program_log->files.file_path, replace(t_rec->filename_j,"cclscratch:",""))
+endif
+if (validate(event))
+	call echojson(event,t_rec->filename_k, 0)
+	call echojson(event, t_rec->filename , 1)
+	call writeLog(build2(cnvtrectojson(event)))
+	call addAttachment(program_log->files.file_path, replace(t_rec->filename_k,"cclscratch:",""))
 endif
  
  

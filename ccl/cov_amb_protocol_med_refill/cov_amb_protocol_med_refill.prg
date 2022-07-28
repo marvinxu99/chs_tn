@@ -71,8 +71,14 @@ record t_rec
 	1 person_id		= f8
 	1 facility      = vc
 	1 unit			= vc
+	1 cmg_alias		= vc
+	1 cmg_cnt		= i4
+	1 cmg_qual[*]
+	 2 facility 	= vc
+	 2 unit			= vc
 ) with protect
- 
+
+declare idx = i4 with noconstant(0) 
  
 call writeLog(build2("* END   Custom Section  ************************************"))
 call writeLog(build2("************************************************************"))
@@ -122,12 +128,44 @@ set reply->text =  build2(reply->text," 1) Last Visit with provider:")
 set reply->text =  build2(reply->text,rtf_definitions->st.reol)
 set reply->text =  build2(reply->text,rtf_definitions->st.reol)
 
+set stat = cnvtjsontorec(sGetCMGLocations(null))
 
 set stat = cnvtjsontorec(sGetAppts_ByPersonID(t_rec->person_id,365,"PAST"))
+;Take appointment location->find group
+;take group->find all other locations
+;match all other locations
+;need group record structure to hold facility and unit and check below. 
+
+for (i=1 to cmg_locations->cnt)
+	if ((cmg_locations->qual[i].display = t_rec->facility) or (cmg_locations->qual[i].unit = t_rec->unit))
+		set t_rec->cmg_alias = cmg_locations->qual[i].group
+		set i = (cmg_locations->cnt + 1)
+	endif
+endfor
+
+
+for (i=1 to cmg_locations->cnt)
+	if (cmg_locations->qual[i].group = t_rec->cmg_alias)
+		set t_rec->cmg_cnt += 1
+		set stat = alterlist(t_rec->cmg_qual,t_rec->cmg_cnt)
+		set t_rec->cmg_qual[t_rec->cmg_cnt].facility = cmg_locations->qual[i].display
+		set t_rec->cmg_qual[t_rec->cmg_cnt].unit = cmg_locations->qual[i].unit
+	endif
+endfor
+
 
 if (stat = TRUE)
 	for (i=1 to appointment_list->cnt)
-	 if ((appointment_list->qual[i].location = t_rec->facility) or (appointment_list->qual[i].location = t_rec->unit))
+	 call writeLog(build2("check appointment_list->qual[i].location=",appointment_list->qual[i].location))
+	 set idx = 0
+	 set idx = locateval(j,1,t_rec->cmg_cnt,appointment_list->qual[i].location,t_rec->cmg_qual[j].facility)
+	 call writeLog(build2("facility idx=",idx))
+	 if (idx = 0)
+	 	set idx = locateval(j,1,t_rec->cmg_cnt,appointment_list->qual[i].location,t_rec->cmg_qual[j].unit)
+	 endif
+	 call writeLog(build2("unit idx=",idx))
+	 if (idx > 0)
+	 ;if ((appointment_list->qual[i].location = t_rec->facility) or (appointment_list->qual[i].location = t_rec->unit))
 		call writeLog(build2("appointment_list_i=",i))
 		call writeLog(build2("appointment_list->qual[i].scheventid=",appointment_list->qual[i].scheventid))
 		set reply->text =  build2(reply->text," \trowd\cellx2000\cellx4000\cellx6000\cellx10000\cellx12000 ")
@@ -168,7 +206,16 @@ call writeLog(build2("stat=",stat))
 
 if (stat = TRUE)
 	for (i=1 to appointment_list->cnt)
-	 if ((appointment_list->qual[i].location = t_rec->facility) or (appointment_list->qual[i].location = t_rec->unit))
+	 call writeLog(build2("check appointment_list->qual[i].location=",appointment_list->qual[i].location))
+	 set idx = 0
+	 set idx = locateval(j,1,t_rec->cmg_cnt,appointment_list->qual[i].location,t_rec->cmg_qual[j].facility)
+	 call writeLog(build2("facility idx=",idx))
+	 if (idx = 0)
+	 	set idx = locateval(j,1,t_rec->cmg_cnt,appointment_list->qual[i].location,t_rec->cmg_qual[j].unit)
+	 endif
+	 call writeLog(build2("unit idx=",idx))
+	 if (idx > 0)
+	; if ((appointment_list->qual[i].location = t_rec->facility) or (appointment_list->qual[i].location = t_rec->unit))
 		call writeLog(build2("appointment_list_i=",i))
 		call writeLog(build2("appointment_list->qual[i].scheventid=",appointment_list->qual[i].scheventid))
 		set reply->text =  build2(reply->text," \trowd\cellx2000\cellx4000\cellx6000\cellx10000\cellx12000 ")
