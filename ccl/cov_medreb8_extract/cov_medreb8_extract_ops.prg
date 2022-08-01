@@ -43,10 +43,10 @@ declare start_date = f8
 declare end_date   = f8
  
 set start_date = cnvtlookbehind("1,M")
-set start_date = datetimefind(start_date,"D","B","B")
+set start_date = datetimefind(start_date,"M","B","B")
 ;set end_date   = cnvtlookahead("2,D",start_date)
 ;set end_date   = cnvtlookbehind("1,SEC", end_date)
-set end_date = datetimefind(cnvtlookbehind("1,M"),"D","E","E")
+set end_date = datetimefind(cnvtlookbehind("1,M"),"M","E","E")
  
 call echo(build2("start_date=",format(start_date,";;q")))
 call echo(build2("end_date=",format(end_date,";;q")))
@@ -95,11 +95,11 @@ and l.location_cd in (
 
 	 21250403 ;FSR
 	,2552503613 ;MMC
-	;,2552503635 ;FLMC
-	;,2552503639 ;MHHS
-	;,2552503645 ;PW
-	;,2552503649 ;RMC
-	;,2552503653 ;LCMC
+	,2552503635 ;FLMC
+	,2552503639 ;MHHS
+	,2552503645 ;PW
+	,2552503649 ;RMC
+	,2552503653 ;LCMC
 	
 
 )
