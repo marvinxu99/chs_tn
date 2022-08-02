@@ -185,7 +185,7 @@ if (facility->file_cnt > 0)
 	 endif
 	endfor
 	;call addAttachment(facility->merged.full_path,facility->merged.filename)
-	execute cov_astream_file_transfer "cclscratch",facility->merged.filename,"","MV"
+	execute cov_astream_file_transfer "cclscratch",facility->merged.filename,"ClinicalAncillary/Pharmacy/MedReb8/","MV"
 endif	
 
 call exitScript(null) 
