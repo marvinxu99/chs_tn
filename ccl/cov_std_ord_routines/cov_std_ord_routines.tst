@@ -124,7 +124,7 @@ call echo(SetProcOrderDetailValue("Workflow Sequence",0))
 call echo(SetProcOrderDetailValue("Freetext Dose",0))
 call echo(SetProcOrderDetailValue("Pharmacy Instructions",0))
 call echo(SetProcOrderDetailValueCd("Frequency Schedule Id",12021.00,1)) 
-call echo(SetProcOrderDetailValue("IVPO Rule",1,1))
+call echo(SetProcOrderDetailValue("IVPO Rule",0,0))
 call echo(SetProcOrderDetailDTTm("Reference Start Date/Time",cnvtdatetime(curdate,curtime3))) 
 
 

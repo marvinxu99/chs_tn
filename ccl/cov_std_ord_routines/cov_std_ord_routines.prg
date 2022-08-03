@@ -111,6 +111,7 @@ subroutine SetupProcOrder(vEncntrID,vSynonymID)
 	
 	declare vReturnSuccess = i2 with noconstant(FALSE), protect
 	declare vPersonID = f8 with noconstant(0.0), protect
+	declare vOrderID = f8 with noconstant(0.0), protect
 	
     select into "nl:"
     from
@@ -125,7 +126,6 @@ subroutine SetupProcOrder(vEncntrID,vSynonymID)
 	  1 seq_name = vc  
 	  1 number = i2   
 	) 
-	
 	
 	record procrequest (
 	  1 productId = f8   
@@ -495,8 +495,11 @@ subroutine SetupProcOrder(vEncntrID,vSynonymID)
 		set 500698request->seq_name = "order_seq"
 		set 500698request->number = 1
 		
+		set stat = tdbexecute(600005,500195,500698,"REC",500698request,"REC",500698reply)
+
+		call SubroutineLog('500698reply','record')
 		
-		set stat = tdbexecute(600005,500196,500698,"REC",500698request,"REC",500698reply)
+		set vOrderID = 500698reply->qual[1].seq_value
 	
 		set procrequest->personid = vPersonID
 		set procrequest->encntrid = vEncntrID
@@ -515,6 +518,7 @@ subroutine SetupProcOrder(vEncntrID,vSynonymID)
  			oc.catalog_cd
  		head oc.catalog_cd
  			stat = alterlist(procrequest->orderList,1)
+ 			procrequest->orderlist[1].orderId = vOrderID
 			procrequest->orderlist[1].encntrid = vEncntrID
  			procrequest->orderList[1].actionTypeCd = uar_get_code_by("MEANING",6003,"ORDER")
  			procrequest->orderList[1].communicationTypeCd = uar_get_code_by("MEANING",6006,"NOCOSIGN")
