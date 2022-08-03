@@ -104,8 +104,8 @@ subroutine SetupOrder(vEncntrID)
 end ;SetupOrder
 
 
-declare SetupProcOrder(vEncntrID=f8,vSynonymID=f8) = i2 with copy, persist
-subroutine SetupProcOrder(vEncntrID,vSynonymID)
+declare SetupProcOrder(vEncntrID=f8,vSynonymID=f8,vOrderingProv=f8(VALUE,1.0)) = i2 with copy, persist
+subroutine SetupProcOrder(vEncntrID,vSynonymID,vOrderingProv)
 	
 	call SubroutineLog(build2('start SetupProcOrder(',vEncntrID,')'))
 	
@@ -522,7 +522,7 @@ subroutine SetupProcOrder(vEncntrID,vSynonymID)
 			procrequest->orderlist[1].encntrid = vEncntrID
  			procrequest->orderList[1].actionTypeCd = uar_get_code_by("MEANING",6003,"ORDER")
  			procrequest->orderList[1].communicationTypeCd = uar_get_code_by("MEANING",6006,"NOCOSIGN")
- 			procrequest->orderList[1].orderProviderId =  12697633
+ 			procrequest->orderList[1].orderProviderId =  vOrderingProv
  			procrequest->orderList[1].origOrderDtTm = cnvtdatetime(sysdate)
  			procrequest->orderList[1].orderDtTm = cnvtdatetime(sysdate)
  			procrequest->orderList[1].oeFormatId = ocs.oe_format_id
