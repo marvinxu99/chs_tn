@@ -78,6 +78,7 @@ record t_rec
 	 2 run_dt_tm 				= dq8
 	 2 hsTrop_cd				= f8
 	 2 order_dt_tm_margin_min	= i4
+	 2 order_dt_tm_margin_max   = i4
 	1 dates
 	 2 start_dt_tm	= dq8
 	 2 stop_dt_tm	= dq8
@@ -133,6 +134,7 @@ endif
  
 set t_rec->cons.hsTrop_cd = GethsTropAlgEC(null)
 set t_rec->cons.order_dt_tm_margin_min = GethsTropAlgOrderMargin(null)
+set t_rec->cons.order_dt_tm_margin_max = GethsTropAlgOrderMarginMax(null)
  
 declare order_comment = vc with noconstant(" "), protect
  
