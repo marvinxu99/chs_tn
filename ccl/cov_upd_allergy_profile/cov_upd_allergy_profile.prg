@@ -90,8 +90,19 @@ record t_rec
 
 	1 alg_exclude_pos			= i2
 	1 alg_exclude_cnt			= i2
-	1 alg_exclue_qua[*]			
+	1 alg_exclude_qual[*]			
 	 2 identifier 				= vc
+	1 exclude_collection_cnt	= i2
+	1 exclude_collection_qual[*]
+	 2 colleciton_group			= vc
+	 2 freetext_pos				= i2
+	 2 freetext_cnt				= i2
+	 2 freetext_qual[*]
+	  3 reaction_ftdesc		= vc
+	 2 nomenclature_pos			= i2
+	 2 nomenclature_cnt			= i2
+	 2 nomenclature_qual[*]
+	  3 source_string			= vc
 	1 conversion
 	 2 substance_cnt			= i2
 	 2 substance_qual[*]
@@ -181,6 +192,7 @@ declare i = i2 with noconstant(0), public
 declare k = i2 with noconstant(0), public
 declare h = i2 with noconstant(0), public
 declare r = i2 with noconstant(0), public
+declare l = i2 with noconstant(0), public
  
 set t_rec->curprog = curprog
 ;set t_rec->curprog = "" ;override for dev script
@@ -315,13 +327,13 @@ order by
 head report
 	call echo(build2("finding free-text to coded query"))
 head cv1.code_value
-	call echo(build2("cv1.code_value=",trim(cv1.display)))
+	;call echo(build2("cv1.code_value=",trim(cv1.display)))
 	t_rec->conversion.substance_cnt = (t_rec->conversion.substance_cnt + 1)
 	stat = alterlist(t_rec->conversion.substance_qual,t_rec->conversion.substance_cnt)
 	t_rec->conversion.substance_qual[t_rec->conversion.substance_cnt].source_identifier = cv1.description
 	t_rec->conversion.substance_qual[t_rec->conversion.substance_cnt].source_string		= cv1.display
 head cv2.code_value
-	call echo(build2("cv2.code_value=",trim(cv2.display)))
+	;call echo(build2("cv2.code_value=",trim(cv2.display)))
 	t_rec->conversion.substance_qual[t_rec->conversion.substance_cnt].freetext_cnt =
 		(t_rec->conversion.substance_qual[t_rec->conversion.substance_cnt].freetext_cnt + 1)
 	stat = alterlist(t_rec->conversion.substance_qual[t_rec->conversion.substance_cnt].freetext_qual,
@@ -371,16 +383,130 @@ for (i = 1 to t_rec->conversion.substance_cnt)
 		 n.source_identifier
 		,n.beg_effective_dt_tm desc
 	head report
-		call echo(build2("inside nomenclature query"))
+		;call echo(build2("inside nomenclature query"))
+		null
 	head n.source_identifier
 		t_rec->conversion.substance_qual[i].substance_nomen_id = n.nomenclature_id
 	foot n.source_identifier
-		call echo(build2("->found ",trim(n.source_identifier),":",trim(n.source_string),"=",trim(cnvtstring(n.nomenclature_id))))
+		;call echo(build2("->found ",trim(n.source_identifier),":",trim(n.source_string),"=",trim(cnvtstring(n.nomenclature_id))))
+		null
 	foot report
-		call echo(build2("leaving nomencatlure query"))
+		;call echo(build2("leaving nomencatlure query"))
+		null
 	with nocounter
 endfor
- 
+
+call echo(build2("Getting List of Meds for Side Effect to Allergy Exclusions"))
+
+select distinct into "nl:"
+	 mdc.category_name
+	,mcdx.drug_identifier
+	,n.source_string
+from 
+	 mltm_drug_categories mdc
+	,mltm_category_drug_xref mcdx
+	,nomenclature n
+plan mdc 
+	where expand(i,1,t_rec->alg_ex_cat_cnt,mdc.category_name,t_rec->alg_ex_cat_qual[i].category_name)
+join mcdx 
+	where mcdx.multum_category_id = mdc.multum_category_id
+join n 
+	where n.source_identifier = mcdx.drug_identifier
+order by 
+	 mdc.category_name
+	,mcdx.drug_identifier
+	,0
+head report
+	call echo(build2("entering category_name query"))
+detail
+	t_rec->alg_exclude_cnt = (t_rec->alg_exclude_cnt + 1)
+	stat = alterlist(t_rec->alg_exclude_qual,t_rec->alg_exclude_cnt)
+	t_rec->alg_exclude_qual[t_rec->alg_exclude_cnt].identifier = mcdx.drug_identifier
+foot report
+	call echo(build2("leaving category_name query"))
+with nocounter, nullreport
+
+
+select distinct into "nl:"
+	macdm.drug_identifier
+from
+	 mltm_alr_category mac
+	,mltm_alr_category_drug_map macdm
+plan mac
+	where expand(i,1,t_rec->alg_ex_class_cnt,mac.category_description,t_rec->alg_ex_class_qual[i].class_name)
+join macdm
+	where macdm.alr_category_id = mac.alr_category_id
+order by
+	 mac.category_description
+	,macdm.drug_identifier
+	,0
+head report
+	call echo(build2("entering category_description query"))
+detail
+	t_rec->alg_exclude_cnt = (t_rec->alg_exclude_cnt + 1)
+	stat = alterlist(t_rec->alg_exclude_qual,t_rec->alg_exclude_cnt)
+	t_rec->alg_exclude_qual[t_rec->alg_exclude_cnt].identifier = macdm.drug_identifier
+foot report
+	call echo(build2("leaving category_description query"))
+with nocounter, nullreport
+
+call echo(build2("Getting collections of reactions to exclude from side effect to allergy conversion"))
+select into "nl:"
+from
+      code_value cv1
+     ,code_value_group cvg
+     ,code_value cv2
+plan cv1
+	where cv1.code_set 				= t_rec->custom_code_set
+	;and   cv1.definition 			= trim(cnvtlower(t_rec->curprog))
+	and   cv1.active_ind 			= 1
+	and   cv1.begin_effective_dt_tm <= cnvtdatetime(curdate,curtime3)
+	and   cv1.end_effective_dt_tm 	>= cnvtdatetime(curdate,curtime3)
+	and   cv1.cdf_meaning			in(
+										 "EXCLUDE_COLL"
+									   )
+join cvg
+	where cvg.parent_code_value		= cv1.code_value
+join cv2
+	where cv2.code_value			= cvg.child_code_value
+	and   cv2.active_ind 			= 1
+	and   cv2.begin_effective_dt_tm <= cnvtdatetime(curdate,curtime3)
+	and   cv2.end_effective_dt_tm 	>= cnvtdatetime(curdate,curtime3)
+	and   cv2.cdf_meaning			in(
+										 "ALLERGY_KEY"
+										,"ALLERGY_FT"
+										)
+order by
+	 cv1.code_value
+	,cv2.code_value
+head report
+	call echo(build2("entering EXCLUDE_COLL query"))
+head cv1.code_value
+	t_rec->exclude_collection_cnt = (t_rec->exclude_collection_cnt + 1)
+	stat = alterlist(t_rec->exclude_collection_qual,t_rec->exclude_collection_cnt)
+	t_rec->exclude_collection_qual[t_rec->exclude_collection_cnt].colleciton_group = cv1.display
+	;call echo(build2("->added collection group=",cv1.display))
+head cv2.code_value
+	if (cv2.cdf_meaning = "ALLERGY_FT")
+		t_rec->exclude_collection_qual[t_rec->exclude_collection_cnt].freetext_cnt += 1
+		stat = alterlist(t_rec->exclude_collection_qual[t_rec->exclude_collection_cnt].freetext_qual,
+			t_rec->exclude_collection_qual[t_rec->exclude_collection_cnt].freetext_cnt)
+			
+		t_rec->exclude_collection_qual[t_rec->exclude_collection_cnt].
+			freetext_qual[t_rec->exclude_collection_qual[t_rec->exclude_collection_cnt].freetext_cnt].reaction_ftdesc = cv2.display
+	elseif (cv2.cdf_meaning = "ALLERGY_KEY")
+		t_rec->exclude_collection_qual[t_rec->exclude_collection_cnt].nomenclature_cnt += 1
+		stat = alterlist(t_rec->exclude_collection_qual[t_rec->exclude_collection_cnt].nomenclature_qual,
+			t_rec->exclude_collection_qual[t_rec->exclude_collection_cnt].nomenclature_cnt)
+			
+		t_rec->exclude_collection_qual[t_rec->exclude_collection_cnt].
+			nomenclature_qual[t_rec->exclude_collection_qual[t_rec->exclude_collection_cnt].nomenclature_cnt].source_string = cv2.display
+	endif
+foot report
+	call echo(build2("leaving EXCLUDE_COLL query"))
+with nocounter,nullreport
+	
+	
 set t_rec->reaction_class_cd	= uar_get_code_by("MEANING",12021,"ALLERGY")
 set t_rec->int_reaction_class_cd = uar_get_code_by("MEANING",12021,"INTOLERANCE")
 set t_rec->contr_reaction_class_cd = uar_get_code_by("MEANING",12021,"TOXICITY")
@@ -597,6 +723,69 @@ for (i=1 to 963006reply->allergy_qual)
 							,trim(963006reply->allergy[i].reaction[j].reaction_ftdesc)))
 						;setting allergy qualifier to YES
 						set t_rec->cur_side_effect_qual = 1
+						
+						
+						
+ 		; check to see if the medication should be excluded from the convert to allergy
+ 		if (t_rec->cur_side_effect_qual = 1)
+ 			/*
+ 			1 EXCLUDE_COLLECTION_QUAL[1,1*]
+			  2 COLLECITON_GROUP=VC27   {Itching Reaction Collection}
+			  2 FREETEXT_POS= I2   {0}
+			  2 FREETEXT_CNT= I2   {2}
+			  2 FREETEXT_QUAL[1,2*]
+			   3 REACTION_FTDESC=VC7   {ITCHING}
+			  2 FREETEXT_QUAL[2,2*]
+			   3 REACTION_FTDESC=VC13   {RASH, ITCHING}
+			  2 NOMENCLATURE_POS= I2   {0}
+			  2 NOMENCLATURE_CNT= I2   {1}
+			  2 NOMENCLATURE_QUAL[1,1*]
+			 */
+			call echo(build2("->checking to see if drug qualifies for exclusion"))
+			
+			for (k = 1 to t_rec->alg_exclude_cnt)
+				if (963006reply->allergy[i].concept_identifier = t_rec->alg_exclude_qual[k].identifier)
+					call echo(build2("-->matched:",t_rec->alg_exclude_qual[k].identifier))
+					call echo(build2("->checking to see if drug qualifies for exclusion"))
+					
+					for (l=1 to t_rec->exclude_collection_cnt)
+						call echo(build2("-->looking in ",t_rec->exclude_collection_qual[l].colleciton_group))
+						if (
+							(locateval(	t_rec->exclude_collection_qual[l].nomenclature_pos,
+									  	1,
+									  	t_rec->exclude_collection_qual[l].nomenclature_cnt,
+									  	trim(963006reply->allergy[i].reaction[j].source_string),
+									  	t_rec->exclude_collection_qual[l].nomenclature_qual[t_rec->exclude_collection_qual[l].
+									  	nomenclature_pos].source_string) > 0
+							)
+							or
+							(locateval(	t_rec->exclude_collection_qual[l].freetext_pos,
+									  	1,
+									  	t_rec->exclude_collection_qual[l].freetext_cnt,
+									  	trim(cnvtlower(963006reply->allergy[i].reaction[j].reaction_ftdesc)),
+									  	cnvtlower(t_rec->exclude_collection_qual[l].freetext_qual[t_rec->exclude_collection_qual[l]
+									  	.freetext_pos].reaction_ftdesc)) > 0
+						  	
+							)
+							)
+						
+						call echo(build2("EXCLUDE MATCH--->963006reply->allergy[",trim(cnvtstring(i)),
+							"].reaction[",trim(cnvtstring(j)),"].source_string="
+							,trim(963006reply->allergy[i].reaction[j].source_string)))
+						call echo(build2("EXCLUDE MATCH--->963006reply->allergy[",trim(cnvtstring(i)),
+							"].reaction[",trim(cnvtstring(j)),"].reaction_ftdesc="
+							,trim(963006reply->allergy[i].reaction[j].reaction_ftdesc)))
+						set t_rec->cur_side_effect_qual = 0
+						set k = (t_rec->alg_exclude_cnt + 1)
+						endif
+					endfor				
+				endif
+			endfor
+ 		endif
+						
+						
+						
+						
 					else
 						;setting allergy qualifer to NO
 						;set t_rec->cur_side_effect_qual = 0
@@ -607,7 +796,7 @@ for (i=1 to 963006reply->allergy_qual)
 				endif ;end check if first reaction or previous reactions qualified
 			endif ; reaction is active
 		endfor ;reaction qualifications
- 
+
 		; check to see if the allergy qualifies
 		if (t_rec->cur_side_effect_qual = 1)
  
@@ -864,8 +1053,14 @@ if ((validate(t_rec)) and (t_rec->return_value = "TRUE"))
  	concat("cclscratch:",trim(cnvtlower(curprog)),"_",trim(format(sysdate,"yyyy_mm_dd_hh_mm_ss;;d")),".dat"),1)
 endif
 */
+
  
-;call echorecord(t_rec)
+;call echorecord(t_rec->alg_ex_cat_qual)
+;call echorecord(t_rec->alg_ex_class_qual)
+call echorecord(t_rec->alg_exclude_qual)
+call echorecord(t_rec->exclude_collection_qual)
+call echorecord(t_rec->reactions)
+
 end
 go
  
