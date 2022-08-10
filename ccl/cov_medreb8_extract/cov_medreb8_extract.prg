@@ -606,7 +606,7 @@ join o where o.order_id = med_admin->mlist[d.seq].orderid
 order by o.order_id
  
 detail
-		med_admin->mlist[d.seq].order_cki = cki_val
+		;med_admin->mlist[d.seq].order_cki = cki_val
 		med_admin->mlist[d.seq].ordered_mnemonic = trim(o.ordered_as_mnemonic,3)
  
 With nocounter
