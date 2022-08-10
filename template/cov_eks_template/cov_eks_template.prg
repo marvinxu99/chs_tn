@@ -27,7 +27,7 @@ Mod   Mod Date    Developer              Comment
 drop program cov_eks_template:dba go
 create program cov_eks_template:dba
 
-execute cov_std_log_routines
+execute cov_std_eks_routines
 
 call SubroutineLog(build2("starting ",trim(curprog)))
 
