@@ -808,11 +808,17 @@ subroutine SetProcOrderDetailValueCd(vOEFieldDesc,vValueCd,vModified,vGroup,vFie
 end ;SetProcOrderDetailValueCd
 
 
-declare SetProcOrderDetailValue(vOEFieldDesc=vc,vValue=f8,vModified=i2(VALUE,0),vGroup=i2(VALUE,0),vField=i2(VALUE,0)) 
+declare SetProcOrderDetailValue(
+									 vOEFieldDesc=vc
+									,vValue=f8
+									,vModified=i2(VALUE,0)
+									,vGroup=i2(VALUE,0)
+									,vField=i2(VALUE,0)
+									,vEmpty=i2(VALUE,0)) 
 	= i2 with copy, persist
-subroutine SetProcOrderDetailValue(vOEFieldDesc,vValue,vModified,vGroup,vField)	
+subroutine SetProcOrderDetailValue(vOEFieldDesc,vValue,vModified,vGroup,vField,vEmpty)	
 
-	call SubroutineLog(build2('start SetProcOrderDetailValue(',vOEFieldDesc,',',vValue,',',vGroup,',',vField,')'))
+	call SubroutineLog(build2('start SetProcOrderDetailValue(',vOEFieldDesc,',',vValue,',',vGroup,',',vField,',',vEmpty,')'))
 	
 	declare vReturnSuccess = i2 with noconstant(FALSE), protect
  	declare j=i4 with noconstant(0), protect
@@ -878,6 +884,11 @@ subroutine SetProcOrderDetailValue(vOEFieldDesc,vValue,vModified,vGroup,vField)
 		
 		if (j=0)
 			set j=idx
+		endif
+		
+		if (vEmpty = 1)
+			set procrequest->orderlist[1].detaillist[j].oefieldvalue = 0.0
+			set procrequest->orderlist[1].detaillist[j].oefielddisplayvalue = ""
 		endif
 		
 		set procrequest->orderlist[1].detaillist[j].modifiedInd = vModified
