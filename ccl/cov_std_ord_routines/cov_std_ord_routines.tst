@@ -19,7 +19,7 @@ call echo(CallOrderServer(null)) go
 
 set debug_ind = 1 
 call echo(GetOrderSynonymbyMnemonic("NS Chaser")) 
-call echo(SetupProcOrder(sGetEncntrID_ByFIN("5213100031"),GetOrderSynonymbyMnemonic("NS Chaser")))
+call echo(SetupProcOrder(sGetEncntrID_ByFIN("5219402159"),GetOrderSynonymbyMnemonic("NS Chaser")))
 
 
 set stat = (SetProcOrderDetailValue("Freetext Orderable",0,0,1,0)) 
