@@ -116,7 +116,12 @@ set stat = SetProcOrderDetailDTTm("Requested Start Date/Time",cnvtdatetime(curda
 set stat = (SetProcOrderDetailValue("Duration",30,1,29,1)) 
 set stat = (SetProcOrderDetailValueCd("Duration Unit",251.00,1,29,2))
 set stat = (SetProcOrderDetailValue("Scheduled / PRN",1,1,30,1)) 
-set stat = (SetProcOrderDetailValueCd("PRN Reason",3909098297.00,1,30,2)) 
+set stat = (SetProcOrderDetailValueCd(	 "PRN Reason"
+										,uar_get_code_by("DISPLAY",4005,"fluid chaser after intermittent infusion")
+										,1
+										,30
+										,2
+									)) 
 set stat = (SetProcOrderDetailValue("Infuse Over",30,1,32,1)) 
 set stat = (SetProcOrderDetailValueCd("Infuse Over Unit",292.00,1,32,2)) 
 ;set stat = (SetProcOrderDetailDTTm("Stop Date/Time",cnvtdatetime(curdate+30,curtime3)),1,43) 
