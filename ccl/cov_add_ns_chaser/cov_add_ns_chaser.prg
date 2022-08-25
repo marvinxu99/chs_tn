@@ -100,7 +100,7 @@ set stat = (GetOrderSynonymbyMnemonic("NS Chaser"))
 set stat = SetupProcOrder(
 							 t_rec->patient.encntr_id
 							,GetOrderSynonymbyMnemonic("NS Chaser")
-							,t_rec->patient.order_provider_id
+							;,t_rec->patient.order_provider_id
 						)
 
 set stat = (SetProcOrderDetailValue("Freetext Orderable",0,0,1,0,1)) 
