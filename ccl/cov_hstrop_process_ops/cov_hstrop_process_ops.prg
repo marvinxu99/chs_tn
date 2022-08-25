@@ -573,12 +573,12 @@ if (reply->status_data.status in("Z","S"))
 endif
 ;001 end
  
-;if (t_rec->ord_process_ind = 1)
-;	call addEmailLog("chad.cummings@covhlth.com")
-;endif
+if (t_rec->ord_process_ind = 1)
+	call addEmailLog("chad.cummings@covhlth.com")
+endif
  
-;call echojson(t_rec, concat("cclscratch:",t_rec->files.records_attachment) , 1)
-;call addAttachment(program_log->files.file_path, replace(t_rec->files.records_attachment,"cclscratch:",""))
+call echojson(t_rec, concat("cclscratch:",t_rec->files.records_attachment) , 1)
+call addAttachment(program_log->files.file_path, replace(t_rec->files.records_attachment,"cclscratch:",""))
 ;execute cov_astream_file_transfer "cclscratch",t_rec->files.records_attachment,"","CP"
 ;execute cov_astream_ccl_sync value(program_log->files.file_path),value(t_rec->files.records_attachment)
  
