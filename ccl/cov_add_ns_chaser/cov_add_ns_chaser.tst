@@ -11,4 +11,5 @@ detail
 	trigger_orderid = o.order_id 
 with nocounter go
 
+
 execute cov_add_ns_chaser go

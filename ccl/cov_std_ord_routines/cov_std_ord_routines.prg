@@ -505,6 +505,7 @@ subroutine SetupProcOrder(vEncntrID,vSynonymID,vOrderingProv)
 		set procrequest->encntrid = vEncntrID
  		set procrequest->replyInfoFlag = 1
  		set procrequest->errorLogOverrideFlag = 1
+ 		set procrequest->actionPersonnelId = vOrderingProv
  		
  		select into "nl:"
  		from
