@@ -49,6 +49,8 @@ declare AddhsTropDataRec(freeRec=i2) = i2 with copy, persist
 declare AddMPEventReply(null) = i2 with copy, persist
 
 declare GetOrderStatus(vOrderID=f8) = f8 with copy, persist
+declare GetOrderDeptStatus(vOrderID=f8) = vc with copy, persist
+
  
 declare GethsTropAlgEC(null) = f8 with copy, persist
 declare GethsTropInterpEC(null) = f8 with copy, persist
@@ -145,6 +147,22 @@ subroutine GetOrderStatus(vOrderID)
 
 end ;GetOrderStatus
 
+subroutine GetOrderDeptStatus(vOrderID)
+
+	declare vOrderDeptStatus = vc
+	
+	select into "nl:"
+	from
+		orders o
+	plan o
+		where o.order_id = vOrderID
+	detail
+		vOrderDeptStatus = uar_get_code_display(o.dept_status_cd)
+	with nocounter
+	
+	return (vOrderDeptStatus)
+
+end ;GetOrderDeptStatus
  
 subroutine GethsTropOpsDate(vScript)
  

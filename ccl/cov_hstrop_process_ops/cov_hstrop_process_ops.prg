@@ -251,8 +251,10 @@ for (i=1 to t_rec->event_cnt)
 
 		if (t_rec->event_list[i].three_hour.run_dt_tm_diff > t_rec->cons.order_dt_tm_margin_max)
 			if (GetOrderStatus(t_rec->event_list[i].three_hour.order_id) in(uar_get_code_by("MEANING",6004,"ORDERED")))
-				set t_rec->event_list[i].three_hour.cancel_ind = 1
-				set t_rec->event_list[i].three_hour.needed_ind = 0
+				if (GetOrderDeptStatus(t_rec->event_list[i].three_hour.order_id) not in("Dispatched"))
+					set t_rec->event_list[i].three_hour.cancel_ind = 1
+					set t_rec->event_list[i].three_hour.needed_ind = 0
+				endif
 			endif
 		endif
 
