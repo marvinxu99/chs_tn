@@ -365,13 +365,18 @@ if (t_rec->constants.year > 0)
 		set t_rec->constants.check_dt_tm = datetimeadd(datetimefind(t_rec->constants.check_dt_tm,'M','E','E'),1)
 	endwhile
 else
-	set t_rec->constants.check_dt_tm = cnvtdatetime("01-JUN-2022 00:00:00")
+	set t_rec->constants.check_dt_tm = cnvtdatetime("01-JUL-2022 00:00:00")
 	set t_rec->batch_cnt = (t_rec->batch_cnt + 1)
 	set stat = alterlist(t_rec->batch_qual,t_rec->batch_cnt)
 	set t_rec->batch_qual[t_rec->batch_cnt].4_start_dt 
 				= format(datetimefind(t_rec->constants.check_dt_tm,'Y','B','B'),"DD-MMM-YYYY;;q")
 	set t_rec->batch_qual[t_rec->batch_cnt].5_end_dt 
 				= format(datetimefind(t_rec->constants.check_dt_tm,'M','E','E'),"DD-MMM-YYYY;;q")
+	;override dates
+	set t_rec->batch_qual[t_rec->batch_cnt].4_start_dt 
+				= format(cnvtdatetime("22-JAN-2022 00:00:00"),"DD-MMM-YYYY;;q")
+	set t_rec->batch_qual[t_rec->batch_cnt].5_end_dt 
+				= format(cnvtdatetime("22-JUL-2022 23:59:59"),"DD-MMM-YYYY;;q")
 endif
 
 for (j=1 to t_rec->batch_cnt)	
