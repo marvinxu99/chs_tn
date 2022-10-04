@@ -31,6 +31,23 @@ set nologvar = 0	;do not create log = 1		, create log = 0
 set noaudvar = 0	;do not create audit = 1	, create audit = 0
 %i ccluserdir:cov_custom_ccl_common.inc 
 
+
+if (not(validate(reply,0)))
+record  reply
+(
+	1 text = vc
+	1 status_data
+	 2 status = c1
+	 2 subeventstatus[1]
+	  3 operationname = c15
+	  3 operationstatus = c1
+	  3 targetobjectname = c15
+	  3 targetobjectvalue = c100
+)
+endif
+
+set reply->status_data.status = "F"
+
 call set_codevalues(null)
 call check_ops(null)
  
@@ -185,9 +202,16 @@ if (facility->file_cnt > 0)
 	 endif
 	endfor
 	;call addAttachment(facility->merged.full_path,facility->merged.filename)
-	execute cov_astream_file_transfer "cclscratch",facility->merged.filename,"ClinicalAncillary/Pharmacy/MedReb8/","MV"
+	call writeLog(build2(^cov_astream_file_transfer "cclscratch",facility->merged.filename,"ClinicalAncillary/Pharmacy/MedReb8","CP"^))
+	execute cov_astream_file_transfer "cclscratch",facility->merged.filename,"ClinicalAncillary/Pharmacy/MedReb8/","CP"
+	
+	call writeLog(build2(^execute cov_astream_file_transfer "cclscratch",facility->merged.filename,"","MV"^))
+	execute cov_astream_file_transfer "cclscratch",facility->merged.filename,"","MV"
 endif	
 
+#exit_script
+call writeLog(build2(cnvtrectojson(facility)))
+set reply->status_data.status = "S"
 call exitScript(null) 
  call echorecord(facility->file_qual)
  call echorecord(facility->merged)

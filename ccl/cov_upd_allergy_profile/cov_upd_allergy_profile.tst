@@ -38,9 +38,10 @@ select into "nl:"
 go
 */
  
-set link_encntrid = 0.0 go
-set link_personid = 0.0 go
- 
+set link_encntrid = 1.0 go
+set link_personid = 15777797.0 go
+
+/* 
 select into "nl:"
 from encounter e,encntr_alias ea
 where ea.alias = "2125900102"; "2300000001"
@@ -49,7 +50,8 @@ detail
 link_personid = e.person_id
 link_encntrid = e.encntr_id
 with nocounter go
- 
+*/
+set debug_ind = 1 go 
 execute cov_upd_allergy_profile go
  
  
