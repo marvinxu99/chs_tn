@@ -147,8 +147,8 @@ declare filepath_var	= vc with constant(build("/cerner/w_custom/", cnvtlower(cur
 													"_cust/to_client_site/ClinicalAncillary/Pharmacy/Med_Alerts/", filename_var))
  
 ;--DEVELOPMENT FILE PATH FOR TESTING-
-;;declare filepath_var	= vc with constant(build("/cerner/w_custom/", cnvtlower(curdomain),
-;;													"_cust/to_client_site/CernerCCL/", filename_var))
+;declare filepath_var	= vc with constant(build("/cerner/w_custom/", cnvtlower(curdomain),
+;													"_cust/to_client_site/CernerCCL/", filename_var))
 ;
 ;-----------------------------
 ; DECLARE OUTPUT VALUES
@@ -256,7 +256,15 @@ where (ede.dlg_dt_tm between cnvtdatetime(START_DATETIME_VAR) and cnvtdatetime(E
 		"PHA_EKM!PHA_LR_ROCEPHIN_DDI_2","PHA_EKM!PHA_STD_ACET_MAXDOSE_5","PHA_EKM!PHA_STD_PREGLACTATION_10",
 		"PHA_EKM!PHA_STP_ADE_WEIGHTCHANGE","PHA_EKM!PHA_STP_VITAMINK_1", "PHA_EKM!PHA_SYN_WARF_INR",
 		"PHA_EKM!PHA_ZIPRASIDONE_ADMIN_1", "POC_EKM!POC_BISPHOSPHONATES_1", "POC_EKM!POC_DIGOXINLAB_1", "POC_EKM!POC_ROUTES_1")
-	and ede.override_reason_cd not in (2559687173, 1332, 1333, 1334, 27406431)
+	and ede.override_reason_cd not in (
+	
+	   1332.00	;		800		mCDS IP Filter
+      , 1333.00	;		800		mCDS HXIP Filter
+     ; , 1334.00	;		800		mCDS IPRX Filter
+   , 27406431.00	;	800		mCDS RX Filter
+ , 2559687173.00	;	800		mCDS DC Days Interaction Filter
+
+	)
 	and parser(OPR_ALERTNAME_VAR)
 	and parser(OPR_ALERTUSER_VAR)
 ;	and parser(OPR_SUPPRESS_VAR)
