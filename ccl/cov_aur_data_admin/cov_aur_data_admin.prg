@@ -749,6 +749,7 @@ subroutine create_cust_au_medadmin(p1)
             PatientID     				= type("vc"),
             LocalDrugIngredientCode  	= type("vc"),
             AdministrationDateTime     	= type("vc"),
+            AdministrationDate	     	= type("vc"),
             MedicationFormCode     		= type("vc"),
             MedicationRouteCode     	= type("vc"),
             WardID     					= type("vc"),
@@ -787,6 +788,7 @@ subroutine pop_cust_au_medadmin(p1)
 		 2 PatientID 					= vc
 		 2 LocalDrugIngredientCode 		= vc
 		 2 AdministrationDateTime 		= vc
+		 2 AdministrationDate	 		= vc
 		 2 MedicationFormCode 			= vc
 		 2 MedicationRouteCode 			= vc
 		 2 WardID 						= vc
@@ -806,6 +808,7 @@ subroutine pop_cust_au_medadmin(p1)
 		temp_cust_au_medadmin->qual[i].PatientID						= piece(r.line,",",3,"notfnd",0)
 		temp_cust_au_medadmin->qual[i].LocalDrugIngredientCode			= piece(r.line,",",4,"notfnd",0)
 		temp_cust_au_medadmin->qual[i].AdministrationDateTime			= piece(r.line,",",5,"notfnd",0)
+		temp_cust_au_medadmin->qual[i].AdministrationDate				= substring(1,10,piece(r.line,",",5,"notfnd",0))
 		temp_cust_au_medadmin->qual[i].MedicationFormCode				= piece(r.line,",",6,"notfnd",0)
 		temp_cust_au_medadmin->qual[i].MedicationRouteCode				= piece(r.line,",",7,"notfnd",0)
 		temp_cust_au_medadmin->qual[i].WardID							= piece(r.line,",",8,"notfnd",0)
@@ -829,6 +832,7 @@ subroutine pop_cust_au_medadmin(p1)
 					,PatientID					= temp_cust_au_medadmin->qual[i].PatientID
 					,LocalDrugIngredientCode	= temp_cust_au_medadmin->qual[i].LocalDrugIngredientCode
 					,AdministrationDateTime		= temp_cust_au_medadmin->qual[i].AdministrationDateTime
+					,AdministrationDate			= temp_cust_au_medadmin->qual[i].AdministrationDate
 					,MedicationFormCode			= temp_cust_au_medadmin->qual[i].MedicationFormCode
 					,MedicationRouteCode		= temp_cust_au_medadmin->qual[i].MedicationRouteCode
 					,WardID						= temp_cust_au_medadmin->qual[i].WardID
@@ -849,7 +853,7 @@ call writeLog(build2("* START Custom   *****************************************
 
 if (t_rec->prompts.mode in("CREATE","RESET"))
 	call writeLog(build2("->creating tables"))
-	/*
+	
 	call create_cust_au_adtwardmapping(null)
 	call create_cust_au_dim_facility(null)
 	call create_cust_au_nhsnloctypecode(null)
@@ -858,13 +862,12 @@ if (t_rec->prompts.mode in("CREATE","RESET"))
 	call create_cust_au_drugingredmapping(null)
 	call create_cust_au_dim_wardtype(null)
 	call create_cust_au_routeofadminmapping(null)
-	*/
 	call create_cust_au_medadmin(null)
 endif
 
 if (t_rec->prompts.mode in("POPULATE","RESET"))
 	call writeLog(build2("->populating tables"))
-	/*
+	
 	call pop_cust_au_adtwardmapping("au_sds_prod_adtwardmapping.csv")
 	call pop_cust_au_dim_facility("au_sds_prod_dim_facility.csv")
 	call pop_cust_au_nhsnloctypecode("au_sds_prod_dim_nhsnlocationtypecode.csv")
@@ -873,7 +876,6 @@ if (t_rec->prompts.mode in("POPULATE","RESET"))
 	call pop_cust_au_drugingredmapping("au_sds_prod_drugingredientmapping.csv")
 	call pop_cust_au_dim_wardtype("au_sds_prod_dim_wardtype.csv")
 	call pop_cust_au_routeofadminmapping("au_sds_prod_routeofadministrationmapping.csv")
-	*/
 	call pop_cust_au_medadmin("au_sds_prod_medicationadministration.csv")
 endif
 
