@@ -17,7 +17,7 @@
   Special Notes:      Called by ccl program(s).
 
 ******************************************************************************
-  GENERATED MODIFICATION CONTROL LOG
+  GENERATED MODIFICATION CONTROL LOG	
 ******************************************************************************
 
 Mod   Mod Date    Developer              Comment
@@ -35,12 +35,12 @@ prompt
 with OUTDEV, EVENTID, COMMIT_MODE
 
 call echo(build("loading script:",curprog))
-set nologvar = 0	;do not create log = 1		, create log = 0
+set nologvar = 0	;do not create log = 1		, create log = 0	
 set noaudvar = 1	;do not create audit = 1	, create audit = 0
 %i ccluserdir:cov_custom_ccl_common.inc
 
 execute cov_std_log_routines
-execute cov_cdi_routines
+execute cov_abx_routines
 
 call writeLog(build2("************************************************************"))
 call writeLog(build2("* START Custom Section  ************************************"))
@@ -207,7 +207,7 @@ plan ce
 	where ce.clinical_event_id = t_rec->event.clinical_event_id
 join cv
 	where cv.code_set = 72
-	and   cv.display = "CDI Coding Query"
+	and   cv.display in("Pharmacy Progress Note","Pharmacy Collaboration Note")
 	and   cv.active_ind = 1
 	and   cv.code_value = ce.event_cd
 detail
@@ -216,7 +216,7 @@ detail
 with nocounter
 
 if (t_rec->event.event_id <= 0.0)
-	set t_rec->log_message = concat("not a CDI valid note")
+	set t_rec->log_message = concat("not a ABX valid note")
 	go to exit_script
 endif
 
@@ -246,6 +246,8 @@ if (t_rec->constants.ppr_cd <= 0.0)
 	go to exit_script
 endif
 
+call writeLog(build2("Getting Document"))
+
 set 969503_request->mdoc_event_id = t_rec->event.event_id
 set 969503_request->read_only_flag = 1
 
@@ -262,12 +264,12 @@ set stat = tdbexecute(
             , 0                 /*mode*/
         ) 
 
-;call echorecord(969503_reply)
-
+call echorecord(969503_reply)
+call writeLog(build2("looking at 969503_reply->document->contributions"))
 for (i=1 to size(969503_reply->document->contributions,5))
 	;call echo(969503_reply->document->contributions[i].html_text)
 	;set pos = findstring("CDI Query Form: Response Requested",969503_reply->document->contributions[i].html_text,1,0)
-	set pos = findstring("CDI Query",969503_reply->document->contributions[i].html_text,1,0)
+	set pos = findstring("PHARMACY COLLABORATION FOR IMPROVED DOCUMENTATION",969503_reply->document->contributions[i].html_text,1,0)
 	if (pos > 0)
 		set t_rec->html_text = 969503_reply->document->contributions[i].html_text
 		call echo(t_rec->html_text)
@@ -280,16 +282,13 @@ if (t_rec->html_text = "")
 endif
 
 
-set t_rec->title_search = "Additional Specificity - "
+set t_rec->title_search = "PHARMACY COLLABORATION FOR IMPROVED DOCUMENTATION - "
 set t_rec->title_start = findstring(t_rec->title_search,t_rec->html_text,1,0)
 
-if (t_rec->title_start = 0)
-	set t_rec->title_search = "Additional Specificity&#xa0;&#8211;&#xa0;"
-	set t_rec->title_start = findstring(t_rec->title_search,t_rec->html_text,1,0)
-endif
+
 
 if (t_rec->title_start > 0)
-	set t_rec->title_end = findstring("</span>",t_rec->html_text,t_rec->title_start,0)
+	set t_rec->title_end = findstring("</u></span>",t_rec->html_text,t_rec->title_start,0)
 else
 	set t_rec->log_message = concat("Additional Specificity title not found")
 	go to exit_script
@@ -300,7 +299,6 @@ if (t_rec->title_end > 0)
 	set t_rec->title_found = trim(substring(	 (t_rec->title_start + size(t_rec->title_search))
 										,(t_rec->title_end - (t_rec->title_start + size(t_rec->title_search)))
 										,t_rec->html_text),3)
-	set t_rec->title_found = replace(t_rec->title_found,^&#xA0;^," ")
 else
 	set t_rec->log_message = concat("Additional Specificity title end position not found")
 	go to exit_script
@@ -323,7 +321,7 @@ for (i=1 to cdi_definition->query_cnt)
 			set t_rec->log_message = build2("Coding section of ",cdi_definition->query_qual[i].coding_section," not found")
 			go to exit_script
 		else
-			set t_rec->coding_end = findstring("______________________________________________",t_rec->html_text,t_rec->coding_start,0)
+			set t_rec->coding_end = findstring("<u>Clinical Results</u>",t_rec->html_text,t_rec->coding_start,0)
 			call writeLog(build2("->t_rec->coding_end:",t_rec->coding_end))
 			if (t_rec->coding_end = 0)
 				set t_rec->log_message = build2("End of coding section ",cdi_definition->query_qual[i].coding_section," not found")

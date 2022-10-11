@@ -7,7 +7,7 @@ set debug_ind = 1 go
 ;TRUE:person_id=16799260|encntr_id=110765501|clinical_event_id=4453870681|event_id=4453870682| (0.57s)
 The result of 'set log_misc1 = build2(3654205312.0) go' is  3654205312.00
 */
-set link_clinicaleventid =     4469868088 go
+set link_clinicaleventid =     5102957084.00 go
 
 
 select into "nl:"
@@ -22,7 +22,7 @@ with nocounter go
 call echo(build2("link_encntrid=",link_encntrid)) go
 call echo(build2("link_personid=",link_personid)) go
 
-execute cov_eks_abx_doc_process ~MINE~,link_clinicaleventid go
+execute cov_eks_abx_doc_process ~MINE~,link_clinicaleventid,1 go
 /*
 execute mp_add_diagnosis 
 								^MINE^, 						;"Output to File/Printer/MINE" = "MINE"

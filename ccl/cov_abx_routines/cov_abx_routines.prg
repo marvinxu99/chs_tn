@@ -263,7 +263,7 @@ subroutine validate_cdi_document(vCEID)
 		where ce.clinical_event_id = vClinical_Event_ID
 	join cv
 		where cv.code_set = 72
-		and   cv.display = "CDI Coding Query"
+		and   cv.display in("Pharmacy Progress Note","Pharmacy Collaboration Note")
 		and   cv.active_ind = 1
 		and   cv.code_value = ce.event_cd
 	detail
@@ -468,7 +468,7 @@ subroutine get_cdi_code_query_def(null)
 		cdi_definition->query_qual[d1.seq].code_qual[d2.seq].codes[d3.seq].snomed_nomenclature_id = n.nomenclature_id
 	with nocounter
 	
-	call SubroutineLog("cdi_definition","record")
+	;call SubroutineLog("cdi_definition","record")
 	
  	set vReturnJSON = cnvtrectojson(cdi_definition)
 	return (vReturnJSON)
