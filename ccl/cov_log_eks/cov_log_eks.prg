@@ -253,7 +253,7 @@ call writeLog(build2("* START Adding Attachments *******************************
 call writeLog(build2("->program_log->files.file_path=",trim(program_log->files.file_path)))
 call writeLog(build2(^->replace(t_rec->filename,"cclscratch:","")=^,trim(replace(t_rec->filename,"cclscratch:",""))))
 call addAttachment(program_log->files.file_path, replace(t_rec->filename,"cclscratch:",""))
-;execute cov_astream_file_transfer "cclscratch",replace(t_rec->filename,"cclscratch:",""),"","MV"
+execute cov_astream_file_transfer "cclscratch",replace(t_rec->filename,"cclscratch:",""),"","CP"
 call writeLog(build2(cnvtrectojson(program_log)))
  
 call writeLog(build2("* END   Custom v1 ************************************"))
