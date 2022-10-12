@@ -436,7 +436,7 @@ for (i=1 to t_rec->select_cnt)
 										t_rec->select_qual[i].diag_nomenclature_id)
 	 endif
 	 
-	 
+	 /* temporarily prevent problems
 	 if (t_rec->select_qual[i].snomed_nomenclature_id > 0.0)
 	 	if (t_rec->commit_mode = 1)
 			execute mp_add_problem 
@@ -463,7 +463,7 @@ for (i=1 to t_rec->select_cnt)
 										t_rec->select_qual[i].select_snomed_code,",",
 										t_rec->select_qual[i].snomed_nomenclature_id)
 	 endif	
-	 		
+	 */	
  	 call echo(_memory_reply_string)
 endfor
 
