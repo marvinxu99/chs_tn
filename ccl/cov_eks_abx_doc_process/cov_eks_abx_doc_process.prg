@@ -382,7 +382,7 @@ for (i=1 to cdi_definition->query_qual[t_rec->query_selected].code_cnt)
 				set t_rec->select_cnt = (t_rec->select_cnt + 1)
 				set stat = alterlist(t_rec->select_qual,t_rec->select_cnt)
 				set t_rec->select_qual[t_rec->select_cnt].select_diag_text 
-					= cdi_definition->query_qual[t_rec->query_selected].description
+					= cdi_definition->query_qual[t_rec->query_selected].code_qual[i].display
 				set t_rec->select_qual[t_rec->select_cnt].select_diag_code 
 					= cdi_definition->query_qual[t_rec->query_selected].code_qual[i].codes[j].icd10code
 				set t_rec->select_qual[t_rec->select_cnt].diag_nomenclature_id = 
@@ -395,7 +395,7 @@ for (i=1 to cdi_definition->query_qual[t_rec->query_selected].code_cnt)
 				set t_rec->select_cnt = (t_rec->select_cnt + 1)
 				set stat = alterlist(t_rec->select_qual,t_rec->select_cnt)
 				set t_rec->select_qual[t_rec->select_cnt].select_snomed_text 
-					= cdi_definition->query_qual[t_rec->query_selected].description
+					= cdi_definition->query_qual[t_rec->query_selected].code_qual[i].display
 				set t_rec->select_qual[t_rec->select_cnt].select_snomed_code 
 					= cdi_definition->query_qual[t_rec->query_selected].code_qual[i].codes[j].snomedcode
 				set t_rec->select_qual[t_rec->select_cnt].snomed_nomenclature_id =
