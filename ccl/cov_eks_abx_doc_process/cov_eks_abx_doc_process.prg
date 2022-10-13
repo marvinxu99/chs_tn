@@ -381,6 +381,8 @@ for (i=1 to cdi_definition->query_qual[t_rec->query_selected].code_cnt)
 				
 				set t_rec->select_cnt = (t_rec->select_cnt + 1)
 				set stat = alterlist(t_rec->select_qual,t_rec->select_cnt)
+				set t_rec->select_qual[t_rec->select_cnt].select_diag_text 
+					= cdi_definition->query_qual[t_rec->query_selected].description
 				set t_rec->select_qual[t_rec->select_cnt].select_diag_code 
 					= cdi_definition->query_qual[t_rec->query_selected].code_qual[i].codes[j].icd10code
 				set t_rec->select_qual[t_rec->select_cnt].diag_nomenclature_id = 
@@ -392,6 +394,8 @@ for (i=1 to cdi_definition->query_qual[t_rec->query_selected].code_cnt)
 				call writeLog(build2("-->snomedcode=:",cdi_definition->query_qual[t_rec->query_selected].code_qual[i].snomedcode))
 				set t_rec->select_cnt = (t_rec->select_cnt + 1)
 				set stat = alterlist(t_rec->select_qual,t_rec->select_cnt)
+				set t_rec->select_qual[t_rec->select_cnt].select_snomed_text 
+					= cdi_definition->query_qual[t_rec->query_selected].description
 				set t_rec->select_qual[t_rec->select_cnt].select_snomed_code 
 					= cdi_definition->query_qual[t_rec->query_selected].code_qual[i].codes[j].snomedcode
 				set t_rec->select_qual[t_rec->select_cnt].snomed_nomenclature_id =
@@ -423,7 +427,7 @@ for (i=1 to t_rec->select_cnt)
 	 	 						t_rec->constants.confirmed_cd,					;"confirmation_cd:" = 0.0
 	 	 						0,												;"priority:" = 0
 	 	 						0.0,											;"trans_nomen_id" = 0.0
-	 	 						""												;"diagnosis_display" = ""
+	 	 						t_rec->select_qual[i].select_diag_text			;"diagnosis_display" = ""
 	 	 						
 	 	 						 						
 	 	 						

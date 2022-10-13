@@ -295,6 +295,7 @@ subroutine get_cdi_code_query_def(null)
 		1 query_qual[*]
 		 2 code_value	= f8
 		 2 display		= vc
+		 2 description  = vc
 		 2 definition	= vc
 		 2 coding_section = vc
 		 2 code_cnt		= i4
@@ -366,7 +367,8 @@ subroutine get_cdi_code_query_def(null)
 		stat = alterlist(cdi_definition->query_qual,i)
 		cdi_definition->query_qual[i].code_value		= cv.code_value
 		cdi_definition->query_qual[i].definition		= cv.definition
-		cdi_definition->query_qual[i].display		= cv.display
+		cdi_definition->query_qual[i].description		= cv.description
+		cdi_definition->query_qual[i].display			= cv.display
 		cdi_definition->query_qual[i].coding_section	= cve.field_value
 	detail
 		j = (j + 1)
