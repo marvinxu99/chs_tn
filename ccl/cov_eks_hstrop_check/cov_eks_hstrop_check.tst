@@ -9,4 +9,4 @@ detail
 	link_orderid = o.order_id 
 with nocounter go
 
-execute cov_eks_hstrop_check go
+execute cov_eks_hstrop_check go 
