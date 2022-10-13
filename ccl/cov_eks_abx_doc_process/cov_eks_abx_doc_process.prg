@@ -269,7 +269,7 @@ call writeLog(build2("looking at 969503_reply->document->contributions"))
 for (i=1 to size(969503_reply->document->contributions,5))
 	;call echo(969503_reply->document->contributions[i].html_text)
 	;set pos = findstring("CDI Query Form: Response Requested",969503_reply->document->contributions[i].html_text,1,0)
-	set pos = findstring("PHARMACY COLLABORATION FOR IMPROVED DOCUMENTATION",969503_reply->document->contributions[i].html_text,1,0)
+	set pos = findstring("Pharmacy Collaboration FOR IMPROVED DOCUMENTATION",969503_reply->document->contributions[i].html_text,1,0)
 	if (pos > 0)
 		set t_rec->html_text = 969503_reply->document->contributions[i].html_text
 		call echo(t_rec->html_text)
@@ -282,13 +282,13 @@ if (t_rec->html_text = "")
 endif
 
 
-set t_rec->title_search = "PHARMACY COLLABORATION FOR IMPROVED DOCUMENTATION - "
+set t_rec->title_search = "Pharmacy Collaboration FOR IMPROVED DOCUMENTATION - "
 set t_rec->title_start = findstring(t_rec->title_search,t_rec->html_text,1,0)
 
 
 
 if (t_rec->title_start > 0)
-	set t_rec->title_end = findstring("</u></span>",t_rec->html_text,t_rec->title_start,0)
+	set t_rec->title_end = findstring("</span>",t_rec->html_text,t_rec->title_start,0)
 else
 	set t_rec->log_message = concat("Additional Specificity title not found")
 	go to exit_script
