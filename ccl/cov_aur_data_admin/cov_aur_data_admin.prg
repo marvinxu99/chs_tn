@@ -941,7 +941,7 @@ subroutine pop_cust_au_adtmovement(p1)
 		for (i=1 to temp_cust_au_adtmovement->cnt)
 			if ((temp_cust_au_adtmovement->qual[i].FacilityID != "notfnd")
 				 and (temp_cust_au_adtmovement->qual[i].FacilityID != "WardID"))
-				insert into cust_au_adtwardmapping
+				insert into cust_au_adtmovement
 				set 
 					 ADTMovementID 			= temp_cust_au_adtmovement->qual[i].ADTMovementID
 					,FacilityID				= temp_cust_au_adtmovement->qual[i].FacilityID
