@@ -94,6 +94,13 @@ CREATE PROGRAM cov_t_ce_create_ce :dba
   SET event_updt_id = eks_common->discern_person_id
   CALL echo (concat ("updt_id being used is from eks_common:  " ,build (event_updt_id ) ) )
  ENDIF
+ 
+ ;override event_updt_id with EVENT_PRSNL EKS Message Parameter if present
+ execute cov_std_eks_routines
+ if (cnvtreal(GetBldMsgText("EVENT_PRSNL")) > 0.0)
+ 	set event_updt_id = cnvtreal(GetBldMsgText("EVENT_PRSNL"))
+ endif
+ 
  CALL echo ("Checking existence and validity of template parameters..." ,1 ,0 )
  RECORD cerequest (
    1 ensure_type = i2
@@ -163,6 +170,7 @@ CREATE PROGRAM cov_t_ce_create_ce :dba
      2 expiration_dt_tm_ind = i2
      2 note_importance_bit_map = i2
      2 event_tag_set_flag = i2
+	 2 entry_mode_cd = f8
      2 io_result [* ]
        3 person_id = f8
        3 io_dt_tm = dq8
@@ -2041,6 +2049,7 @@ CREATE PROGRAM cov_t_ce_create_ce :dba
  SET cerequest->clin_event[1 ].view_level_ind = 0
  SET cerequest->clin_event[1 ].publish_flag = 1
  SET cerequest->clin_event[1 ].publish_flag_ind = 0
+ SET cerequest->clin_event[1 ].entry_mode_cd =      679378.00
  SET cerequest->clin_event[1 ].ce_dynamic_label_id = link_ce_dynamic_label_id
  IF (NOT (ce_update_ind ) )
   SET cerequest->clin_event[1 ].person_id = link_personid

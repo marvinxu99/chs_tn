@@ -848,6 +848,122 @@ subroutine pop_cust_au_medadmin(p1)
 end
 
 
+
+;au_sds_prod_adtmovement.csv
+declare create_cust_au_adtmovement(p1=vc) = i2 with copy
+subroutine create_cust_au_adtmovement(p1)
+		;ADTMovementID,FacilityID,PatientID,AdmissionID,MovementID,MovementDateTime,PreviousMovementID,
+		;MovementTypeCode,DischargeDisposition,BedSectionID,WardID,RoomBedID
+		
+		drop table cust_au_adtmovement
+        select into table cust_au_adtmovement
+            ADTMovementID  				= type("f8"),
+            FacilityID     				= type("vc"),
+            PatientID     				= type("vc"),
+            AdmissionID  				= type("vc"),
+            MovementID     				= type("vc"),
+            MovementDateTime	     	= type("vc"),
+            PreviousMovementID     		= type("vc"),
+            MovementTypeCode     		= type("vc"),
+            DischargeDisposition		= type("vc"),
+            BedSectionID    			= type("vc"),
+            WardID   					= type("vc"),
+            RoomBedID    				= type("vc")
+        from dummyt         d
+        with    constraint(ADTMovementID, "primary key", "unique"),
+                index(ADTMovementID),
+                synonym = "CUST_AU_ADTMOVEMENT",
+                organization = "P"
+        
+        execute oragen3 "CUST_AU_ADTMOVEMENT"
+        
+	return (TRUE)
+end
+declare pop_cust_au_adtmovement(p1=vc) = i2 with copy
+subroutine pop_cust_au_adtmovement(p1)
+
+	if(findfile(p1) = 0)
+   		call echo("*************************************************************************")
+    	call echo(concat("Failed - could not find the file: ", p1))
+    	call echo("*************************************************************************")
+    	return (FALSE)
+	endif
+	
+	free define rtl3
+	define rtl3 is p1
+            
+	free record temp_cust_au_adtmovement
+	record temp_cust_au_adtmovement
+	(
+		1 cnt = i4
+		1 qual[*]
+		 2 ADTMovementID = f8
+		 2 FacilityID = vc
+		 2 PatientID = vc
+		 2 AdmissionID = vc
+		 2 MovementID = vc
+		 2 MovementDateTime = vc
+		 2 PreviousMovementID = vc
+		 2 MovementTypeCode = vc
+		 2 BedSectionID = vc
+		 2 WardID = vc
+		 2 RoomBedID = vc
+	)
+	
+	select into "nl:"
+	from rtl3t r
+	where r.line > ""
+	head report 
+		i = 0
+	detail
+		i += 1
+		stat = alterlist(temp_cust_au_adtmovement->qual,i)
+		temp_cust_au_adtmovement->qual[i].ADTMovementID			= cnvtreal(piece(r.line,",",1,"notfnd",0))
+		temp_cust_au_adtmovement->qual[i].FacilityID			= piece(r.line,",",2,"notfnd",0)
+		temp_cust_au_adtmovement->qual[i].PatientID				= piece(r.line,",",3,"notfnd",0)
+		temp_cust_au_adtmovement->qual[i].AdmissionID			= piece(r.line,",",4,"notfnd",0)
+		temp_cust_au_adtmovement->qual[i].MovementID			= piece(r.line,",",5,"notfnd",0)
+		temp_cust_au_adtmovement->qual[i].MovementDateTime		= piece(r.line,",",5,"notfnd",0)
+		temp_cust_au_adtmovement->qual[i].PreviousMovementID	= piece(r.line,",",5,"notfnd",0)
+		temp_cust_au_adtmovement->qual[i].MovementTypeCode		= piece(r.line,",",5,"notfnd",0)
+		temp_cust_au_adtmovement->qual[i].BedSectionID			= piece(r.line,",",5,"notfnd",0)
+		temp_cust_au_adtmovement->qual[i].WardID				= piece(r.line,",",5,"notfnd",0)
+		temp_cust_au_adtmovement->qual[i].RoomBedID				= piece(r.line,",",5,"notfnd",0)
+		
+	foot report
+		temp_cust_au_adtmovement->cnt = i
+	with nocounter
+	
+	;call echorecord(temp_cust_au_adtmovement)
+	
+	if (temp_cust_au_adtmovement->cnt > 0)
+		
+		for (i=1 to temp_cust_au_adtmovement->cnt)
+			if ((temp_cust_au_adtmovement->qual[i].FacilityID != "notfnd")
+				 and (temp_cust_au_adtmovement->qual[i].FacilityID != "WardID"))
+				insert into cust_au_adtwardmapping
+				set 
+					 ADTMovementID 			= temp_cust_au_adtmovement->qual[i].ADTMovementID
+					,FacilityID				= temp_cust_au_adtmovement->qual[i].FacilityID
+					,PatientID				= temp_cust_au_adtmovement->qual[i].PatientID	
+					,AdmissionID			= temp_cust_au_adtmovement->qual[i].AdmissionID
+					,MovementID				= temp_cust_au_adtmovement->qual[i].MovementID
+					,MovementDateTime		= temp_cust_au_adtmovement->qual[i].MovementDateTime
+					,PreviousMovementID		= temp_cust_au_adtmovement->qual[i].PreviousMovementID
+					,MovementTypeCode		= temp_cust_au_adtmovement->qual[i].MovementTypeCode
+					,BedSectionID			= temp_cust_au_adtmovement->qual[i].BedSectionID
+					,WardID					= temp_cust_au_adtmovement->qual[i].WardID
+					,RoomBedID				= temp_cust_au_adtmovement->qual[i].RoomBedID
+				commit
+			endif
+		endfor
+	
+	endif
+	
+	return (TRUE)
+end
+
+
 call writeLog(build2("************************************************************"))
 call writeLog(build2("* START Custom   *******************************************"))
 
@@ -863,6 +979,7 @@ if (t_rec->prompts.mode in("CREATE","RESET"))
 	call create_cust_au_dim_wardtype(null)
 	call create_cust_au_routeofadminmapping(null)
 	call create_cust_au_medadmin(null)
+	call create_cust_au_adtmovement(null)
 endif
 
 if (t_rec->prompts.mode in("POPULATE","RESET"))
@@ -877,6 +994,7 @@ if (t_rec->prompts.mode in("POPULATE","RESET"))
 	call pop_cust_au_dim_wardtype("au_sds_prod_dim_wardtype.csv")
 	call pop_cust_au_routeofadminmapping("au_sds_prod_routeofadministrationmapping.csv")
 	call pop_cust_au_medadmin("au_sds_prod_medicationadministration.csv")
+	call pop_cust_au_adtmovement("au_sds_prod_adtmovement.csv")
 endif
 
 
