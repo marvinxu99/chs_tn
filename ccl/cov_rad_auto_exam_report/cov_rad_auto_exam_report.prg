@@ -124,6 +124,7 @@ record t_rec
 	 2 encntr_id = f8
 	 2 person_id = f8
 	 2 order_id = f8
+	1 user_message = vc
 	1 retval = i2
 	1 log_message =  vc
 	1 log_misc1 = vc
@@ -145,6 +146,8 @@ endif
 ;	set t_rec->log_message = concat("link_personid not found")
 ;	go to exit_script
 ;endif
+
+set t_rec->user_message = "Please see Physician/Surgeon notes for the report"
 
 record 455014request (
   1 ord_rad [*]
@@ -240,7 +243,7 @@ call echorecord(455014REPLY)
 set event_id = 455014REQUEST->ord_rad[1].group_event_id 
 set order_id  = 455014REQUEST->ord_rad[1].order_id 
 
-execute cov_him_auth_by_event ^MINE^,event_id 
+execute cov_rad_auth_by_event ^MINE^,event_id 
 execute cov_eks_trigger_by_o "NOFORMS","COV_EE_COMPLETE_ORD",order_id 
 
 set t_rec->return_value = "TRUE"
