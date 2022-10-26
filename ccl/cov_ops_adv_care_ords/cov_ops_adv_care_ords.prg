@@ -326,6 +326,9 @@ if (size(EKSOPSRequest->qual,5) > 0)
 		call writeLog(build2("------>CALLING srvRequest"))
 		call srvRequest(dparam)
 	endif
+else
+	set reply->status_data.status = "Z"
+	go to exit_script
 endif
 
 call writeLog(build2("* END   Building EKS Call   *******************************************"))
@@ -349,9 +352,10 @@ call writeLog(build2("* END   Creating Audit ***********************************
 call writeLog(build2("************************************************************"))
 */
 
+set reply->status_data.status = "S"
+
 #exit_script
 
-set reply->status_data.status = "S"
 
 if (reply->status_data.status in("Z","S"))
 	call writeLog(build2("* START Set Date Range ************************************"))
