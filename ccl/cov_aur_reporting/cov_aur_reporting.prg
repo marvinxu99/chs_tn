@@ -6,8 +6,8 @@
 	Author:				Chad Cummings
 	Date Written:		
 	Solution:			
-	Source file name:	cov_aur_data_admin.prg
-	Object name:		cov_aur_data_admin
+	Source file name:	cov_aur_reporting.prg
+	Object name:		cov_aur_reporting
 	Request #:
 
 	Program purpose:
