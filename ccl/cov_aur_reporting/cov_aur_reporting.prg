@@ -91,6 +91,10 @@ record t_rec
 
 record output_data
 (
+	1 file_cnt = i4
+	1 file_qual[*]
+	 2 FacilityID = vc
+	 2 Output = vc
 	1 cnt = i4
 	1 qual[*]
 		2 FacilityID = vc
@@ -145,6 +149,15 @@ set output_data->qual[output_data->cnt].AUDaysIVRoute = ^Sample Data^
 set output_data->qual[output_data->cnt].AUDaysDigestiveRoute = ^Sample Data^
 set output_data->qual[output_data->cnt].AUDaysRespiratoryRoute = ^Sample Data^
 
+set output_data->file_cnt += 1
+set stat = alterlist(output_data->file_qual,output_data->file_cnt)
+set output_data->file_qual[output_data->file_cnt].FacilityID = build(^Sample Data ^,output_data->file_cnt)
+
+set output_data->file_cnt += 1
+set stat = alterlist(output_data->file_qual,output_data->file_cnt)
+set output_data->file_qual[output_data->file_cnt].FacilityID = build(^Sample Data ^,output_data->file_cnt)
+
+
 call writeLog(build2("* END   Custom   *******************************************"))
 call writeLog(build2("************************************************************"))
 
@@ -178,11 +191,11 @@ elseif (t_rec->prompts.csv = 1)
 		,AUDaysRespe = output_data->qual[d1.seq].AUDaysRespiratoryRoute
 	from
 		(dummyt d1 with seq=output_data->cnt)
-	with nocounter,format,seperator=" "
+	with nocounter,format,separator=" "
 
 elseif (t_rec->prompts.csv = 2)
 
-	declare sFILE1    = vc  with protect, constant("covenant_AU_")
+	declare sFILE1    = vc  with protect, constant("AU_")
 
  
 	declare ploc      = vc  with protect
