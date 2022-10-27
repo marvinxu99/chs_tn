@@ -2467,8 +2467,8 @@ CREATE PROGRAM cov_t_ce_create_ce :dba
   SET eksdata->tqual[tcurindex ].qual[curindex ].logging = msg
  ENDIF
  set filename = concat("cclscratch:eks_cerequest_",trim(format(sysdate,"yyyy_mm_dd_hh_mm_ss;;d")),".dat")
- call echojson(cerequest,filename)
- ;FREE SET cerequest
+ ;call echojson(cerequest,filename)
+ FREE SET cerequest
  CALL echo (msg )
  CALL echo (concat (format (curdate ,"dd-mmm-yyyy;;d" ) ," " ,format (curtime3 ,"hh:mm:ss.cc;3;m" ) ,
    "  *******  End of Program eks_t_ce_create_ce_a  *********" ) )
