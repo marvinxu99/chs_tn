@@ -1,0 +1,18 @@
+select * from nomenclature n where n.nomenclature_id=960419
+
+select * from code_value cv where cv.code_value=          3288
+
+
+select 
+from
+	nomenclature n
+plan n
+	where n.source_vocabulary_cd = value(uar_get_code_by("MEANING",400,"ALLERGY"))
+	and   n.source_string = "No Known Allergies"
+	and   n.active_ind = 1
+	and   n.beg_effective_dt_tm <= cnvtdatetime(curdate,curtime3)
+	and   n.end_effective_dt_tm >= cnvtdatetime(curdate,curtime3)
+	
+	
+	 
+

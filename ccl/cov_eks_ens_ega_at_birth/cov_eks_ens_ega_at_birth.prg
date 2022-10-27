@@ -63,7 +63,8 @@ endif
 if(size(trim(reflect(parameter(1,0))),1) > 0)
   set t_rec->log_message = build2("param1:",value(parameter(1,0)))
   set t_rec->result.ega_at_birth_vc = value(parameter(1,0))
-  set t_rec->result.ega_at_birth = cnvtint(t_rec->result.ega_at_birth_vc)
+  ;set t_rec->result.ega_at_birth = cnvtint(t_rec->result.ega_at_birth_vc)
+  set t_rec->result.ega_at_birth = value(parameter(1,0))
 endif 
 
 set t_rec->return_value = "FALSE"

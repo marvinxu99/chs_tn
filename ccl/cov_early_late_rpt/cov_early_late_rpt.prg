@@ -69,9 +69,9 @@ else																		;a single value was selected
 endif
 
 select into $OUTDEV
-   window = if (((maa.event_dt_tm - mame.scheduled_dt_tm) *60 *24) < -30)
+   window = if (datetimediff(maa.event_dt_tm,mame.scheduled_dt_tm,4) < -30)
   					"Early"
-  				   elseif (((maa.event_dt_tm - mame.scheduled_dt_tm) *60 *24) > 30)
+  				   elseif (datetimediff(maa.event_dt_tm,mame.scheduled_dt_tm,4) > 30)
   				    "Late"
   				   else
   				    "On-time"
@@ -86,7 +86,7 @@ select into $OUTDEV
   , FIN = trim(ea.alias)
   , prsnl = p.name_full_formatted
   , mame.reason_cd
-  , mame.freetext_reason
+  , freetext_reason=check(mame.freetext_reason)
   , mae.event_type_cd
   , mame.order_id
  
