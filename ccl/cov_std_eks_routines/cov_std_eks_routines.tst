@@ -31,3 +31,5 @@ record eksdata(
 
 set stat = SetBldMsg("FIRST","This is the first message") go
 call echo(GetBldMsgText("FIRST")) go
+call echo(build2(">>",GetBldMsgText("EVENT_PRSNL"),"<<")) go
+call echo(build2(">>",cnvtreal(GetBldMsgText("EVENT_PRSNL")),"<<")) go

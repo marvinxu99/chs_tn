@@ -1,0 +1,6 @@
+MedicationFormCode,MedicationRouteCode,NHSNMedicationRouteCode,NHSNMedicationRouteCodeSystem,NHSNMedicationRouteName
+1,1,2522-1,cdcNHSN,Digestive
+2,2,2523-9,cdcNHSN,Respiratory
+3,3,47625008,SNOMED CT,Intravenous
+4,4,78421000,SNOMED CT,Intramuscular
+5,5,0,NA,NA
