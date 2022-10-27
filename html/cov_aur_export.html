@@ -1,0 +1,445 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"> 
+ <html> 
+ <head> 
+ <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"> 
+ <title>Infection Control Export Utility</title> 
+ <script language="javascript"> 
+   
+//define the report types
+var LABID_RPT = 0
+var AU_RPT = 1
+var AR_RPT = 2   
+   
+//the xml data passed in from the CCL script   
+ var xmlString         = 'sXMLData'; 
+ 
+ /*Parse the XMLSTRING into its component parts and assign each piece
+ * to be its own object with attribute  **/
+var splitArray        	= []; 
+var xmlData         	= xmlString.split("$$"); 
+var driveLocation    = xmlData[0];
+var totalFileCounts			= xmlData[1].split("|");
+var totalFacCount			= Number(totalFileCounts[0]);
+var totalFileCount        	= Number(totalFileCounts[1]); 
+var folderPrefix        = xmlData[2]; 
+ 
+if(folderPrefix == "LabID_")
+   var rpt_type = LABID_RPT;
+else if(folderPrefix == "AU_")
+   var rpt_type = AU_RPT;
+else if(folderPrefix == "AR_")
+   var rpt_type = AR_RPT;
+ 
+ 
+if(totalFileCount > 0 && rpt_type == LABID_RPT){ 
+    var fileSplit = xmlData[3];
+    var fileDet = fileSplit.split("@@");
+    for(var i=0; i<totalFileCount; i++){ 
+        splitArray[i] = {}; 
+        splitArray[i].data = fileDet[i]; 
+        var dataSplit = splitArray[i].data; 
+        var data = dataSplit.split("|"); 
+   
+        splitArray[i].raw = data[0].replace(/^\s+|\s+$/g, ''); //make sure there are no spaces in the filename
+        splitArray[i].raw = splitArray[i].raw.replace(/ /g, ''); //make extra sure
+        splitArray[i].fname = data[1];
+        splitArray[i].pname = data[2]; 
+        splitArray[i].pid = data[3]; 
+        splitArray[i].eid = data[4]; 
+        splitArray[i].desc = data[5];
+        splitArray[i].fCnt = data[6]; 
+        splitArray[i].bInd = Number(data[7]); 
+        splitArray[i].data = data[8]; 
+    } 
+} 
+else if(totalFileCount > 0 && rpt_type == AR_RPT){
+    var fileSplit = xmlData[3];
+    var fileDet = fileSplit.split("@@");
+    for(var i=0; i<totalFileCount; i++){ 
+        splitArray[i] = {}; 
+        splitArray[i].data = fileDet[i]; 
+        var dataSplit = splitArray[i].data;
+        var data = dataSplit.split("|");
+   
+        splitArray[i].raw = data[0].replace(/^\s+|\s+$/g, ''); //make sure there are no spaces in the filename
+        splitArray[i].raw = splitArray[i].raw.replace(/ /g, ''); //make extra sure
+        splitArray[i].fname = data[1];
+        splitArray[i].pname = data[2]; 
+        splitArray[i].pid = data[3]; 
+        splitArray[i].eid = data[4]; 
+        splitArray[i].desc = data[5];
+        splitArray[i].fCnt = 0; 
+        splitArray[i].xmlType = Number(data[6]); 
+        splitArray[i].data = data[7]; 
+    }     
+}
+else if(totalFileCount > 0 && rpt_type == AU_RPT){
+
+    var fileSplit = xmlData[3];
+    var fileDet = fileSplit.split("@@");
+    for(var i=0; i<totalFileCount; i++){ 
+        splitArray[i] = {}; 
+        splitArray[i].data = fileDet[i]; 
+        var dataSplit = splitArray[i].data; 
+        var data = dataSplit.split("|"); 
+   
+        splitArray[i].raw = data[0].replace(/^\s+|\s+$/g, ''); //make sure there are no spaces in the filename
+	    splitArray[i].raw = splitArray[i].raw.replace(/ /g, ''); //make extra sure
+	    splitArray[i].fname = data[1];
+        splitArray[i].data = data[2];
+        splitArray[i].fCnt = 0;
+   } 
+
+} //elseif folderPrefix = "AU_" only create splitArray: .raw, .fname, .data 
+ 
+ 
+ /* Create a date object  for today and store off its value for use in folder name creation **/
+var today = new Date();
+var dd = today.getDate();
+var mm = today.getMonth()+1; //January is 0!
+var yyyy = today.getFullYear();
+if(dd<10){dd='0'+dd}
+if(mm<10){mm='0'+mm}
+var date = ''+mm+dd+yyyy;
+   
+   
+  /* called on page load, builds the tables, folders, files, and links, in that order */ 
+ function initPage(){ 
+   try{ 
+     document.getElementById('spFileList').innerHTML = buildTbl(splitArray);
+   
+     if(driveLocation != 0){ 
+       if(totalFileCount > 0){ 
+         createXMLFiles(); 
+         document.getElementById('spFolderLoc').innerHTML = "<a target='_blank' title='Open folder...' href='" + driveLocation + "'>" +  driveLocation + folderPrefix + "</a>"; 
+       } 
+     } 
+   } 
+   catch(error){ 
+     alert("An error has occurred["+error.message+"]"); 
+   } 
+ } 
+   
+/*generates the table displaying the export results, called by initPage()*/  
+function buildTbl(obj){ 
+    if(rpt_type == LABID_RPT){
+        var tableBody = "<table id='tblFiles' class='tbl' width='100.00%' colspan='3' cellspacing='0'>"; 
+      
+        var rowType        = ''; 
+        var nbrRows     = obj.length; 
+       
+        tableBody += "<thead>" 
+                  +         "<tr>" 
+                  +         "<th width='30.000%' colspan='1' id='th_file' class='FieldName000'>File</th>" 
+                  +            "<th width='20.000%' colspan='1' id='th_data' class='FieldName000'>Patient</th>" 
+                  +         "<th width='50.000%' colspan='1' id='th_data' class='FieldName000'>Description</th>" 
+                  +        "</tr>" 
+                  +    "</thead>" 
+                  +    "<tbody id='tblFileListBdy'>"; 
+        if (nbrRows == 0){ 
+            tableBody     += "<tr><td width='100.000%' colspan='3' class='FieldName001 alternateRow'>" 
+                        +  "<i><b>* No records found.</b></i>" 
+                        +  "</td></tr>"; 
+        } 
+        else 
+            for (i=0;i<nbrRows;i++) { 
+                if (rowType == ""){rowType="alternateRow";} 
+                else{rowType = ""} 
+
+                var s = splitArray[i].raw; 
+
+                if (splitArray[i].bInd > 0){
+                        var folder = folderPrefix + splitArray[i].fname + "_Bld_" + date;
+                    } else {
+                        var folder = folderPrefix + splitArray[i].fname + "_N-Bld_" + date;
+                    }
+                var fileLoc = driveLocation + folder + "\\" + s + '.xml'; 
+                tableBody   +=    "<tr title='person_id="+String(splitArray[i].pid)+"-encntr_id="+String(splitArray[i].eid)+"'>" 
+                            +    "<td width='30.000%' colspan='1' class='FieldName001 "+rowType+"'><span><a target='_blank' title='Open file...' href='"+ fileLoc +"'>" + fileLoc + "</a></span></td>" 
+                            +   "<td width='20.000%' colspan='1' class='FieldName001 "+rowType+"'><span>"+ splitArray[i].pname    + "</span></td>" 
+                            +   "<td width='50.000%' colspan='1' class='FieldName001 "+rowType+"'><span>"+ splitArray[i].desc    + "</span></td>" 
+                            +   "</tr>"; 
+            } 
+      
+        tableBody += "</tbody></table>"; 
+    }
+    else if(rpt_type == AU_RPT){
+        var tableBody = "<table id='tblFiles' class='tbl' width='100.00%' colspan='1' cellspacing='0'>"; 
+      
+        var rowType        = ''; 
+        var nbrRows     = obj.length; 
+       
+        tableBody += "<thead>" 
+                  +    "<tr>" 
+                  +    "<th width='50.000%' colspan='1' id='th_file' class='FieldName000'>File</th>" 
+                  +    "</tr>" 
+                  +    "</thead>" 
+                  +    "<tbody id='tblFileListBdy'>"; 
+        if (nbrRows == 0){ 
+            tableBody     += "<tr><td width='100.000%' colspan='1' class='FieldName001 alternateRow'>" 
+                        +  "<i><b>* No records found.</b></i>" 
+                        +  "</td></tr>"; 
+        } 
+        else 
+            for (i=0;i<nbrRows;i++) { 
+                if (rowType == ""){rowType="alternateRow";} 
+                else{rowType = ""} 
+                var s = splitArray[i].raw; 
+                var fileLoc = driveLocation + folderPrefix + splitArray[i].fname + "_" + date + "\\" + s + '.xml'; 
+                tableBody   +=    "<tr>" 
+                            +    "<td width='50.000%' colspan='1' class='FieldName001 "+rowType+"'><span><a target='_blank' title='Open file...' href='"+ fileLoc +"'>" + fileLoc + "</a></span></td>" 
+                            +   "</tr>"; 
+            } 
+      
+        tableBody += "</tbody></table>"; 
+    }
+    else if(rpt_type == AR_RPT){
+        var tableBody = "<table id='tblFiles' class='tbl' width='100.00%' colspan='3' cellspacing='0'>"; 
+      
+        var rowType        = ''; 
+        var nbrRows     = obj.length; 
+       
+        tableBody += "<thead>" 
+                  +         "<tr>" 
+                  +         "<th width='30.000%' colspan='1' id='th_file' class='FieldName000'>File</th>" 
+                  +            "<th width='20.000%' colspan='1' id='th_data' class='FieldName000'>Patient</th>" 
+                  +         "<th width='50.000%' colspan='1' id='th_data' class='FieldName000'>Description</th>" 
+                  +        "</tr>" 
+                  +    "</thead>" 
+                  +    "<tbody id='tblFileListBdy'>"; 
+        if (nbrRows == 0){ 
+            tableBody     += "<tr><td width='100.000%' colspan='3' class='FieldName001 alternateRow'>" 
+                        +  "<i><b>* No records found.</b></i>" 
+                        +  "</td></tr>"; 
+        } 
+        else 
+            for (i=0;i<nbrRows;i++) { 
+                if (rowType == ""){rowType="alternateRow";} 
+                else{rowType = ""} 
+
+                var s = splitArray[i].raw; 
+
+                if (splitArray[i].xmlType == 0){
+                        var folder = folderPrefix + splitArray[i].fname + "_NUM_" + date;
+                    } else {
+                        var folder = folderPrefix + splitArray[i].fname + "_DENOM_" + date;
+                    }
+                var fileLoc = driveLocation + folder + "\\" + s + '.xml'; 
+                tableBody   +=    "<tr title='person_id="+String(splitArray[i].pid)+"-encntr_id="+String(splitArray[i].eid)+"'>" 
+                            +    "<td width='30.000%' colspan='1' class='FieldName001 "+rowType+"'><span><a target='_blank' title='Open file...' href='"+ fileLoc +"'>" + fileLoc + "</a></span></td>" 
+                            +   "<td width='20.000%' colspan='1' class='FieldName001 "+rowType+"'><span>"+ splitArray[i].pname    + "</span></td>" 
+                            +   "<td width='50.000%' colspan='1' class='FieldName001 "+rowType+"'><span>"+ splitArray[i].desc    + "</span></td>" 
+                            +   "</tr>"; 
+            } 
+      
+        tableBody += "</tbody></table>"; 
+    }
+    else
+        tableBody = ""
+    return tableBody; 
+} 
+ 
+/* generates the folders and files */ 
+ function createXMLFiles(){ //add parameter and only hard code "_Bld_" if it is lab_id
+ 
+	//loop through facility
+	for(var fac =0; fac < totalFacCount; fac++){
+		for(var file =0; file < totalFileCount; file++){
+			if(splitArray[file].fCnt == fac){
+                if(rpt_type == LABID_RPT){
+                    if (splitArray[file].bInd > 0){
+                        var folderName = folderPrefix + splitArray[file].fname + "_Bld_" + date;
+                    } else {
+                        var folderName = folderPrefix + splitArray[file].fname + "_N-Bld_" + date;
+                    }
+                }
+                else if(rpt_type == AU_RPT){
+                    var folderName = folderPrefix + splitArray[file].fname + "_" + date;
+                }
+                else if(rpt_type == AR_RPT){
+                    if (splitArray[file].xmlType == 0){
+                        var folderName = folderPrefix + splitArray[file].fname + "_NUM_" + date;
+                    } else {
+                        var folderName = folderPrefix + splitArray[file].fname + "_DENOM_" + date;
+                    }
+                }
+				
+				var folder = createFolder(driveLocation,folderName);
+				var folderPath = getFolderPath(driveLocation,folderName);				
+				var fileName = splitArray[file].raw;
+				
+				if (splitArray[file].data.length > 0){				     					
+					createFile(folder, folderPath, fileName, splitArray[file].data);
+				}
+		
+			}
+		}
+	}
+}
+
+function createFolder(driveLocation, folderName) {
+	var WshShell = new ActiveXObject("WScript.Shell");
+	var fileSystemObject = new ActiveXObject("Scripting.FileSystemObject");
+	
+	driveLocation += "\\" + folderName;
+	
+	var folderArray = driveLocation.split("\\");
+	
+	/* The beginning of the drive location may be different depending on
+	the string passed in for parsing.  If we have a C:\ kind of string, then
+	we do not need to adjust our start.  If we have a \\gmfileshare01\ kind
+	of string, then we need to bump our iterator up two notches so as to 
+	capture gmfileshare01 as the actual drive. */
+	if (driveLocation.substr(0, 2) == "\\\\") {
+		var folderLocation = "\\\\" + folderArray[2];
+		var folderStart = 3;
+	} else {
+		var folderLocation = folderArray[0];
+		var folderStart = 1;
+	}
+	for (var folder = folderStart; folder < folderArray.length; folder++) {
+		if (folderArray[folder] != "") {
+			folderLocation += "\\" + folderArray[folder];
+			if (!fileSystemObject.FolderExists(folderLocation)) {
+				fileSystemObject.CreateFolder(folderLocation);
+			}
+		}
+	}
+	return fileSystemObject;
+}
+
+function getFolderPath(driveLocation, folderName){
+	
+	var folderArray=driveLocation.split("\\");
+	
+	var folderLocation=folderArray[0];
+	for(var folder=1;folder<folderArray.length;folder++){	
+		folderLocation+="\\"+folderArray[folder];
+	}
+	
+	folderLocation+="\\"+folderName;
+	
+	return folderLocation;
+}
+
+function createFile(folderObj,driveLocation,fileName, fileContents){
+	
+	//create a file	location	
+	var fpXML = folderObj.BuildPath(driveLocation,fileName+'.xml');
+	
+	//create the file at that location				
+	var file = folderObj.CreateTextFile(fpXML,true);
+	
+	//we need to replace any non ASCII characters with an empty string
+	file.Write(fileContents.replace(/[^A-Za-z 0-9 \.,\?""!@#\$%\^&\*\(\)-_=\+;:<>\/\\\|\}\{\[\]`'~]*/g, ''));
+	file.Close();
+}
+
+function getTableTitle(){
+    if(rpt_type == LABID_RPT)
+        document.getElementById("title").innerHTML = "LabID XML Export Utility"; 
+    else if(rpt_type == AU_RPT)
+        document.getElementById("title").innerHTML = "Antimicrobial Usage XML Export Utility"; 
+    else if(rpt_type == AR_RPT)
+        document.getElementById("title").innerHTML = "Antimicrobial Resistance XML Export Utility";
+}
+
+ </script> 
+   
+ <style> 
+ table { 
+     border-collapse:collapse; 
+     empty-cells:     show; 
+     border:         0.000in none #000000; 
+ } 
+   
+ .Header { 
+     border-width:     0.014in; 
+     border-color:     #444444; 
+     border-style:     none none none none; 
+     padding:         0.000in 0.0200in 0.000in 0.0200in; 
+     font:             bold 12pt Helvetica; 
+     color:             Green; 
+     text-align:     left; 
+     vertical-align: middle; 
+ } 
+   
+ .OptionBtnHdr{ 
+     border-width:     0.00in; 
+     border-color:     #FFFFFF; 
+     border-style:     none none none none; 
+     padding:         0.000in 0.0200in 0.000in 0.0200in; 
+     font:             bold 8pt Helvetica; 
+     color:             Black; 
+     text-align:     left; 
+     vertical-align: middle; 
+ } 
+ .FieldName000 { 
+     border-width:     0.014in; 
+     border-color:     #CCCCFF; 
+     border-style:     none none solid none; 
+     padding:         0.000in 0.000in 0.000in 0.100in; 
+     font:             bold 10pt Helvetica; 
+     color:             #000000; 
+     text-align:     left; 
+     vertical-align: middle; 
+ } 
+ .FieldName001 { 
+     border-width:     0.00in; 
+     border-color:     #FFFFFF; 
+     border-style:     none none none none; 
+     padding:         0.000in 0.000in 0.000in 0.1800in; 
+     font:             9pt Helvetica; 
+     color:             #000000; 
+     text-align:     left; 
+     vertical-align: middle; 
+ } 
+ .RowTypeLine{ 
+     border-width:     0.014in; 
+     border-color:     #666699; 
+     border-style:     solid none none none; 
+     padding:         0.000in 0.000in 0.000in 0.200in; 
+     font:             8pt Helvetica; 
+     color:             #000000; 
+     text-align:     left; 
+     vertical-align: middle; 
+ } 
+ .divClass{ 
+     overflow:        auto; 
+     position:        absolute; 
+     width:            1600px; 
+ } 
+ .tbl { 
+     border-width:     0.014in; 
+     border-color:     #666699; 
+     border-style:     solid solid solid solid; 
+ } 
+ .alternateRow { background-color: #E8E8F3; } 
+   
+ </style> 
+ </head> 
+ <body onload='javascript:initPage();'> 
+     <table width='100%' id='hdrTable' colspan='1'> 
+         <tr> 
+             <td id="title" width='100.000%' class='Header' colspan='1'><script>getTableTitle();</script></td> 
+         </tr> 
+         <tr> 
+             <td width='100.000%' class='RowTypeLine' colspan='1'><br></td> 
+         </tr> 
+         <tr> 
+             <td> 
+                 <span id='spFileList'></span> 
+             </td> 
+         </tr> 
+         <tr> 
+             <td width='100.000%' class='FieldName001' colspan='1'><br></td> 
+         </tr> 
+         <tr> 
+             <td> 
+                 <span id='spFolderLoc'></span> 
+             </td> 
+         </tr> 
+     </table> 
+ </body> 
+ </html> 
+ 

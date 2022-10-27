@@ -44,9 +44,13 @@ declare k=i4 with noconstant(0), protect
 **********************************************************************************************************************/
 
 declare BuildParams  (null) = i2 with copy, persist
+subroutine BuildParams(null)
+	call echo("temp")
+end
 
-declare OpenPage(sFile = vc) = i2 with copy, persist
-subroutine OpenPage(sFile)
+
+declare OpenPage(sFile = vc,sOutdev = vc) = i2 with copy, persist
+subroutine OpenPage(sFile,sOutdev)
 	
 	call echo("calling OpenPage")
 	free set replyOut
@@ -98,7 +102,7 @@ subroutine OpenPage(sFile)
 	call echo(build("sData ------------>",sData))
 	call echorecord(getReply)
 	 
-	set putRequest->source_dir = $outdev
+	set putRequest->source_dir = sOutdev
 	set putRequest->IsBlob = "1"
 	set putRequest->document = replace(getReply->data_blob,"sXMLData",sData,0)
 	set putRequest->document_size = size(putRequest->document)

@@ -42,6 +42,8 @@ set nologvar = 0	;do not create log = 1		, create log = 0
 set noaudvar = 0	;do not create audit = 1	, create audit = 0
 %i ccluserdir:cov_custom_ccl_common.inc
 
+execute cov_aur_routines
+
 call writeLog(build2("************************************************************"))
 call writeLog(build2("* START Custom Section  ************************************"))
 
@@ -87,6 +89,24 @@ record t_rec
 	 2 name_full_formatted = vc
 )
 
+record output_data
+(
+	1 cnt = i4
+	1 qual[*]
+		2 FacilityID = vc
+		2 WardID = vc
+		2 NHSNLocationTypeCode = vc
+		2 SummaryYYYYMM = vc
+		2 AdmissionsForMonth = vc
+		2 NumberOfDaysPresentForMonth = vc
+		2 NHSNDrugIngredientCode = vc
+		2 AUDaysAllRoute = vc
+		2 AUDaysIMRoute = vc
+		2 AUDaysIVRoute = vc
+		2 AUDaysDigestiveRoute = vc
+		2 AUDaysRespiratoryRoute = vc
+)
+
 ;call addEmailLog("chad.cummings@covhlth.com")
 
 set t_rec->files.records_attachment = concat(trim(cnvtlower(curprog)),"_rec_",trim(format(sysdate,"yyyy_mm_dd_hh_mm_ss;;d")),".dat")
@@ -99,82 +119,105 @@ set t_rec->prompts.csv = $CSV
 
 set t_rec->cons.run_dt_tm 		= cnvtdatetime(curdate,curtime3)
 
-
-
-subroutine OpenPage(sFile)
-	
-	call echo("calling OpenPage")
-	free set replyOut
-	record replyOut(
-    	1 info_line [*]
-      	2 new_line = vc
-  	)
-  	free set getREPLY
-  	record getREPLY (
-    	1 INFO_LINE[*]
-      		2 new_line                = vc
-    	1 data_blob                 = gvc
-    	1 data_blob_size            = i4
-%i cclsource:status_block.inc
-	)
-	free set getREQUEST
-  	record getREQUEST (
-    	1 Module_Dir = vc
-    	1 Module_Name = vc
-	    1 bAsBlob = i2
-	)
-	
-	set getrequest->module_dir= "cer_install:"
-	set getrequest->Module_name = trim(sFile)
-	set getrequest->bAsBlob = 1
-	execute eks_get_source with replace (REQUEST,getREQUEST),replace(REPLY,getREPLY)
-	call echo("after eks_get_source")
-	free set putreply
-	record putreply (
-    	1 INFO_LINE [*]
-			2 new_line = vc
-%i cclsource:status_block.inc
-		)
-	free set putREQUEST
-	record putREQUEST (
-	    	1 source_dir = vc
-	    1 source_filename = vc
-	    1 nbrlines = i4
-	    1 line [*]
-			2 lineData = vc
-		1 OverFlowPage [*]
-			2 ofr_qual [*]
-				3 ofr_line = vc
-		1 IsBlob = c1
-		1 document_size = i4
-		1 document = gvc
-	  )
-	 
-	call echo(build("sData ------------>",sData))
-	call echorecord(getReply)
-	 
-	set putRequest->source_dir = $outdev
-	set putRequest->IsBlob = "1"
-	set putRequest->document = replace(getReply->data_blob,"sXMLData",sData,0)
-	set putRequest->document_size = size(putRequest->document)
-	call echorecord(putREQUEST)
-	
-	execute eks_put_source with replace(Request,putRequest),replace(reply,putReply)
-	
-	return ( 1 )
-end ; subroutine OpenPage()
 call writeLog(build2("* END   Custom Section  ************************************"))
 call writeLog(build2("************************************************************"))
 
 
 
-call writeLog(build2("* END   Custom   *******************************************"))
-call writeLog(build2("************************************************************"))
-
 
 call writeLog(build2("************************************************************"))
 call writeLog(build2("* START Custom   *******************************************"))
+
+
+;create output_data
+set output_data->cnt = 1
+set stat = alterlist(output_data->qual,output_data->cnt)
+set output_data->qual[output_data->cnt].FacilityID = ^Sample Data^
+set output_data->qual[output_data->cnt].WardID = ^Sample Data^
+set output_data->qual[output_data->cnt].NHSNLocationTypeCode = ^Sample Data^
+set output_data->qual[output_data->cnt].SummaryYYYYMM = ^Sample Data^
+set output_data->qual[output_data->cnt].AdmissionsForMonth = ^Sample Data^
+set output_data->qual[output_data->cnt].NumberOfDaysPresentForMonth = ^Sample Data^
+set output_data->qual[output_data->cnt].NHSNDrugIngredientCode = ^Sample Data^
+set output_data->qual[output_data->cnt].AUDaysAllRoute = ^Sample Data^
+set output_data->qual[output_data->cnt].AUDaysIMRoute = ^Sample Data^
+set output_data->qual[output_data->cnt].AUDaysIVRoute = ^Sample Data^
+set output_data->qual[output_data->cnt].AUDaysDigestiveRoute = ^Sample Data^
+set output_data->qual[output_data->cnt].AUDaysRespiratoryRoute = ^Sample Data^
+
 call writeLog(build2("* END   Custom   *******************************************"))
+call writeLog(build2("************************************************************"))
+
+
+call writeLog(build2("************************************************************"))
+call writeLog(build2("* START Creating Output   *******************************************"))
+
+if (t_rec->prompts.csv = 0)
+
+	select into t_rec->prompts.outdev
+	from
+		(dummyt d1 with seq=1)
+	head report
+		col 0 "ASCII Report"
+	with nocounter
+
+elseif (t_rec->prompts.csv = 1)
+
+	select into t_rec->prompts.outdev
+		 FacilityID = output_data->qual[d1.seq].FacilityID
+		,WardID = output_data->qual[d1.seq].WardID
+		,NHSNLoc = output_data->qual[d1.seq].NHSNLocationTypeCode
+		,SumYYYYMM = output_data->qual[d1.seq].SummaryYYYYMM
+		,Admits = output_data->qual[d1.seq].AdmissionsForMonth
+		,Days = output_data->qual[d1.seq].NumberOfDaysPresentForMonth
+		,DrugCode = output_data->qual[d1.seq].NHSNDrugIngredientCode
+		,AUDaysAll = output_data->qual[d1.seq].AUDaysAllRoute
+		,AUDaysIM = output_data->qual[d1.seq].AUDaysIMRoute
+		,AUDaysIV = output_data->qual[d1.seq].AUDaysIVRoute
+		,AUDaysDig = output_data->qual[d1.seq].AUDaysDigestiveRoute
+		,AUDaysRespe = output_data->qual[d1.seq].AUDaysRespiratoryRoute
+	from
+		(dummyt d1 with seq=output_data->cnt)
+	with nocounter,format,seperator=" "
+
+elseif (t_rec->prompts.csv = 2)
+
+	declare sFILE1    = vc  with protect, constant("covenant_AU_")
+
+ 
+	declare ploc      = vc  with protect
+	declare sData     = vc  with protect
+	declare stat      = i4  with protect, noconstant(0)
+	declare lStat     = i4  with protect, noconstant(0)
+	declare pCnt      = i4  with protect, noconstant(0)
+
+	call echo(sFile1)
+	
+	; Get/Set Folder Location
+	set ploc = t_rec->prompts.file
+	set lStat = size(ploc,1)
+	set stat = findstring("\",ploc,1,1)
+	if (stat = 0)
+	    set stat = findstring("/",ploc,1,1)
+	endif
+	
+	call echo(build("lStat->",lStat, "/stat->",stat))
+	if (stat < lStat)
+    	call echo("Adding '\' to the end of the file location...")
+	    set ploc = concat(trim(ploc),"\")
+	endif
+
+	set ploc = replace(ploc,"\","\\",0)
+	set ploc = replace(ploc,"/","\\",0)
+	
+	set lStat =  BuildParams(null)
+	call echo("calling html")
+	set lStat = OpenPage("cov_aur_export.html",value(t_rec->prompts.outdev))
+	call echo("ending call html")
+
+endif
+
+call writeLog(build2("* END   Creating Output   *******************************************"))
 call writeLog(build2("************************************************************"))
 
 /*
