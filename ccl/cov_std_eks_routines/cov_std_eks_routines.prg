@@ -191,7 +191,8 @@ subroutine EKSOPSREQUESTSrvRequest(dparam)
     else  ;  If not interactive CCL, get current App handle
 	   set hApp = uar_crmgetapphandle()
 	endif
- 
+ 	call echo(build2("hApp=",hApp))
+ 	
 	if (hApp > 0)
 		call echo("uar_crmbegintask")
 		set crmStatus = uar_crmbegintask( hApp, task, hTask )
@@ -489,7 +490,9 @@ subroutine  sCallEKSOPSRequest(null)
 	if (not(validate(EKSOPSRequest,0)))
 		return (vReturnValue)
 	else
-		set vReturnValue = EKSOPSREQUESTSrvRequest(0)
+		free record EKSOPSReply
+		set stat = tdbexecute(3055000,4801,3091001,"REC",EKSOPSRequest,"REC",EKSOPSReply) 
+		call echorecord(EKSOPSReply)
 	endif
 	
 	return (vReturnValue)
