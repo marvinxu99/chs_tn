@@ -45,7 +45,84 @@ declare k=i4 with noconstant(0), protect
 
 declare BuildParams  (null) = i2 with copy, persist
 subroutine BuildParams(null)
-	call echo("temp")
+subroutine BuildParams(null)
+		call echo("Starting BuildParams.....")
+		declare iCnt  = i4  with protect, noconstant(0)
+		declare sTemp = vc  with protect
+		declare type = vc with protect
+	 
+		call echo(build("cnt -->",cnt))
+		
+		set count = 0
+		set fcount = 0
+	 
+		for (fcnt = 1 to output_data->file_cnt)
+
+			set count += 1
+			
+			if (count = 1)
+				set sTemp = concat(		trim(sTemp), "$$",
+			                          	trim(cnvtstring(fCnt)), "|",
+			                           	trim(output_data->file_qual[fcnt].FacilityID), "|",
+			                           	trim(output_data->file_qual[fcnt].Output))
+				
+			else
+				set sTemp = concat(		trim(sTemp), "@@",
+			                          	trim(cnvtstring(fCnt)), "|",
+			                           	trim(output_data->file_qual[fcnt].FacilityID), "|",
+			                           	trim(output_data->file_qual[fcnt].Output))
+			
+			endif	
+			
+		endfor
+		
+		/*
+			for (cnt = 1 to reply->facility[fcnt]->event_cnt)
+				if (reply->facility[fcnt]->event[cnt].XML_IND > 0)
+					set count = count + 1
+	
+			    	if (count = 1)
+				        set sTemp = concat(trim(sTemp), "$$",
+			                           concat(trim(cnvtstring(reply->facility[fcnt]->event[cnt].EVENT_ID))
+										,"_" ,trim(cnvtstring(reply->facility[fcnt]->event[cnt].LOCATION_CD))
+										,"_" ,trim(reply->facility[fcnt]->event[cnt].MDRO_CAT_NAME,4)
+										,"_" ,trim(format(reply->facility[fcnt]->event[cnt].COLL_DT_TM,"MMDDYY;;D"),4)),   "|",
+										trim(reply->facility[fcnt].FACILITY_DISPLAY),      "|",
+			                           trim(reply->facility[fcnt]->event[cnt].name_full_formatted),      "|",
+			                           trim(cnvtstring(reply->facility[fcnt]->event[cnt].person_id)),    "|",
+			                           trim(cnvtstring(reply->facility[fcnt]->event[cnt].encntr_id)),    "|",
+			                           trim(reply->facility[fcnt]->event[cnt].mdro_cat_name),            "|",
+			                           trim(cnvtstring(fCnt)), "|",
+			                           trim(cnvtstring(reply->facility[fcnt]->event[cnt].BLOODIND)), "|",
+			                           trim(reply->facility[fcnt]->event[cnt].xml_string))
+			    	else
+			        	set sTemp = concat(trim(sTemp), "@@",
+			                           concat(trim(cnvtstring(reply->facility[fcnt]->event[cnt].EVENT_ID))
+			                            ,"_" ,trim(cnvtstring(reply->facility[fcnt]->event[cnt].LOCATION_CD))
+										,"_" ,trim(reply->facility[fcnt]->event[cnt].MDRO_CAT_NAME,4)
+										,"_" ,trim(format(reply->facility[fcnt]->event[cnt].COLL_DT_TM,"MMDDYY;;D"),4)),   "|",
+										trim(reply->facility[fcnt].FACILITY_DISPLAY),      "|",
+			                           trim(reply->facility[fcnt]->event[cnt].name_full_formatted),      "|",
+			                           trim(cnvtstring(reply->facility[fcnt]->event[cnt].person_id)),    "|",
+			                           trim(cnvtstring(reply->facility[fcnt]->event[cnt].encntr_id)),    "|",
+			                           trim(reply->facility[fcnt]->event[cnt].mdro_cat_name),            "|",
+			                           trim(cnvtstring(fCnt)), "|",
+			                           trim(cnvtstring(reply->facility[fcnt]->event[cnt].BLOODIND)), "|",
+			                           trim(reply->facility[fcnt]->event[cnt].xml_string))
+					endif
+				endif
+			endfor
+			
+		endfor
+		*/
+		
+		set sTemp = concat(ploc, "$$", trim(cnvtstring(fcnt)), "|", trim(cnvtstring(count)),"$$",sFILE1, trim(sTemp))
+	  
+		set sData = sTemp
+		call echo("Ending BuildParams.....")
+		call echo(build("sTemp...",sTemp,"...ENDsTemp"))
+		return ( 1 )
+	end ; subroutine BuildParams
 end
 
 
