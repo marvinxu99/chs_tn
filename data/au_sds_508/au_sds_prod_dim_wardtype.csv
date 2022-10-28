@@ -1,0 +1,11 @@
+WardTypeCode,WardTypeName
+1,Medical Ward
+10,Burn Unit
+2,Surgical Ward
+3,Medical Surgical Ward
+4,Medical Critical Care
+5,Surgical Critical Care
+6,Medical Surgical Critical Care
+7,Telemetry/Cardiology
+8,Adult Step Down Unit
+9,Adult Mixed Acuity Unit
