@@ -34,9 +34,10 @@ prompt
 	, "Select Facility:" = 0
 	, "Case Areas" = 0
 	, "Begin Date:" = ""
-	, "End Date" = "" 
+	, "End Date" = ""
+	, "Report Type" = "CSV" 
 
-with OUTDEV, FSEARCH, FACILITY, SURG_AREA, BEG_DATE, END_DATE
+with OUTDEV, FSEARCH, FACILITY, SURG_AREA, BEG_DATE, END_DATE, REPORT_TYPE
 
 
 call echo(build("loading script:",curprog))
@@ -72,6 +73,7 @@ record t_rec
 	 2 outdev		= vc
 	 2 start_dt_tm	= vc
 	 2 end_dt_tm	= vc
+	 2 report_type  = vc
 	1 files
 	 2 records_attachment		= vc
 	1 dminfo
@@ -95,6 +97,7 @@ record t_rec
 set t_rec->files.records_attachment = concat(trim(cnvtlower(curprog)),"_rec_",trim(format(sysdate,"yyyy_mm_dd_hh_mm_ss;;d")),".dat")
 
 set t_rec->prompts.outdev = $OUTDEV
+set t_rec->prompts.report_type = $REPORT_TYPE
 
 set t_rec->cons.run_dt_tm 		= cnvtdatetime(curdate,curtime3)
 
@@ -115,6 +118,8 @@ record pat_list (
 ) 
 
 /*Get list of person_id and encntr_id from surgical case*/
+
+if (t_rec->prompts.report_type = "CSV")
 
 select into "nl:"
 p.name_full_formatted,
@@ -296,6 +301,8 @@ stat = alterlist(planned_ords->planned_ords, cnt)
 with nocounter
 
 call echorecord(planned_ords)
+
+endif
    
 call writeLog(build2("* END   Finding Diagnosis   *******************************************"))
 call writeLog(build2("************************************************************"))
@@ -303,6 +310,7 @@ call writeLog(build2("**********************************************************
 call writeLog(build2("************************************************************"))
 call writeLog(build2("* START Custom   *******************************************"))
 
+if (t_rec->prompts.report_type = "CSV")
 SELECT into $OUTDEV
       Facility = trim(planned_ords->planned_ords[d.seq]->facility)
     , MRN = trim(planned_ords->planned_ords[d.seq]->MRN)
@@ -329,6 +337,12 @@ ORDER BY
 
 WITH format, separator = " "
 
+else
+
+	execute PHA_GET_PLANNED_ORDERS
+	$OUTDEV, $FSEARCH, $FACILITY, $SURG_AREA, $BEG_DATE, $END_DATE
+
+endif
 
 call writeLog(build2("* END   Custom   *******************************************"))
 call writeLog(build2("************************************************************"))
