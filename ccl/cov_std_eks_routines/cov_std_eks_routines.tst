@@ -33,3 +33,24 @@ set stat = SetBldMsg("FIRST","This is the first message") go
 call echo(GetBldMsgText("FIRST")) go
 call echo(build2(">>",GetBldMsgText("EVENT_PRSNL"),"<<")) go
 call echo(build2(">>",cnvtreal(GetBldMsgText("EVENT_PRSNL")),"<<")) go
+
+declare pEncntrID = f8 with noconstant(0) go
+declare pPersonID = f8 with noconstant(0) go
+
+select into "nl:"
+from
+	encntr_alias ea
+	,encounter e
+plan ea where ea.alias = "2116400626"
+join e where e.encntr_id = ea.encntr_id
+detail
+	pEncntrID = ea.encntr_id
+	pPersonID = e.person_id
+with nocounter go
+
+set stat = sPopulateEKSOPSRequest(pEncntrID,1) go
+set stat = sAddEKSOPSRequestData("test value") go
+set stat = sCallEKSOPSRequest(null) go
+
+call echorecord(EKSOPSREQUEST) go
+
