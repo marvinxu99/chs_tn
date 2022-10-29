@@ -62,7 +62,7 @@ subroutine  sAddCovDiscernAlert (vEncntrID,vOrderID,vAlertType,vAlertText )
 									
 		set stat = sPopulateEKSOPSRequest(vEncntrID,TRUE)
 		set stat = sSetEKSOPSRequestTrigger("COV_EE_ADD_DISCERN_ALERT")
-		set stat = sAddEKSOPSRequestData(sGetNomenIDforDTAReponse("D-Covenant Discern Alert",vAlertType),0,0)
+		set stat = sAddEKSOPSRequestData(sGetNomenIDforDTAReponse(sGetCovDiscernAlertMnemonic(null),vAlertType),0,0)
 		set stat = sAddEKSOPSRequestData(vAlertType,0,0)
 		
 		set stat = sAddEKSOPSRequestData(vAlertText,0,1)
@@ -123,10 +123,60 @@ subroutine  sGetAllCovDiscernAlert (vEncntrID,vPersonLevel )
 	    set vScopeParam = ""
 	endif
 
-	
+	free record discern_alerts
+	record discern_alerts
+	(
+		1 scope = c1
+		1 cnt = i4
+		1 qual[*]
+		 2 alert_type = vc
+		 2 alert_text = vc
+		 2 event_id = f8
+		 2 ce_event_note_id = f8
+		 2 long_blob_id = f8
+		 2 alert_dt_tm = dq8
+	)
 	
 	return (vReturnAlerts)
 end
+
+
+/**********************************************************************************************************************
+** Function sGetCovDiscernAlertCode(null)
+** ---------------------------------------------------------------------------------------
+** 
+**********************************************************************************************************************/
+declare sGetCovDiscernAlertCode(null) = f8 with copy, persist
+subroutine  sGetCovDiscernAlertCode (null)
+	
+	call SubroutineLog(build2('start sGetCovDiscernAlertCode()'))	
+	
+	set stat = cnvtjsontorec(sGetFullDTAInfo(sGetCovDiscernAlertMnemonic(null)))
+	call echorecord(dta_reply)
+	declare vReturnCode = f8 with noconstant(0.0)
+	
+	if (validate(dta_reply,0))
+	     set vReturnCode = dta_reply->dta[1].task_assay_cd
+	endif
+	
+	return (vReturnCode)
+end
+
+/**********************************************************************************************************************
+** Function sGetCovDiscernAlertMnemonic(null)
+** ---------------------------------------------------------------------------------------
+** 
+**********************************************************************************************************************/
+declare sGetCovDiscernAlertMnemonic(null) = vc with copy, persist
+subroutine  sGetCovDiscernAlertMnemonic (null)
+	
+	call SubroutineLog(build2('start sGetCovDiscernAlertMnemonic()'))	
+	
+	declare vReturnMnemonic = vc with constant("D-Covenant Discern Alert")
+	
+	return (vReturnMnemonic)
+end
+
 call echo(build2("finishing ",trim(cnvtlower(curprog))))
  
 end go
