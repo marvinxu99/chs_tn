@@ -1,0 +1,49 @@
+<prompt-def program = 'COV_DISCERN_ALERT_MANAGER' group = '0' auto-arrange = 'true' stream-ver = '0' export-dt-tm = '202210291422' version = '7' script-enabled = 'true' prompt-control-version = '3.000000' updt_dt_tm = '10/29/2022 14:21:59' resource-enabled = 'false'><control name = 'OUTDEV' control = '6' height = '20' width = '275' position = '0' result-type = '1' exclude = 'false'><display align = 'left'>Output to File/Printer/MINE</display>
+<description></description>
+<default>MINE</default>
+<component name = 'CWizOutputDevice'><property name = 'OUTPUT-DEVICES:00'><![CDATA[HIDE-BROWSER='false' DEVICES='' DISPLAY-ALL='true' DISALLOW-FREETEXT='false'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            ]]></property>
+</component>
+<component name = 'GENERAL'><property name = 'PROGRAM'><![CDATA[PROMPT-CONTROL-VERSION='3.000000' AUTO-ARRANGE='true' OWNER='' DU-BASE-HORZ='8' VERSION='7' STREAM-VER='0' REPORT-NAME='' UPDT_DT_TM='10/29/2022 14:21:59' DU-BASE-VERT='16' SCRIPT-ENABLED='true'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      ]]></property>
+<property name = 'PROMPT'><![CDATA[REQUIRED='false' CTRL-VERT-OFFSET='' BOTTOM='20' HIDE-LABEL='false' AUTO-GROUP='false' BORDER='false' LABEL-POS-LEFT='10' LEFT='160' CTRL-WIDTH='' LABEL-POS-TOP='10' CTRL-TOP='' EXCLUDE-RUNTIME='false' CTRL-HEIGHT='' RESIZABLE='false' RIGHT='275' LABEL-POS-HEIGHT='13' CTRL-HORZ-OFFSET='' TOP='10' LABEL-LEFT='true' CTRL-LEFT='' LABEL-POS-WIDTH='130' TRIM='false' ]]></property>
+</component>
+<component name = 'JAVASCRIPT'><property name = 'CODE:00'><![CDATA[//#import "res:dataset_help"  
+//#import "cclsource:ccps_pm_search.js"
+var theForm = null;
+
+function onLoad() {
+
+    theForm = new DiscernForm();
+    var pmDataItems = [["Encntr ID",    "ENCOUNTER_ID",        false, 20],  
+                       ["FIN",          "FIN NBR",             true,  20],  
+                       ["Patient Sex",  "SEX_CD",              true,  10],  
+                       ["Encoutner Type",  "ENCNTR_TYPE_CD",   true,  10],
+                       ["Patient Name", "NAME_FULL_FORMATTED", true, 50]]; 
+    // insert event handlers
+ccpsPMSearchSetup(theForm.ENCNTR_ID, theForm.SEARCH, theForm.REMOVE, pmSearchConst.pmEncounterMode, pmSearchConst.pmSingleSelectect,pmDataItems); 
+
+}                                                                                                                                                                                                                                                                                       ]]></property>
+</component>
+</control>
+<control name = 'ENCNTR_ID' control = '3' height = '100' width = '600' position = '1' result-type = '3' exclude = 'false'><display align = 'left'>Search for a Patient</display>
+<description></description>
+<default></default>
+<component name = 'CWizDataSource'><property name = 'DATASRC:00'><![CDATA[MODIFIABLE='false' SORT='false' INC-ANY='false' DUAL-LIST='false' KEEP-SELECTION='false' LABEL-COLUMNS='false' QBE-SOURCE='' MULTI-SELECT='false' STR-DEFAULT='' SOURCE-TYPE='STRING' MULTI_COLUMN='false'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              ]]></property>
+<property name = 'STRING-TABLE:00'><![CDATA[                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        ]]></property>
+<property name = 'TABLE-HEADER:00'><![CDATA[{TABLE='' ORDINAL='0' VISIBLE='true' COLUMN='0' ALIAS='' FORMAT='' WIDTH='27.000000' TYPE='' VALUE='true' BINDING='A' TITLE='A' }{TABLE='' ORDINAL='1' VISIBLE='true' COLUMN='1' ALIAS='' FORMAT='' WIDTH='27.000000' TYPE='' VALUE='false' BINDING='B' TITLE='B' }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     ]]></property>
+</component>
+<component name = 'GENERAL'><property name = 'PROMPT'><![CDATA[REQUIRED='false' CTRL-VERT-OFFSET='' BOTTOM='100' HIDE-LABEL='false' AUTO-GROUP='false' BORDER='false' LABEL-POS-LEFT='10' LEFT='160' CTRL-WIDTH='600' LABEL-POS-TOP='37' CTRL-TOP='' EXCLUDE-RUNTIME='false' CTRL-HEIGHT='' RESIZABLE='false' RIGHT='600' LABEL-POS-HEIGHT='13' CTRL-HORZ-OFFSET='' TOP='37' LABEL-LEFT='true' CTRL-LEFT='' LABEL-POS-WIDTH='97' TRIM='true' ]]></property>
+</component>
+</control>
+<control name = 'SEARCH' control = '9' height = '25' width = '70' position = '2' result-type = '1' exclude = 'true'><display align = 'left'>Search</display>
+<description></description>
+<default></default>
+<component name = 'GENERAL'><property name = 'PROMPT'><![CDATA[REQUIRED='false' CTRL-VERT-OFFSET='' BOTTOM='25' HIDE-LABEL='true' AUTO-GROUP='false' BORDER='false' LABEL-POS-LEFT='0' LEFT='160' CTRL-WIDTH='' LABEL-POS-TOP='0' CTRL-TOP='' EXCLUDE-RUNTIME='true' CTRL-HEIGHT='' RESIZABLE='false' RIGHT='70' LABEL-POS-HEIGHT='0' CTRL-HORZ-OFFSET='' TOP='144' LABEL-LEFT='true' CTRL-LEFT='' LABEL-POS-WIDTH='0' TRIM='false' ]]></property>
+</component>
+</control>
+<control name = 'REMOVE' control = '9' height = '25' width = '70' position = '3' result-type = '1' exclude = 'true'><display align = 'left'>Remove</display>
+<description></description>
+<default></default>
+<component name = 'GENERAL'><property name = 'PROMPT'><![CDATA[REQUIRED='false' CTRL-VERT-OFFSET='-32' BOTTOM='25' HIDE-LABEL='true' AUTO-GROUP='false' BORDER='false' LABEL-POS-LEFT='0' LEFT='160' CTRL-WIDTH='' LABEL-POS-TOP='0' CTRL-TOP='' EXCLUDE-RUNTIME='true' CTRL-HEIGHT='' RESIZABLE='false' RIGHT='70' LABEL-POS-HEIGHT='0' CTRL-HORZ-OFFSET='+80' TOP='176' LABEL-LEFT='true' CTRL-LEFT='' LABEL-POS-WIDTH='0' TRIM='false' ]]></property>
+</component>
+</control>
+</prompt-def>

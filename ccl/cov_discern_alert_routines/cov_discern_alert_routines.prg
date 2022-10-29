@@ -105,14 +105,14 @@ end
 
 
 /**********************************************************************************************************************
-** Function sGetAllCovDiscernAlert(vEncntrID,vOrderID,vAlertType,vPersonLevel)
+** Function sGetAllPatientDiscernAlert(vEncntrID,vOrderID,vAlertType,vPersonLevel)
 ** ---------------------------------------------------------------------------------------
 ** Create a new Message to be used in EKS. N=Name of Message. T=Text of Message
 **********************************************************************************************************************/
-declare sGetAllCovDiscernAlert(
+declare sGetAllPatientDiscernAlert(
 								 vEncntrID=f8
 								,vPersonLevel=i2(VALUE,0)) = vc with copy, persist
-subroutine  sGetAllCovDiscernAlert (vEncntrID,vPersonLevel )
+subroutine  sGetAllPatientDiscernAlert (vEncntrID,vPersonLevel )
 	
 	call SubroutineLog(build2('start sGetAllCovDiscernAlert(',vEncntrID,',',vPersonLevel,')'))	
 	
