@@ -59,29 +59,74 @@ subroutine  sAddCovDiscernAlert (vEncntrID,vOrderID,vAlertType,vAlertText )
 	declare vReturnSuccess = f8 with noconstant(FALSE)
 
 	if ((vEncntrID > 0.0) and (vAlertType > "") and (vAlertText > ""))
-	
-		set vRuleTrigger = "COV_EE_ADD_DISCERN_ALERT"
-		
-		set vFreeTextParam = concat(
-										^"<P>VALUE1=306356034.0<6>Patient Custody"^
-										;vAlertType
-										;,"@@@"
-										;,vAlertText
-									)
 									
-		set stat = sPopulateEKSOPSRequest(vEncntrID,1)
-		set stat = sSetEKSOPSRequestTrigger(vRuleTrigger)
-		set stat = sAddEKSOPSRequestData(sGetNomenIDforDTAReponse("D-Covenant Discern Alert",vAlertType))
-		set stat = sCallEKSOPSRequest(null)
+		set stat = sPopulateEKSOPSRequest(vEncntrID,TRUE)
+		set stat = sSetEKSOPSRequestTrigger("COV_EE_ADD_DISCERN_ALERT")
+		set stat = sAddEKSOPSRequestData(sGetNomenIDforDTAReponse("D-Covenant Discern Alert",vAlertType),0,0)
+		set stat = sAddEKSOPSRequestData(vAlertType,0,0)
 		
-		call echorecord(EKSOPSRequest)
+		set stat = sAddEKSOPSRequestData(vAlertText,0,1)
 		
-		set vReturnSuccess = TRUE
+		set vReturnSuccess = sCallEKSOPSRequest(null)
+		
 	endif
 	
 	return (vReturnSuccess)
 end
 
+
+/**********************************************************************************************************************
+** Function sGetCovDiscernAlert(vEncntrID,vOrderID,vAlertType,vPersonLevel)
+** ---------------------------------------------------------------------------------------
+** Create a new Message to be used in EKS. N=Name of Message. T=Text of Message
+**********************************************************************************************************************/
+declare sGetCovDiscernAlert(
+								 vEncntrID=f8
+								,vOrderID=f8(VALUE,0.0)
+								,vAlertType=vc(VALUE,"")
+								,vPersonLevel=i2(VALUE,0)) = vc with copy, persist
+subroutine  sGetCovDiscernAlert (vEncntrID,vOrderID,vAlertType,vPersonLevel )
+	
+	call SubroutineLog(build2('start sGetCovDiscernAlert(',vEncntrID,',',vOrderID,',',vAlertType,',',vPersonLevel,')'))	
+	
+	declare vReturnComment = vc with noconstant("")
+	declare vScopeParam = vc with noconstant("ce.encntr_id = vEncntrID")
+	
+	if (vPersonLevel = 1)
+	    set vScopeParam = ""
+	endif
+
+	
+	
+	return (vReturnComment)
+end
+
+
+
+
+/**********************************************************************************************************************
+** Function sGetAllCovDiscernAlert(vEncntrID,vOrderID,vAlertType,vPersonLevel)
+** ---------------------------------------------------------------------------------------
+** Create a new Message to be used in EKS. N=Name of Message. T=Text of Message
+**********************************************************************************************************************/
+declare sGetAllCovDiscernAlert(
+								 vEncntrID=f8
+								,vPersonLevel=i2(VALUE,0)) = vc with copy, persist
+subroutine  sGetAllCovDiscernAlert (vEncntrID,vPersonLevel )
+	
+	call SubroutineLog(build2('start sGetAllCovDiscernAlert(',vEncntrID,',',vPersonLevel,')'))	
+	
+	declare vReturnAlerts = vc with noconstant("")
+	declare vScopeParam = vc with noconstant("ce.encntr_id = vEncntrID")
+	
+	if (vPersonLevel = 1)
+	    set vScopeParam = ""
+	endif
+
+	
+	
+	return (vReturnAlerts)
+end
 call echo(build2("finishing ",trim(cnvtlower(curprog))))
  
 end go

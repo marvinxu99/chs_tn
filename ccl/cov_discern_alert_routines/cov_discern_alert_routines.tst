@@ -17,7 +17,8 @@ detail
 with nocounter go
 	
 	
-call echo(build2("sAddCovDiscernAlert=",sAddCovDiscernAlert(pEncntrID,0.0,"Power of Attorney","Needs to be reviewed"))) go
+;call echo(build2("sAddCovDiscernAlert=",sAddCovDiscernAlert(pEncntrID,0.0,"Patient Custody","Needs to be reviewed again"))) go
+call echo(build2("sGetCovDiscernAlert=",sGetCovDiscernAlert(pEncntrID,0.0,"Patient Custody"))) go
 
 /*
 select ce.event_cd,ce.result_val,ce.event_end_dt_tm,clr.result_cd,clr.descriptor,clr.nomenclature_id,clr.* from
