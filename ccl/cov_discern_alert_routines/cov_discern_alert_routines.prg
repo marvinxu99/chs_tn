@@ -32,6 +32,7 @@ call echo(build2("starting ",trim(cnvtlower(curprog))))
 
 execute cov_std_log_routines
 execute cov_std_eks_routines
+execute cov_std_ce_routines
  
 declare i=i4 with noconstant(0), protect
 declare j=i4 with noconstant(0), protect
@@ -111,13 +112,14 @@ end
 **********************************************************************************************************************/
 declare sGetAllPatientDiscernAlert(
 								 vEncntrID=f8
-								,vPersonLevel=i2(VALUE,0)) = vc with copy, persist
-subroutine  sGetAllPatientDiscernAlert (vEncntrID,vPersonLevel )
+								,vPersonLevel=i2(VALUE,0)
+								,vHistorical=i2(VALUE,0)) = vc with copy, persist
+subroutine  sGetAllPatientDiscernAlert (vEncntrID,vPersonLevel,vHistorical )
 	
 	call SubroutineLog(build2('start sGetAllCovDiscernAlert(',vEncntrID,',',vPersonLevel,')'))	
 	
 	declare vReturnAlerts = vc with noconstant("")
-	declare vScopeParam = vc with noconstant("ce.encntr_id = e.encntr_id")
+	declare vEncntrScopeParam = vc with noconstant("ce.encntr_id = e.encntr_id")
 	declare vCovAlertEC = f8 with constant(sGetCovDiscernAlertCode(null))
 	
 	declare OCFCOMP_VAR = f8 with Constant(uar_get_code_by("MEANING",120,"OCFCOMP")),protect
@@ -127,7 +129,7 @@ subroutine  sGetAllPatientDiscernAlert (vEncntrID,vPersonLevel )
     declare bsize = i4
 	
 	if (vPersonLevel = 1)
-	    set vScopeParam = "1=1"
+	    set vEncntrScopeParam = "1=1"
 	endif
 
 	free record discern_alerts
@@ -142,6 +144,9 @@ subroutine  sGetAllPatientDiscernAlert (vEncntrID,vPersonLevel )
 		 2 ce_event_note_id = f8
 		 2 long_blob_id = f8
 		 2 alert_dt_tm = dq8
+		 2 valid_from_dt_tm = dq8
+		 2 valid_until_dt_tm = dq8
+		 2 result_status_cd = f8
 	)
 	
 	select into "nl:"
@@ -158,7 +163,7 @@ subroutine  sGetAllPatientDiscernAlert (vEncntrID,vPersonLevel )
 	     where p.person_id = e.person_id
 	join ce
 	     where ce.person_id = p.person_id
-	     and parser(vScopeParam)
+	     and parser(vEncntrScopeParam)
 	     and   ce.event_cd = vCovAlertEC
 	     and   ce.valid_from_dt_tm <= cnvtdatetime(sysdate)
 	     and   ce.valid_until_dt_tm >= cnvtdatetime(sysdate)

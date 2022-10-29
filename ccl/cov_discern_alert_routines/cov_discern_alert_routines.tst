@@ -1,5 +1,4 @@
 set debug_ind = 1 go
-execute cov_std_ce_routines go
 execute cov_discern_alert_routines go
 
 declare pEncntrID = f8 with noconstant(0) go
