@@ -117,10 +117,17 @@ subroutine  sGetAllCovDiscernAlert (vEncntrID,vPersonLevel )
 	call SubroutineLog(build2('start sGetAllCovDiscernAlert(',vEncntrID,',',vPersonLevel,')'))	
 	
 	declare vReturnAlerts = vc with noconstant("")
-	declare vScopeParam = vc with noconstant("ce.encntr_id = vEncntrID")
+	declare vScopeParam = vc with noconstant("ce.encntr_id = e.encntr_id")
+	declare vCovAlertEC = f8 with constant(sGetCovDiscernAlertCode(null))
+	
+	declare OCFCOMP_VAR = f8 with Constant(uar_get_code_by("MEANING",120,"OCFCOMP")),protect
+    declare NOCOMP_VAR = f8 with Constant(uar_get_code_by("MEANING",120,"NOCOMP")),protect
+    declare BlobOut = vc
+    declare BlobNoRTF =  vc
+    declare bsize = i4
 	
 	if (vPersonLevel = 1)
-	    set vScopeParam = ""
+	    set vScopeParam = "1=1"
 	endif
 
 	free record discern_alerts
@@ -137,6 +144,91 @@ subroutine  sGetAllCovDiscernAlert (vEncntrID,vPersonLevel )
 		 2 alert_dt_tm = dq8
 	)
 	
+	select into "nl:"
+	from
+	     person p
+	     ,encounter e
+	     ,clinical_event ce
+	     ,ce_coded_result ccr
+	     ,ce_event_note cen
+	     ,long_blob lb
+	plan e 
+	     where e.encntr_id = vEncntrID
+	join p
+	     where p.person_id = e.person_id
+	join ce
+	     where ce.person_id = p.person_id
+	     and parser(vScopeParam)
+	     and   ce.event_cd = vCovAlertEC
+	     and   ce.valid_from_dt_tm <= cnvtdatetime(sysdate)
+	     and   ce.valid_until_dt_tm >= cnvtdatetime(sysdate)
+	     and   ce.result_status_cd in(value(uar_get_code_by("MEANING",8,"AUTH")))
+	join ccr
+	     where ccr.event_id = ce.event_id
+	     and   ccr.valid_from_dt_tm <= cnvtdatetime(sysdate)
+	     and   ccr.valid_until_dt_tm >= cnvtdatetime(sysdate)
+	join cen
+	     where cen.event_id = ce.event_id	     
+	     and   cen.valid_from_dt_tm <= cnvtdatetime(sysdate)
+	     and   cen.valid_until_dt_tm >= cnvtdatetime(sysdate)	     
+	join lb
+	     where lb.parent_entity_id = cen.ce_event_note_id
+	     and   lb.parent_entity_name = "CE_EVENT_NOTE"
+	order by
+	      ce.event_end_dt_tm desc
+	     ,ce.event_id
+	head report
+	     i = 0
+	     if (vPersonLevel = 1)
+	          discern_alerts->scope = "P"
+	     else
+	          discern_alerts->scope = "E"
+	     endif
+	head ce.event_id
+	     i += 1
+	     stat = alterlist(discern_alerts->qual,i)
+	     discern_alerts->qual[i].alert_dt_tm = ce.event_end_dt_tm
+	     discern_alerts->qual[i].alert_type = ccr.descriptor
+	     discern_alerts->qual[i].ce_event_note_id = cen.ce_event_note_id
+	     discern_alerts->qual[i].event_id = ce.event_id
+	     discern_alerts->qual[i].long_blob_id = lb.long_blob_id
+	     
+	
+	blobout = notrim(fillstring(32768," "))
+	blobnortf = notrim(fillstring(32768," "))
+
+	if(cen.compression_cd = ocfcomp_var)
+	  ;use a variable to get the actual uncompressed size
+	  uncompsize = 0
+	  ;use uar_ocf_uncompress to uncompress the blob
+	  ;the uncompressed blob is assigned to the variable blobout
+	   blob_un = UAR_OCF_UNCOMPRESS
+					(lb.long_blob, size( Lb.LONG_BLOB ), ;;; lenblob, change for 64bit  (2018) domains
+					 BLOBOUT, SIZE( BLOBOUT ), uncompsize)
+
+					 ;In 64bit environments using the select expression lenblob in the above uar_ocf_uncompress call
+
+					 ;can cause programs to crash.  Changing it to use the Size() function seems to prevent the crash.
+
+	  ;use uar_rtf2 to strip the rtf from the blob
+			stat = uar_rtf2(blobout,uncompsize,
+							blobnortf,size(blobnortf),bsize,0)
+	  ;set blobnortf to actual size
+	   blobnortf = substring(1,bsize,blobnortf)
+	 else
+	   blobnortf = lb.long_blob
+	endif
+	
+	discern_alerts->qual[i].alert_text = blobnortf
+	
+	foot report
+	     discern_alerts->cnt = i
+	with nocounter
+	
+	
+	set vReturnAlerts = cnvtrectojson(discern_alerts)
+	free record discern_alerts
+	
 	return (vReturnAlerts)
 end
 
@@ -152,11 +244,11 @@ subroutine  sGetCovDiscernAlertCode (null)
 	call SubroutineLog(build2('start sGetCovDiscernAlertCode()'))	
 	
 	set stat = cnvtjsontorec(sGetFullDTAInfo(sGetCovDiscernAlertMnemonic(null)))
-	call echorecord(dta_reply)
-	declare vReturnCode = f8 with noconstant(0.0)
 	
+	declare vReturnCode = f8 with noconstant(0.0)
+	;call echorecord(dta_reply)
 	if (validate(dta_reply,0))
-	     set vReturnCode = dta_reply->dta[1].task_assay_cd
+	     set vReturnCode = dta_reply->dta[1].event_cd
 	endif
 	
 	return (vReturnCode)
