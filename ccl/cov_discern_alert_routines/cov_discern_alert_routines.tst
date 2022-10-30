@@ -22,9 +22,9 @@ with nocounter go
 
 
 ;call echo(build2("sGetCovDiscernAlertCode=",sGetCovDiscernAlertCode(null))) go
-;call echo(build2("sGetAllCovDiscernAlert=",sGetAllCovDiscernAlert(pEncntrID))) go
-set stat = cnvtjsontorec(sGetAllPatientDiscernAlert(pEncntrID)) go
-call echorecord(discern_alerts) go
+call echo(build2("sGetAllPatientDiscernAlert=",sGetAllPatientDiscernAlert(pEncntrID))) go
+;set stat = cnvtjsontorec(sGetAllPatientDiscernAlert(pEncntrID)) go
+;call echorecord(discern_alerts) go
 /*
 select ce.event_cd,ce.result_val,ce.event_end_dt_tm,clr.result_cd,clr.descriptor,clr.nomenclature_id,clr.* from
 clinical_event ce,ce_coded_result clr

@@ -95,7 +95,7 @@ elseif (t_rec->prompts.encntr_id > 0.0)
 	
 	;Define fields in the data set
 	set vEventID	= AddRealField("Event ID","Event ID:", 1)
-	set vAlertType 	= AddStringField("AlertType","Alert Type:", 1, 25)
+	set vAlertType 	= AddStringField("AlertType","Alert Type:", 1, 255)
 	;set vAlertText	= AddStringField("AlertText", "Alert Text:", 1, 20)
 	
 	;Populate the data set
@@ -132,13 +132,10 @@ elseif ((t_rec->prompts.encntr_id = 0.0) and (t_rec->prompts.event_id = 0.0))
 		for (j=1 to size(dta_reply->dta[i].ref_range_factor,5))
 			
 			for (k=1 to size(dta_reply->dta[i].ref_range_factor[j].alpha_responses,5))
-				
-				set pAlertType = dta_reply->dta[i].ref_range_factor[j].alpha_responses[k].mnemonic
-				call SubroutineLog(build2('pAlertType=',pAlertType))
-				
+						
 				set temp_list->cnt += 1
 				set stat = alterlist(temp_list->qual,temp_list->cnt)
-				set temp_list->qual[temp_list->cnt].mnemonic = pAlertType
+				set temp_list->qual[temp_list->cnt].mnemonic = dta_reply->dta[i].ref_range_factor[j].alpha_responses[k].source_string
 				
 			endfor
 		endfor
@@ -152,7 +149,7 @@ elseif ((t_rec->prompts.encntr_id = 0.0) and (t_rec->prompts.event_id = 0.0))
 	set stat = MakeDataSet(10)
 	
 	;Define fields in the data set
-	set vAlertType 	= AddStringField("AlertType","Alert Type:", 1,25)
+	set vAlertType 	= AddStringField("AlertType","Alert Type:", 1,255)
 	
 	for (lcnt = 1 to tcnt)
 		set RecNum = GetNextRecord(0)
