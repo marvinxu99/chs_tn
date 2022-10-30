@@ -34,12 +34,15 @@ prompt
 	;<<hidden>>"Search" = ""
 	;<<hidden>>"Remove" = ""
 	, "Alert List" = 0
+	, "Delete Selected" = 0
 	;<<hidden>>"Alert Text" = ""
 	, "New Alert" = ""
 	, "New Alert Text" = "" 
 
-with OUTDEV, ENCNTR_ID, ALERT_LIST, NEW_ALERT_TYPE, NEW_ALERT_TEXT
+with OUTDEV, ENCNTR_ID, ALERT_LIST, DELETE_SEL, NEW_ALERT_TYPE, NEW_ALERT_TEXT
 
+execute cov_discern_alert_routines 
+execute cov_std_ce_routines
 
 call echo(build("loading script:",curprog))
 set nologvar = 0	;do not create log = 1		, create log = 0
@@ -63,8 +66,6 @@ record  reply
 )
 endif
 
-call set_codevalues(null)
-call check_ops(null)
 
 ;free set t_rec
 record t_rec
@@ -72,6 +73,11 @@ record t_rec
 	1 cnt			= i4
 	1 prompts
 	 2 outdev		= vc
+	 2 encntr_id	= f8
+	 2 event_id		= f8
+	 2 delete_sel	= i2
+	 2 new_alert_type = vc
+	 2 new_alert_text = vc	 
 	1 files
 	 2 records_attachment		= vc
 	1 dminfo
@@ -95,6 +101,11 @@ record t_rec
 set t_rec->files.records_attachment = concat(trim(cnvtlower(curprog)),"_rec_",trim(format(sysdate,"yyyy_mm_dd_hh_mm_ss;;d")),".dat")
 
 set t_rec->prompts.outdev = $OUTDEV
+set t_rec->prompts.encntr_id = $ENCNTR_ID
+set t_rec->prompts.event_id = $ALERT_LIST
+set t_rec->prompts.delete_sel = $DELETE_SEL
+set t_rec->prompts.new_alert_type = $NEW_ALERT_TYPE
+set t_rec->prompts.new_alert_text = $NEW_ALERT_TEXT
 
 set t_rec->cons.run_dt_tm 		= cnvtdatetime(curdate,curtime3)
 
@@ -105,6 +116,56 @@ call writeLog(build2("**********************************************************
 call writeLog(build2("************************************************************"))
 call writeLog(build2("* START Finding Diagnosis   *******************************************"))
 
+if ((t_rec->prompts.new_alert_type > " ") and (t_rec->prompts.new_alert_text > " "))
+
+	if (t_rec->prompts.encntr_id > 0.0)
+	
+		set stat = sAddCovDiscernAlert(t_rec->prompts.encntr_id,0.0,t_rec->prompts.new_alert_type,t_rec->prompts.new_alert_text)
+		
+		select into t_rec->prompts.outdev
+			from
+				dummyt d1
+			plan d1
+			head report
+				col 0 "<html><body>"
+				row +1
+				col 0 "<font size=-1 family=arial>"
+				row +1
+				col 0 t_rec->prompts.new_alert_type
+				row +1
+				col 0 "<br><br>"
+				row +1
+				col 0 t_rec->prompts.new_alert_text
+				row +1
+				col 0 "</body></html>"
+			with nocounter,maxcol=32000
+		
+	endif
+
+
+elseif ((t_rec->prompts.delete_sel = 1) and (t_rec->prompts.event_id > 0.0))
+
+	set stat = Remove_CEResult(t_rec->prompts.event_id)
+	
+	select into t_rec->prompts.outdev
+			from
+				dummyt d1
+			plan d1
+			head report
+				col 0 "<html><body>"
+				row +1
+				col 0 "<font size=-1 family=arial>"
+				row +1
+				col 0 t_rec->prompts.event_id
+				row +1
+				col 0 "<br><br>"
+				row +1
+				col 0 "Removed"
+				row +1
+				col 0 "</body></html>"
+			with nocounter,maxcol=32000
+			
+endif
 
 call writeLog(build2("* END   Finding Diagnosis   *******************************************"))
 call writeLog(build2("************************************************************"))
