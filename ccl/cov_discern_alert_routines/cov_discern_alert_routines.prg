@@ -225,7 +225,7 @@ subroutine  sGetAllPatientDiscernAlert (vEncntrID,vPersonLevel,vHistorical )
 	endif
 	
 	discern_alerts->qual[i].alert_text = blobnortf
-	
+	discern_alerts->qual[i].alert_text = replace(discern_alerts->qual[i].alert_text,"ocf_blob","")
 	foot report
 	     discern_alerts->cnt = i
 	with nocounter

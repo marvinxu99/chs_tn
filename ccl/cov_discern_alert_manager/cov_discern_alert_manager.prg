@@ -30,11 +30,15 @@ create program cov_discern_alert_manager:dba
 
 prompt 
 	"Output to File/Printer/MINE" = "MINE"
-	, "Search for a Patient " = 0
+	, "Search for a Patient" = 0
 	;<<hidden>>"Search" = ""
-	;<<hidden>>"Remove" = "" 
+	;<<hidden>>"Remove" = ""
+	, "Alert List" = 0
+	;<<hidden>>"Alert Text" = ""
+	, "New Alert" = ""
+	, "New Alert Text" = "" 
 
-with OUTDEV, ENCNTR_ID
+with OUTDEV, ENCNTR_ID, ALERT_LIST, NEW_ALERT_TYPE, NEW_ALERT_TEXT
 
 
 call echo(build("loading script:",curprog))
