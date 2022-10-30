@@ -12,15 +12,71 @@
 </script>
  
 <script type="text/javascript" src="I:/Winintel/static_content/custom_mpage_content/jquery/jquery-current.js"></script>
-<script type="text/javascript" src="I:/Winintel/static_content/custom_mpage_content/eks/js/cov_standard_lib.js"></script>
+<script type="text/javascript" src="I:/Winintel/static_content/custom_mpage_content/eks/js/cov_standard_lib.js"></script> 
 
+<script language="javascript">
 
-<script type="text/javascript">
-	AddDebugInfo(patientDataSplit,'patientDataSplit')
-</script> 
+	function BuildPatientAlerts()	{
 
+    PatientAlertsHTML = [];
+    PatientAlertsHTML.push("<table width=100% border=0>");
+	
+	var patientAlertParams = '"nl:",'+encntrID;
+
+    var alertsObj = window.external.XMLCclRequest();
+ 	
+	alertsObj.open("GET", "cov_discern_alert_data", false);
+	alertsObj.send(patientAlertParams);		
+ 
+	if (alertsObj.status == 200) {
+
+		AddDebugInfo(alertsObj.responseText,"discern alerts");
+ 		var patientAlerts = JSON.parse(alertsObj.responseText);
+ 		
+ 		for (i=0;i<patientAlerts.DISCERN_ALERTS.CNT;i++)   {
+ 				PatientAlertsHTML.push("<tr>");
+    			PatientAlertsHTML.push("<td colspan=2>");
+    			PatientAlertsHTML.push("<h2><u>");
+ 				PatientAlertsHTML.push(patientAlerts.DISCERN_ALERTS.QUAL[i].ALERT_TYPE);
+ 				PatientAlertsHTML.push("</u></h2>");
+ 				PatientAlertsHTML.push("</td>");
+ 				PatientAlertsHTML.push("</tr>");
+ 				
+ 				PatientAlertsHTML.push("<tr>");
+    			PatientAlertsHTML.push("<td colspan=2>");
+ 				PatientAlertsHTML.push(patientAlerts.DISCERN_ALERTS.QUAL[i].ALERT_TEXT);
+ 				PatientAlertsHTML.push("</td>");
+ 				PatientAlertsHTML.push("</tr>")
+ 				
+ 				PatientAlertsHTML.push("<tr>");
+    			PatientAlertsHTML.push("<td colspan=2>");
+    			PatientAlertsHTML.push("<br><br>");
+    			PatientAlertsHTML.push("</td>");
+    			PatientAlertsHTML.push("</tr>");
+ 		}
+ 
+	}
+	else {
+   		alert('XMLCclRequest failed with status of ' + alertsObj.status);
+	}
+ 
+  	PatientAlertsHTML.push("</table>");
+  	
+ 	$("#patientDiscernAlerts").html(PatientAlertsHTML.join(''))
+   	$("#patientDiscernAlerts").addClass('discern_alerts')
+   	
+	alertsObj.cleanup();
+}
+</script>
 </head>
 <body onload='InitMain();'>
 <div id=patientBannerBar onload="BuildPatientBannerBar()"></div>
+
+<br><br>
+<h1>Covenant Chart Alerts</h1>
+<div id=patientDiscernAlerts onload="BuildPatientAlerts()"></div>
+
+<div onload="AddDebugInfo(patientDataSplit,'patientDataSplit')"></div>
+
 </body>
 </html>
