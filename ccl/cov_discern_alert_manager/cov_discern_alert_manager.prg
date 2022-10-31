@@ -37,9 +37,11 @@ prompt
 	, "Delete Selected" = 0
 	;<<hidden>>"Alert Text" = ""
 	, "New Alert" = ""
-	, "New Alert Text" = "" 
+	, "New Alert Text" = ""
+	, "Alert Audits" = "" 
 
-with OUTDEV, ENCNTR_ID, ALERT_LIST, DELETE_SEL, NEW_ALERT_TYPE, NEW_ALERT_TEXT
+with OUTDEV, ENCNTR_ID, ALERT_LIST, DELETE_SEL, NEW_ALERT_TYPE, NEW_ALERT_TEXT, 
+	RPT_AUDITS
 
 execute cov_discern_alert_routines 
 execute cov_std_ce_routines
@@ -77,7 +79,8 @@ record t_rec
 	 2 event_id		= f8
 	 2 delete_sel	= i2
 	 2 new_alert_type = vc
-	 2 new_alert_text = vc	 
+	 2 new_alert_text = vc
+	 2 rpt_audits	= vc	 
 	1 files
 	 2 records_attachment		= vc
 	1 dminfo
@@ -94,6 +97,9 @@ record t_rec
 	 2 mrn			= vc
 	 2 fin			= vc
 	 2 name_full_formatted = vc
+	 2 alert_type	= vc
+	 2 alert_text 	= vc
+	 2 alert_dt_tm	= vc
 )
 
 ;call addEmailLog("chad.cummings@covhlth.com")
@@ -106,6 +112,7 @@ set t_rec->prompts.event_id = $ALERT_LIST
 set t_rec->prompts.delete_sel = $DELETE_SEL
 set t_rec->prompts.new_alert_type = $NEW_ALERT_TYPE
 set t_rec->prompts.new_alert_text = $NEW_ALERT_TEXT
+set t_rec->prompts.rpt_audits = $RPT_AUDITS
 
 set t_rec->cons.run_dt_tm 		= cnvtdatetime(curdate,curtime3)
 
@@ -116,7 +123,23 @@ call writeLog(build2("**********************************************************
 call writeLog(build2("************************************************************"))
 call writeLog(build2("* START Finding Diagnosis   *******************************************"))
 
-if ((t_rec->prompts.new_alert_type > " ") and (t_rec->prompts.new_alert_text > " "))
+if (t_rec->prompts.rpt_audits > " ")
+
+	if (t_rec->prompts.rpt_audits = "PERSON")
+	
+		if (t_rec->prompts.encntr_id > 0.0)
+		
+			set stat = 0
+		
+		endif
+	
+	elseif (t_rec->prompts.rpt_audits = "ACTIVE")
+	
+		set stat = 0
+	
+	endif
+
+elseif ((t_rec->prompts.new_alert_type > " ") and (t_rec->prompts.new_alert_text > " "))
 
 	if (t_rec->prompts.encntr_id > 0.0)
 	
