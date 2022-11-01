@@ -94,12 +94,16 @@ record t_rec
 	 2 diag_qual[*]
 	  3 diagnosis_id = f8
 	  3 nomenclature_id = f8
+	 2 complete_cnt = i4
+	 2 complete_qual[*]
+	  3 order_id = f8
 )
 
 call addEmailLog("chad.cummings@covhlth.com")
 
 set t_rec->files.records_attachment = concat(trim(cnvtlower(curprog)),"_rec_",trim(format(sysdate,"yyyy_mm_dd_hh_mm_ss;;d")),".dat")
 
+/*
 set t_rec->dminfo.info_domain	= "COV_DEV_OPS"
 set t_rec->dminfo.info_name		= concat(trim(cnvtupper(curprog)),":","start_dt_tm")
 set t_rec->dates.start_dt_tm 	= get_dminfo_date(t_rec->dminfo.info_domain,t_rec->dminfo.info_name)
@@ -109,6 +113,7 @@ if (t_rec->dates.start_dt_tm = 0.0)
 	call writeLog(build2("->No start date and time found, setting to go live date"))
 	set t_rec->dates.start_dt_tm = cnvtdatetime(curdate,curtime3)
 endif
+*/
 
 set t_rec->cons.run_dt_tm 		= cnvtdatetime(curdate,curtime3)
 set t_rec->cons.trigger			= "COV_EE_ADD_DX_ORD"
@@ -191,7 +196,10 @@ from
 	 (dummyt d1 with seq=t_rec->cnt)
 	,orders o
 	,order_catalog oc
+	,orders o2
 plan d1
+join o2
+	where o2.order_id = t_rec->qual[d1.seq].order_id
 join o
 	where o.person_id = t_rec->qual[d1.seq].person_id
 	and   o.order_status_cd in(value(uar_get_code_by("MEANING",6004,"COMPLETED")))
@@ -200,12 +208,18 @@ join o
 join oc
 	where oc.catalog_cd = o.catalog_cd
 	and   expand(i,1,t_rec->catalog_cnt,oc.catalog_cd,t_rec->catalog_qual[i].catalog_cd)
+	and   oc.catalog_cd = o2.catalog_cd
 order by
-	d1.seq
+	 o2.order_id
+	,o.order_id
 head report
 	null	
-head d1.seq
+head o2.order_id
 	t_rec->qual[d1.seq].cancel_ind = 1
+head o.order_id
+	t_rec->qual[d1.seq].complete_cnt += 1
+	stat = alterlist(t_rec->qual[d1.seq].complete_qual,t_rec->qual[d1.seq].complete_cnt)
+	t_rec->qual[d1.seq].complete_qual[t_rec->qual[d1.seq].complete_cnt].order_id = o.order_id
 foot report
 	null
 with nocounter
@@ -280,7 +294,7 @@ call get_patientname(null)
 
 
 call writeLog(build2("************************************************************"))
-call writeLog(build2("* START Building EKS Call to Complete   *******************************************"))
+call writeLog(build2("* START Building EKS Call to Add Dx   *******************************************"))
 
 select into "NL:"
 	e.encntr_id,
@@ -383,10 +397,9 @@ if (size(EKSOPSRequest->qual,5) > 0)
 	endif
 else
 	set reply->status_data.status = "Z"
-	go to exit_script
 endif
 
-call writeLog(build2("* END   Building EKS Call to Complete  *******************************************"))
+call writeLog(build2("* END   Building EKS Call to Add Dx  *******************************************"))
 call writeLog(build2("************************************************************"))
 
 
@@ -403,11 +416,8 @@ from
 	 person p
 	,encounter e
 	,(dummyt d1 with seq=t_rec->cnt)
-	,(dummyt d2)
 plan d1
-	where maxrec(d2,size(t_rec->qual[d1.seq].diag_qual,5))
-	and   t_rec->qual[d1.seq].cancel_ind = 1
-join d2
+	where t_rec->qual[d1.seq].cancel_ind = 1
 join e 
 	where e.encntr_id = t_rec->qual[d1.seq].encntr_id
 join p 
@@ -424,15 +434,12 @@ detail
 	EKSOPSRequest->qual[cnt].encntr_id  = e.encntr_id
 	stat = alterlist(EKSOPSRequest->qual[cnt].data,2)
 	EKSOPSRequest->qual[cnt].data[1].double_var = t_rec->qual[d1.seq].order_id
-	EKSOPSRequest->qual[cnt].data[2].double_var = t_rec->qual[d1.seq].diag_qual[d2.seq].nomenclature_id
 		call writeLog(build2("---->EKSOPSRequest->qual[",trim(cnvtstring(cnt)),"].person_id=",
 			trim(cnvtstring(EKSOPSRequest->qual[cnt].person_id))))
 		call writeLog(build2("---->EKSOPSRequest->qual[",trim(cnvtstring(cnt)),"].encntr_id=",
 			trim(cnvtstring(EKSOPSRequest->qual[cnt].encntr_id))))
 		call writeLog(build2("---->EKSOPSRequest->qual[",trim(cnvtstring(cnt)),"].data[1].double_var=",
 			trim(cnvtstring(EKSOPSRequest->qual[cnt].data[1].double_var))))
-		call writeLog(build2("---->EKSOPSRequest->qual[",trim(cnvtstring(cnt)),"].data[2].double_var=",
-			trim(cnvtstring(EKSOPSRequest->qual[cnt].data[2].double_var))))
 with nocounter
 
 call echorecord(EKSOPSRequest)
@@ -446,7 +453,6 @@ if (size(EKSOPSRequest->qual,5) > 0)
 	endif
 else
 	set reply->status_data.status = "Z"
-	go to exit_script
 endif
 
 call writeLog(build2("* END   Building EKS Call to Cancel  *******************************************"))
@@ -471,19 +477,21 @@ call writeLog(build2("**********************************************************
 */
 
 set reply->status_data.status = "S"
-
+set reply->status_data.subeventstatus[1].targetobjectname = "records"
+set reply->status_data.subeventstatus[1].targetobjectvalue = t_rec->files.records_attachment
 #exit_script
 
-
+/*
 if (reply->status_data.status in("Z","S"))
 	call writeLog(build2("* START Set Date Range ************************************"))
 	call set_dminfo_date(t_rec->dminfo.info_domain,t_rec->dminfo.info_name,t_rec->dates.end_dt_tm)
 	call writeLog(build2("* END Set Date Range ************************************v1"))
 endif
 ;001 end
+*/
 
 call echojson(t_rec, concat("cclscratch:",t_rec->files.records_attachment) , 1)
-;execute cov_astream_file_transfer "cclscratch",t_rec->files.records_attachment,"Extracts/HIM/","CP" 
+execute cov_astream_file_transfer "cclscratch",t_rec->files.records_attachment,"","CP" 
 ;execute cov_astream_ccl_sync value(program_log->files.file_path),value(t_rec->files.records_attachment)
 
 
