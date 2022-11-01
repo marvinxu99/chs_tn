@@ -239,6 +239,54 @@ subroutine Add_CEResult(vEncntrID,vEventCD,vResult,vEventDateTime,vEventClass)
 	return (vReturnSuccess)
 end 
 
+
+
+/**********************************************************************************************************************
+** Function Remove_CEResult()
+** ---------------------------------------------------------------------------------------
+**
+**********************************************************************************************************************/
+declare Remove_CEResult(vEventID=f8) = f8 with copy, persist
+subroutine Remove_CEResult(vEventID)
+	declare _memory_reply_string = vc with protect
+	
+	declare vPersonID = f8 with noconstant(0.0)
+	declare vEncntrID = f8 with noconstant(0.0)
+	declare vEventCD = f8 with noconstant(0.0)
+	declare	SystemPrsnlID = f8 with noconstant(1.0)
+	declare rParentEventID = f8 with noconstant(0.0)
+ 
+    select into "nl:"
+    from
+         clinical_event ce
+    plan ce
+         where ce.event_id = vEventID
+    	 and   ce.valid_from_dt_tm <= cnvtdatetime(sysdate)
+	     and   ce.valid_until_dt_tm >= cnvtdatetime(sysdate)
+	    ; and   ce.result_status_cd in(value(uar_get_code_by("MEANING",8,"AUTH")))
+	detail
+	     vPersonID = ce.person_id
+	     vEncntrID = ce.encntr_id
+	     vEventCD = ce.event_cd
+	with nocounter
+	
+ 	execute cov_mp_unchart_result
+											 ^MINE^
+											,vPersonID
+											,value(SystemPrsnlID)
+											,vEncntrID
+											,vEventCD
+											,vEventID
+											,0.0
+		free record record_data
+		set stat = cnvtjsontorec(_memory_reply_string)
+		;call echorecord(record_data)
+		set _memory_reply_string = ""
+ 
+ 		set rParentEventID = vEventID ;this needs to be updated to get ID from reply
+ 	return (rParentEventID)
+end 
+
 /**********************************************************************************************************************
 ** Function sGetFullDTAInfo(vMnemonic)
 ** ---------------------------------------------------------------------------------------
