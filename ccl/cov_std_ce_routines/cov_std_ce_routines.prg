@@ -239,6 +239,92 @@ subroutine Add_CEResult(vEncntrID,vEventCD,vResult,vEventDateTime,vEventClass)
 	return (vReturnSuccess)
 end 
 
+/**********************************************************************************************************************
+** Function sGetFullDTAInfo(vMnemonic)
+** ---------------------------------------------------------------------------------------
+** Return the DTA, Event Code, Reference Ranges and Alpha Responses for the Provided DTA Mnemonic
+**********************************************************************************************************************/
+declare sGetFullDTAInfo(vMnemonic=vc) = vc with copy, persist
+subroutine sGetFullDTAInfo(vMnemonic)
+
+	call SubroutineLog(build2('start sGetFullDTAInfo(',vMnemonic,')'))
+	
+	declare vReturnDTA = vc with protect
+	
+	free record dta_info
+	record dta_info
+	(
+  		1 dta[*]
+    	 2 task_assay_cd		= f8
+	)
+
+	select into "nl:"
+	from
+		discrete_task_assay dta
+	plan dta
+		where dta.mnemonic = vMnemonic
+		and   dta.active_ind = 1
+	head report
+		i = 0
+	detail
+		i += 1
+		stat = alterlist(dta_info->dta,i)
+		dta_info->dta[i].task_assay_cd = dta.task_assay_cd
+	foot report
+		null
+	with nocounter
+	
+	free record dta_reply
+	
+	set stat = tdbexecute(600005,600154,600469,"REC",dta_info,"REC",dta_reply)	;dcp_get_dl_dta_info
+	
+	set vReturnDTA = cnvtrectojson(dta_reply)
+	free record dta_reply
+	
+	return (vReturnDTA)
+	
+end
+
+
+/**********************************************************************************************************************
+** Function sGetNomenIDforDTAReponse(vMnemonic)
+** ---------------------------------------------------------------------------------------
+** Return the Nomenclature ID for a specific Response attached to a DTA Mnemonic
+**********************************************************************************************************************/
+declare sGetNomenIDforDTAReponse(vMnemonic=vc,vResponse=vc) = f8 with copy, persist
+subroutine sGetNomenIDforDTAReponse(vMnemonic,vResponse)
+
+	declare vReturnNomenclatureID = f8 with noconstant(0.0)
+	declare vPos = i4 with noconstant(0)
+	
+	set stat = cnvtjsontorec(sGetFullDTAInfo(vMnemonic))
+	
+	for (i=1 to size(dta_reply->dta,5))
+		call SubroutineLog(build2('dta_reply->dta[',i,'].mnemonic=',dta_reply->dta[i].mnemonic))
+		for (j=1 to size(dta_reply->dta[i].ref_range_factor,5))
+			call SubroutineLog(build2('dta_reply->dta[',i,'].ref_range_factor[',j,'].age_to=',dta_reply->dta[i].ref_range_factor[j].age_to))
+			if (vReturnNomenclatureID = 0.0)
+				set k = 0
+				set vPos = locateval(
+										 k
+										,1
+										,dta_reply->dta[i].ref_range_factor[j].alpha_responses_cnt
+										,vResponse
+										,dta_reply->dta[i].ref_range_factor[j].alpha_responses[k].source_string
+									)
+									
+				if (vPos > 0)
+					set vReturnNomenclatureID = dta_reply->dta[i].ref_range_factor[j].alpha_responses[vPos].nomenclature_id
+				endif
+			endif
+		endfor
+	endfor
+	
+	return (vReturnNomenclatureID)
+end
+
 call echo(build2("finishing ",trim(cnvtlower(curprog))))
  
 end go
+
+
