@@ -537,6 +537,8 @@ subroutine sGetCMGLocations(null)
 			2 description 	= vc
 			2 location_cd 	= f8
 			2 unit			= vc
+			2 org_name		= vc
+			2 org_id		= f8
 	)
 
 	select into "nl:"
@@ -589,6 +591,8 @@ subroutine sGetCMGLocations(null)
 		cmg_locations->qual[i].description		= uar_get_code_description(l.location_cd)
 		cmg_locations->qual[i].location_cd		= l.location_cd	
 		cmg_locations->qual[i].unit				= uar_get_code_display(l2.location_cd)
+		cmg_locations->qual[i].org_id			= o.organization_id
+		cmg_locations->qual[i].org_name			= o.org_name
 	foot report
 		cmg_locations->cnt = i
 	with nocounter
