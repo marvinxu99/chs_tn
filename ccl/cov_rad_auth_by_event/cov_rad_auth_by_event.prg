@@ -6,8 +6,8 @@
 	Author:				   Chad Cummings
 	Date Written:		   03/01/2019
 	Solution:			   
-	Source file name:	   cov_him_auth_by_event.prg
-	Object name:		   cov_him_auth_by_event
+	Source file name:	   cov_rad_auth_by_event.prg
+	Object name:		   cov_rad_auth_by_event
 	Request #:
 
 	Program purpose:
@@ -25,8 +25,8 @@ Mod 	Mod Date	  Developer				      Comment
 001 	03/01/2019  Chad Cummings
 ******************************************************************************/
 
-drop program cov_him_auth_by_event:dba go
-create program cov_him_auth_by_event:dba
+drop program cov_rad_auth_by_event:dba go
+create program cov_rad_auth_by_event:dba
 
 prompt 
 	"Output to File/Printer/MINE" = "MINE"   ;* Enter or select the printer or file name to send this report to.
@@ -166,7 +166,7 @@ the data in the EKSOPSRequest to the Expert Servers.
 call writeLog(build2("Starting EKSOPSRequest calls:",trim(cnvtstring(t_rec->cnt))))
 for (i = 1 to t_rec->cnt)
 	call writeLog(build2("-->Looking at Item:",trim(cnvtstring(i))))
-	call writeLog(build2("-->Setting Expert Trigger to HIM_AUTH_DOCUMENTS"))
+	call writeLog(build2("-->Setting Expert Trigger to COV_EE_RAD_COMPLETE"))
 	set stat = initrec(EKSOPSRequest)
 	select into "NL:"
 		e.encntr_id,
@@ -184,7 +184,7 @@ for (i = 1 to t_rec->cnt)
 	join p where p.person_id= e.person_id
 	head report
 		cnt = 0
-		EKSOPSRequest->expert_trigger = "HIM_AUTH_DOCUMENTS"
+		EKSOPSRequest->expert_trigger = "COV_EE_RAD_COMPLETE"
 	detail
 		cnt = cnt +1
 		stat = alterlist(EKSOPSRequest->qual, cnt)
@@ -219,7 +219,7 @@ if (program_log->run_from_ops = 1)
 	set reply->status_data.subeventstatus[1].operationname		= "DOCUMENTS"
 	set reply->status_data.subeventstatus[1].operationstatus	= "S"
 	set reply->status_data.subeventstatus[1].targetobjectname	= "CLINICAL_EVENT"
-	set reply->status_data.subeventstatus[1].targetobjectvalue	= "Documents Removed"
+	set reply->status_data.subeventstatus[1].targetobjectvalue	= "Documents Updated"
 endif
 	
 call writeLog(build2("* END   Custom Section  ************************************"))
