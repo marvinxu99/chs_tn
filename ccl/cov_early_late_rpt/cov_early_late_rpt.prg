@@ -69,85 +69,123 @@ else																		;a single value was selected
 endif
 
 select into $OUTDEV
-   window = if (datetimediff(maa.event_dt_tm,mame.scheduled_dt_tm,4) < -30)
+   window = if (datetimediff(mae.beg_dt_tm,o.current_start_dt_tm,4) < -30)
   					"Early"
-  				   elseif (datetimediff(maa.event_dt_tm,mame.scheduled_dt_tm,4) > 30)
+  				   elseif (datetimediff(mae.beg_dt_tm,o.current_start_dt_tm,4) > 30)
   				    "Late"
   				   else
   				    "On-time"
   				   endif
-  , mame.scheduled_dt_tm
+  , o.current_start_dt_tm
   , mae.beg_dt_tm
-  , difference = datetimediff(maa.event_dt_tm,mame.scheduled_dt_tm,4)
+  , difference = datetimediff(mae.beg_dt_tm,o.current_start_dt_tm,4)
+  , o.order_mnemonic
   , oi.hna_order_mnemonic
-  , oi.order_detail_display_line
-  , nu.loc_facility_cd
-  , maa.nurse_unit_cd
+  , o.simplified_display_line
+  , enc.loc_nurse_unit_cd
   , FIN = trim(ea.alias)
   , prsnl = p.name_full_formatted
-  , mame.reason_cd
-  , freetext_reason=check(mame.freetext_reason)
   , mae.event_type_cd
-  , mame.order_id
- 
-FROM ENCOUNTER ENC
+  , o.order_id
+
+
+/*
+
+MED_ADMIN_EVENT MAE
+  ,CLINICAL_EVENT CE
+  ,ENCOUNTER E
+  ,ENCNTR_ALIAS EA
+  ,ORDERS O
+;;; set your time range below - start with one day or less then expand out if necessary
+plan MAE where
+  ( MAE.BEG_DT_TM  between CNVTDATETIME( "15-May-2019 00:00:00:00" ) ; START TIME - TIME ADMINISTERED
+                  and    CNVTDATETIME( "15-May-2019 23:59:59:00" ) ) ; STOP TIME
+                  and    MAE.EVENT_TYPE_CD = 4055412.00 ; ADMINISTERED
+                                                        ;;; if CCL does not execute, check this value in your domain
+join CE where
+    CE.EVENT_ID = OUTERJOIN( MAE.EVENT_ID )
+join O where
+    O.ORDER_ID = MAE.ORDER_ID
+and O.PRN_IND = 0 ; IGNORE PRN ORDERS
+                  ;;; set to 1 if you want to include PRN orders
+;;; remove the comment on the and line below to filter down the orders returned based on the frequency type flag
+;;;
+;;; 0-1-2-3 unknown (at least, I cannot find their meaning on the Wiki pages)
+;;; 4: Once (scheduled)
+;;; 5: Unscheduled frequencies
+; and o.freq_type_flag !=
+join E where
+    E.ENCNTR_ID = CE.ENCNTR_ID
+join EA where
+    EA.ENCNTR_ID = E.ENCNTR_ID
+and EA.ENCNTR_ALIAS_TYPE_CD = 1077.00 ; FIN NUMBER
+*/ 
+FROM 
+	ENCOUNTER ENC
   , ENCNTR_ALIAS EA
-  , ORDER_INGREDIENT OI
-  , NURSE_UNIT NU
   , MED_ADMIN_EVENT MAE
-  , MED_ADMIN_ALERT MAA
-  , MED_ADMIN_MED_ERROR MAME
   , PRSNL P
-WHERE maa.med_admin_alert_id > 0
-AND nu.location_cd = maa.nurse_unit_cd
-AND mame.med_admin_alert_id = maa.med_admin_alert_id
-AND mame.encounter_id = enc.encntr_id
-and operator(enc.loc_facility_cd, OPR_FAC_VAR, $FACILITY_PMPT)
-AND oi.order_id =  mame.template_order_id  and
-oi.action_sequence = mame.action_sequence and
-oi.ingredient_type_flag  != 5
-AND mae.event_id = mame.event_id and
-mae.event_id > 0.0 and
-mae.event_type_cd != value(uar_get_code_by("MEANING",4000040,'TASKPURGED'))
-AND mae.beg_dt_tm between cnvtdatetime(START_DATETIME) and cnvtdatetime(END_DATETIME)
-  AND maa.alert_type_cd IN (4039991.00)
-and ea.encntr_id = enc.encntr_id
-and ea.encntr_alias_type_cd = 1077
-and ea.active_ind = 1
-and ea.end_effective_dt_tm >= cnvtdatetime(curdate,curtime3) 
-and p.person_id = maa.prsnl_id 
-and (
- cnvtlower(oi.hna_order_mnemonic) in('*tacrolimus*')
-or cnvtlower(oi.hna_order_mnemonic) in('*tacrolimus topical*')
-or cnvtlower(oi.hna_order_mnemonic) in('*albumin human*')
-or cnvtlower(oi.hna_order_mnemonic) in('*albumin aggregated*')
-or cnvtlower(oi.hna_order_mnemonic) in('*pyridostigmine*')
-or cnvtlower(oi.hna_order_mnemonic) in('*mycophenolate mofetil*')
-or cnvtlower(oi.hna_order_mnemonic) in('*efgartigimod alfa*')
-or cnvtlower(oi.hna_order_mnemonic) in('*prednisone*')
-or cnvtlower(oi.hna_order_mnemonic) in('*azathioprine*')
-or cnvtlower(oi.hna_order_mnemonic) in('*cyclosporine*')
-or cnvtlower(oi.hna_order_mnemonic) in('*cyclosporine ophthalmic*')
-or cnvtlower(oi.hna_order_mnemonic) in('*ravulizumab*')
-or cnvtlower(oi.hna_order_mnemonic) in('*sirolimus*')
-or cnvtlower(oi.hna_order_mnemonic) in('*sirolimus protein-bound*')
-or cnvtlower(oi.hna_order_mnemonic) in('*everolimus*')
-or cnvtlower(oi.hna_order_mnemonic) in('*insulin**')
-or cnvtlower(oi.hna_order_mnemonic) in('*buprenorphine*')
-or cnvtlower(oi.hna_order_mnemonic) in('*butorphanol*')
-or cnvtlower(oi.hna_order_mnemonic) in('*codeine-guaifenesin*')
-or cnvtlower(oi.hna_order_mnemonic) in('*fentanyl*')
-or cnvtlower(oi.hna_order_mnemonic) in('*gabapentin*')
-or cnvtlower(oi.hna_order_mnemonic) in('*hydrocodone-acetaminophen*')
-or cnvtlower(oi.hna_order_mnemonic) in('*hydromorphone*')
-or cnvtlower(oi.hna_order_mnemonic) in('*ketamine*')
-or cnvtlower(oi.hna_order_mnemonic) in('*meperidine*')
-or cnvtlower(oi.hna_order_mnemonic) in('*methadone*')
-or cnvtlower(oi.hna_order_mnemonic) in('*morphine*')
-or cnvtlower(oi.hna_order_mnemonic) in('*oxycodone*')
-or cnvtlower(oi.hna_order_mnemonic) in('*pregabalin*')
-or cnvtlower(oi.hna_order_mnemonic) in('*tramadol*')
-)
+  ,	CLINICAL_EVENT CE
+  , ORDER_INGREDIENT OI
+  , ORDERS O
+  , ORDER_CATALOG OC
+plan mae
+	where mae.beg_dt_tm between cnvtdatetime(START_DATETIME) and cnvtdatetime(END_DATETIME)
+ 	
+join ce
+	where ce.event_id = mae.event_id
+join enc
+	where enc.encntr_id = ce.encntr_id
+	and operator(enc.loc_facility_cd, OPR_FAC_VAR, $FACILITY_PMPT)
+	;and enc.encntr_id = 132104854
+join ea
+	where ea.encntr_id = enc.encntr_id
+	and ea.encntr_alias_type_cd = 1077
+	and ea.active_ind = 1
+	and ea.end_effective_dt_tm >= cnvtdatetime(curdate,curtime3) 
+join p
+	where p.person_id = mae.prsnl_id
+join o
+	where o.order_id = mae.order_id
+	and   o.prn_ind = 0
+join oi
+	where oi.order_id  = outerjoin(mae.order_id)
+join oc
+	where oc.catalog_cd = o.catalog_cd
+	
+	and (
+		   cnvtlower(oc.primary_mnemonic) in('*tacrolimus*')
+		or cnvtlower(oc.primary_mnemonic) in('*tacrolimus topical*')
+		or cnvtlower(oc.primary_mnemonic) in('*albumin human*')
+		or cnvtlower(oc.primary_mnemonic) in('*albumin aggregated*')
+		or cnvtlower(oc.primary_mnemonic) in('*pyridostigmine*')
+		or cnvtlower(oc.primary_mnemonic) in('*mycophenolate mofetil*')
+		or cnvtlower(oc.primary_mnemonic) in('*efgartigimod alfa*')
+		or cnvtlower(oc.primary_mnemonic) in('*prednisone*')
+		or cnvtlower(oc.primary_mnemonic) in('*azathioprine*')
+		or cnvtlower(oc.primary_mnemonic) in('*cyclosporine*')
+		or cnvtlower(oc.primary_mnemonic) in('*cyclosporine ophthalmic*')
+		or cnvtlower(oc.primary_mnemonic) in('*ravulizumab*')
+		or cnvtlower(oc.primary_mnemonic) in('*sirolimus*')
+		or cnvtlower(oc.primary_mnemonic) in('*sirolimus protein-bound*')
+		or cnvtlower(oc.primary_mnemonic) in('*everolimus*')
+		or cnvtlower(oc.primary_mnemonic) in('*insulin**')
+		or cnvtlower(oc.primary_mnemonic) in('*buprenorphine*')
+		or cnvtlower(oc.primary_mnemonic) in('*butorphanol*')
+		or cnvtlower(oc.primary_mnemonic) in('*codeine-guaifenesin*')
+		or cnvtlower(oc.primary_mnemonic) in('*fentanyl*')
+		or cnvtlower(oc.primary_mnemonic) in('*gabapentin*')
+		or cnvtlower(oc.primary_mnemonic) in('*hydrocodone-acetaminophen*')
+		or cnvtlower(oc.primary_mnemonic) in('*hydromorphone*')
+		or cnvtlower(oc.primary_mnemonic) in('*ketamine*')
+		or cnvtlower(oc.primary_mnemonic) in('*meperidine*')
+		or cnvtlower(oc.primary_mnemonic) in('*methadone*')
+		or cnvtlower(oc.primary_mnemonic) in('*morphine*')
+		or cnvtlower(oc.primary_mnemonic) in('*oxycodone*')
+		or cnvtlower(oc.primary_mnemonic) in('*pregabalin*')
+		or cnvtlower(oc.primary_mnemonic) in('*tramadol*')
+		)
+		
 with format(date,";;q"),uar_code(d,1),format,separator=" "
 
 end 
