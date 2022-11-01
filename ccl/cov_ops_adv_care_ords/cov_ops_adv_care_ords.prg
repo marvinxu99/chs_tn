@@ -73,6 +73,7 @@ record t_rec
 	1 cons
 	 2 run_dt_tm 	= dq8
 	 2 trigger		= vc
+	 2 trigger_cancel = vc
 	1 dates
 	 2 start_dt_tm	= dq8
 	 2 end_dt_tm	= dq8
@@ -111,19 +112,18 @@ endif
 
 set t_rec->cons.run_dt_tm 		= cnvtdatetime(curdate,curtime3)
 set t_rec->cons.trigger			= "COV_EE_ADD_DX_ORD"
+set t_rec->cons.trigger_cancel	= "COV_EE_CANCEL_ORD"
 
 call writeLog(build2("* END   Custom Section  ************************************"))
 call writeLog(build2("************************************************************"))
 
-
 call writeLog(build2("************************************************************"))
-call writeLog(build2("* START Finding Orders   *******************************************"))
+call writeLog(build2("* START Order Catalog Items *******************************************"))
 
 select
 into "nl:"
 from
 	 order_catalog oc
-	,orders o
 plan oc
 	where oc.description in(
 								 "Advance Care Planning Discussion and Documentation Declined 1124F"
@@ -131,13 +131,8 @@ plan oc
 								,"Hospice services received by patient during measurement period G9692"
 							)
 	and oc.active_ind = 1
-join o
-	where o.catalog_cd = oc.catalog_cd
-	and   o.order_status_cd in(value(uar_get_code_by("MEANING",6004,"ORDERED")))
-	and   o.active_ind = 1
 order by
 	 oc.catalog_cd
-	,o.order_id
 head report
 	null	
 head oc.catalog_cd
@@ -145,6 +140,32 @@ head oc.catalog_cd
 	stat = alterlist(t_rec->catalog_qual,t_rec->catalog_cnt)
 	t_rec->catalog_qual[t_rec->catalog_cnt].catalog_cd = oc.catalog_cd
 	t_rec->catalog_qual[t_rec->catalog_cnt].mnemonic = oc.description
+with nocounter
+
+call writeLog(build2("* END   Order Catalog Items ******************************"))
+call writeLog(build2("************************************************************"))
+
+call writeLog(build2("************************************************************"))
+call writeLog(build2("* START Finding Active Orders   *******************************************"))
+
+	
+select
+into "nl:"
+from
+	 (dummyt d1 with seq=t_rec->catalog_cnt)
+	,orders o
+	,order_catalog oc
+plan d1
+join oc
+	where oc.catalog_cd = t_rec->catalog_qual[d1.seq].catalog_cd
+join o
+	where o.catalog_cd = oc.catalog_cd
+	and   o.order_status_cd in(value(uar_get_code_by("MEANING",6004,"ORDERED")))
+	and   o.active_ind = 1
+order by
+	 o.order_id
+head report
+	null	
 head o.order_id	
 	t_rec->cnt += 1
 	stat = alterlist(t_rec->qual,t_rec->cnt)
@@ -155,8 +176,43 @@ foot report
 	null
 with nocounter
     
-call writeLog(build2("* END   Finding Orders   *******************************************"))
+call writeLog(build2("* END   Finding Active Orders   *******************************************"))
 call writeLog(build2("************************************************************"))
+
+
+
+call writeLog(build2("************************************************************"))
+call writeLog(build2("* START Finding Previous Orders   *******************************************"))
+
+	
+select
+into "nl:"
+from
+	 (dummyt d1 with seq=t_rec->cnt)
+	,orders o
+	,order_catalog oc
+plan d1
+join o
+	where o.person_id = t_rec->qual[d1.seq].person_id
+	and   o.order_status_cd in(value(uar_get_code_by("MEANING",6004,"COMPLETED")))
+	and   o.active_ind = 1
+	and   o.orig_order_dt_tm >= cnvtdatetime(datetimefind(cnvtdatetime(sysdate), 'Y', 'B', 'B'))
+join oc
+	where oc.catalog_cd = o.catalog_cd
+	and   expand(i,1,t_rec->catalog_cnt,oc.catalog_cd,t_rec->catalog_qual[i].catalog_cd)
+order by
+	d1.seq
+head report
+	null	
+head d1.seq
+	t_rec->qual[d1.seq].cancel_ind = 1
+foot report
+	null
+with nocounter
+    
+call writeLog(build2("* END   Finding Previous Orders   *******************************************"))
+call writeLog(build2("************************************************************"))
+
 
 call writeLog(build2("************************************************************"))
 call writeLog(build2("* START Finding Diagnosis   *******************************************"))
@@ -224,8 +280,7 @@ call get_patientname(null)
 
 
 call writeLog(build2("************************************************************"))
-call writeLog(build2("* START Building EKS Call   *******************************************"))
-
+call writeLog(build2("* START Building EKS Call to Complete   *******************************************"))
 
 select into "NL:"
 	e.encntr_id,
@@ -331,7 +386,70 @@ else
 	go to exit_script
 endif
 
-call writeLog(build2("* END   Building EKS Call   *******************************************"))
+call writeLog(build2("* END   Building EKS Call to Complete  *******************************************"))
+call writeLog(build2("************************************************************"))
+
+
+call writeLog(build2("************************************************************"))
+call writeLog(build2("* START Building EKS Call to Cancel   *******************************************"))
+
+select into "NL:"
+	e.encntr_id,
+	e.person_id,
+	e.reg_dt_tm,
+	p.birth_dt_tm,
+	p.sex_cd
+from
+	 person p
+	,encounter e
+	,(dummyt d1 with seq=t_rec->cnt)
+	,(dummyt d2)
+plan d1
+	where maxrec(d2,size(t_rec->qual[d1.seq].diag_qual,5))
+	and   t_rec->qual[d1.seq].cancel_ind = 1
+join d2
+join e 
+	where e.encntr_id = t_rec->qual[d1.seq].encntr_id
+join p 
+	where p.person_id= e.person_id
+head report
+	cnt = 0
+	EKSOPSRequest->expert_trigger = t_rec->cons.trigger_cancel
+detail
+	cnt = cnt +1
+	stat = alterlist(EKSOPSRequest->qual, cnt)
+	EKSOPSRequest->qual[cnt].person_id = p.person_id
+	EKSOPSRequest->qual[cnt].sex_cd  = p.sex_cd
+	EKSOPSRequest->qual[cnt].birth_dt_tm  = p.birth_dt_tm
+	EKSOPSRequest->qual[cnt].encntr_id  = e.encntr_id
+	stat = alterlist(EKSOPSRequest->qual[cnt].data,2)
+	EKSOPSRequest->qual[cnt].data[1].double_var = t_rec->qual[d1.seq].order_id
+	EKSOPSRequest->qual[cnt].data[2].double_var = t_rec->qual[d1.seq].diag_qual[d2.seq].nomenclature_id
+		call writeLog(build2("---->EKSOPSRequest->qual[",trim(cnvtstring(cnt)),"].person_id=",
+			trim(cnvtstring(EKSOPSRequest->qual[cnt].person_id))))
+		call writeLog(build2("---->EKSOPSRequest->qual[",trim(cnvtstring(cnt)),"].encntr_id=",
+			trim(cnvtstring(EKSOPSRequest->qual[cnt].encntr_id))))
+		call writeLog(build2("---->EKSOPSRequest->qual[",trim(cnvtstring(cnt)),"].data[1].double_var=",
+			trim(cnvtstring(EKSOPSRequest->qual[cnt].data[1].double_var))))
+		call writeLog(build2("---->EKSOPSRequest->qual[",trim(cnvtstring(cnt)),"].data[2].double_var=",
+			trim(cnvtstring(EKSOPSRequest->qual[cnt].data[2].double_var))))
+with nocounter
+
+call echorecord(EKSOPSRequest)
+
+if (size(EKSOPSRequest->qual,5) > 0)
+
+	set dparam = 0
+	if (t_rec->audit_mode != 1)
+		call writeLog(build2("------>CALLING srvRequest"))
+		call srvRequest(dparam)
+	endif
+else
+	set reply->status_data.status = "Z"
+	go to exit_script
+endif
+
+call writeLog(build2("* END   Building EKS Call to Cancel  *******************************************"))
 call writeLog(build2("************************************************************"))
 
 /*
