@@ -1,5 +1,4 @@
 set debug_ind = 1 go
-execute cov_std_ce_routines go
 execute cov_discern_alert_routines go
 
 declare pEncntrID = f8 with noconstant(0) go
@@ -17,8 +16,15 @@ detail
 with nocounter go
 	
 	
-call echo(build2("sAddCovDiscernAlert=",sAddCovDiscernAlert(pEncntrID,0.0,"Power of Attorney","Needs to be reviewed"))) go
+;call echo(build2("sAddCovDiscernAlert=",sAddCovDiscernAlert(pEncntrID,0.0,"Patient Custody","Needs to be reviewed again"))) go
+;call echo(build2("sAddCovDiscernAlert=",sAddCovDiscernAlert(pEncntrID,0.0,"Power of Attorney","First Alert"))) go
+;call echo(build2("sGetCovDiscernAlert=",sGetCovDiscernAlert(pEncntrID,0.0,"Patient Custody"))) go
 
+
+call echo(build2("sGetCovDiscernAlertCode=",sGetCovDiscernAlertCode(null))) go
+call echo(build2("sGetAllPatientDiscernAlert=",sGetAllPatientDiscernAlert(pEncntrID))) go
+set stat = cnvtjsontorec(sGetAllDiscernAlerts(null)) go
+call echorecord(discern_alerts) go
 /*
 select ce.event_cd,ce.result_val,ce.event_end_dt_tm,clr.result_cd,clr.descriptor,clr.nomenclature_id,clr.* from
 clinical_event ce,ce_coded_result clr
