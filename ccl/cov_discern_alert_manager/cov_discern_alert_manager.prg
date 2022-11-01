@@ -129,13 +129,41 @@ if (t_rec->prompts.rpt_audits > " ")
 	
 		if (t_rec->prompts.encntr_id > 0.0)
 		
-			set stat = 0
+			select into t_rec->prompts.outdev
+			from
+				dummyt d1
+			plan d1
+			head report
+				col 0 "<html><body>"
+				row +1
+				col 0 "<font size=-1 family=arial>"
+				row +1
+				col 0 "Patient Audit"
+				row +1
+				col 0 "<br><br>"
+				row +1
+				col 0 "</body></html>"
+			with nocounter,maxcol=32000
 		
 		endif
 	
 	elseif (t_rec->prompts.rpt_audits = "ACTIVE")
 	
-		set stat = 0
+		select into t_rec->prompts.outdev
+			from
+				dummyt d1
+			plan d1
+			head report
+				col 0 "<html><body>"
+				row +1
+				col 0 "<font size=-1 family=arial>"
+				row +1
+				col 0 "System Audit"
+				row +1
+				col 0 "<br><br>"
+				row +1
+				col 0 "</body></html>"
+			with nocounter,maxcol=32000
 	
 	endif
 
