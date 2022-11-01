@@ -33,3 +33,9 @@ call echo(build2("sGetFullDTAInfo=",sGetFullDTAInfo("D-Covenant Discern Alert"))
 call echo(build2("sGetNomenIDforDTAReponse=",sGetNomenIDforDTAReponse("D-Covenant Discern Alert","Power of Attorney"))) go
 
 
+set stat = cnvtjsontorec(sGetFullDTAInfo("D-Covenant Discern Alert")) go
+call echorecord(dta_reply) go
+
+;call echo(build2("Remove_CEResult=",Remove_CEResult(3654666806.00))) go
+
+
