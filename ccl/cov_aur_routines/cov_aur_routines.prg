@@ -190,6 +190,8 @@ subroutine OpenPage(sFile,sOutdev)
 	return ( 1 )
 end ; subroutine OpenPage()
 
+subroutine sGetNSHNMedications(null) = vc with copy,persist
+
 call echo(build2("finishing ",trim(cnvtlower(curprog))))
  
 end go
