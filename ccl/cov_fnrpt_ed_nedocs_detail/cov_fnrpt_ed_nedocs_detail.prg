@@ -1767,4 +1767,6 @@ with OUTDEV, repName, trackGroupCd, startDate, endDate
  ENDIF
  CALL finalizereport (_sendto )
  call echorecord(output_data)
+ ;call echorecord(rnedocs)
+; set _memory_reply_string = cnvtrectojson(rnedocs)
 END GO
