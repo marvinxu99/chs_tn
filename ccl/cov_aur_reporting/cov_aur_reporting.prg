@@ -133,21 +133,36 @@ call writeLog(build2("**********************************************************
 call writeLog(build2("* START Custom   *******************************************"))
 
 
+;get list of medications
+free record medication_list
+record medication_list
+(
+	1 cnt = i4
+	1 qual[*]
+	 2 v =  vc
+)
+
+;get list of routes
+;get list of locations
+;get list of admins
+
+;get denominator
+
 ;create output_data
 set output_data->cnt = 1
 set stat = alterlist(output_data->qual,output_data->cnt)
-set output_data->qual[output_data->cnt].FacilityID = ^Sample Data^
-set output_data->qual[output_data->cnt].WardID = ^Sample Data^
-set output_data->qual[output_data->cnt].NHSNLocationTypeCode = ^Sample Data^
-set output_data->qual[output_data->cnt].SummaryYYYYMM = ^Sample Data^
-set output_data->qual[output_data->cnt].AdmissionsForMonth = ^Sample Data^
-set output_data->qual[output_data->cnt].NumberOfDaysPresentForMonth = ^Sample Data^
-set output_data->qual[output_data->cnt].NHSNDrugIngredientCode = ^Sample Data^
-set output_data->qual[output_data->cnt].AUDaysAllRoute = ^Sample Data^
-set output_data->qual[output_data->cnt].AUDaysIMRoute = ^Sample Data^
-set output_data->qual[output_data->cnt].AUDaysIVRoute = ^Sample Data^
-set output_data->qual[output_data->cnt].AUDaysDigestiveRoute = ^Sample Data^
-set output_data->qual[output_data->cnt].AUDaysRespiratoryRoute = ^Sample Data^
+set output_data->qual[output_data->cnt].FacilityID = ^1^
+set output_data->qual[output_data->cnt].WardID = ^1^
+set output_data->qual[output_data->cnt].NHSNLocationTypeCode = ^1072-8^
+set output_data->qual[output_data->cnt].SummaryYYYYMM = ^202210^
+set output_data->qual[output_data->cnt].AdmissionsForMonth = ^NULL^
+set output_data->qual[output_data->cnt].NumberOfDaysPresentForMonth = ^100^
+set output_data->qual[output_data->cnt].NHSNDrugIngredientCode = ^10207^
+set output_data->qual[output_data->cnt].AUDaysAllRoute = ^5^
+set output_data->qual[output_data->cnt].AUDaysIMRoute = ^2^
+set output_data->qual[output_data->cnt].AUDaysIVRoute = ^1^
+set output_data->qual[output_data->cnt].AUDaysDigestiveRoute = ^2^
+set output_data->qual[output_data->cnt].AUDaysRespiratoryRoute = ^0^
 
 set output_data->file_cnt += 1
 set stat = alterlist(output_data->file_qual,output_data->file_cnt)
@@ -177,6 +192,39 @@ if (t_rec->prompts.csv = 0)
 elseif (t_rec->prompts.csv = 1)
 
 	select into t_rec->prompts.outdev
+	detail
+	
+		col 0 	^FacilityID^, 					^,^,
+				^WardID^, 						^,^,
+				^NHSNLocationTypeCode^, 		^,^,
+				^SummaryYYYYMM^, 				^,^,
+				^AdmissionsForMonth^, 			^,^,
+				^NumberOfDaysPresentForMonth^, 	^,^,
+				^NHSNDrugIngredientCode^, 		^,^,
+				^AUDaysAllRoute^, 				^,^,
+				^AUDaysIMRoute^, 				^,^,
+				^AUDaysIVRoute^, 				^,^,
+				^AUDaysDigestiveRoute^, 		^,^,
+				^AUDaysRespiratoryRoute^
+		for (i=1 to output_data->cnt)
+			row +1
+			col 0  	output_data->qual[i].FacilityID, ^,^,
+					output_data->qual[i].WardID, ^,^,
+					output_data->qual[i].NHSNLocationTypeCode, ^,^,
+					output_data->qual[i].SummaryYYYYMM, ^,^,
+					output_data->qual[i].AdmissionsForMonth, ^,^,
+					output_data->qual[i].NumberOfDaysPresentForMonth, ^,^,
+					output_data->qual[i].NHSNDrugIngredientCode, ^,^,
+					output_data->qual[i].AUDaysAllRoute, ^,^,
+					output_data->qual[i].AUDaysIMRoute, ^,^,
+					output_data->qual[i].AUDaysIVRoute, ^,^,
+					output_data->qual[i].AUDaysDigestiveRoute, ^,^,
+					output_data->qual[i].AUDaysRespiratoryRoute		
+		endfor
+	with format = variable, noheading, formfeed = none , maxrow = 1, maxcol = 30000
+
+/*
+	select into t_rec->prompts.outdev
 		 FacilityID = output_data->qual[d1.seq].FacilityID
 		,WardID = output_data->qual[d1.seq].WardID
 		,NHSNLoc = output_data->qual[d1.seq].NHSNLocationTypeCode
@@ -192,6 +240,7 @@ elseif (t_rec->prompts.csv = 1)
 	from
 		(dummyt d1 with seq=output_data->cnt)
 	with nocounter,format,separator=" "
+*/
 
 elseif (t_rec->prompts.csv = 2)
 
