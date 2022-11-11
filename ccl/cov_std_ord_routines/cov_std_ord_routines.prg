@@ -1025,6 +1025,41 @@ subroutine CallProcServer(null)
 	return (vNewOrderID)
 end ;CallOrderServer
 
+
+declare GetOrderSynonymByID(vSynonymID=f8) = vc with copy, persist
+subroutine GetOrderSynonymByID(vSynonymID)
+	declare vReturnSynonym = vc with noconstant(""), protect
+ 
+	select into "nl:"
+	from
+		order_catalog_synonym ocs
+	plan ocs
+		where ocs.synonym_id = vSynonymID
+	detail
+		vReturnSynonym = ocs.mnemonic
+	with nocounter
+ 
+	return (vReturnSynonym)
+end ;GetOrderSynonymbyID
+
+declare GetOrderMnemonicByCode(vCatalogCd=f8) = vc with copy, persist
+subroutine GetOrderMnemonicByCode(vCatalogCd)
+	declare vReturnSynonym = vc with noconstant(""), protect
+ 
+	select into "nl:"
+	from
+		order_catalog oc
+	plan oc
+		where oc.catalog_cd = vCatalogCd
+	detail
+		vReturnSynonym = oc.primary_mnemonic
+	with nocounter
+ 
+	return (vReturnSynonym)
+end ;GetOrderMnemonicByCode
+
+
+
 call echo(build2("finishing ",trim(cnvtlower(curprog))))
  
 end go

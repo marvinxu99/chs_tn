@@ -327,11 +327,13 @@ subroutine  GetTemplateByAlias (vTemplateAlias)
   	declare tdx = i4 with private ,noconstant(0)
   	
   	for (i = 1 to size(eksdata->tqual,5))
+  	 if (i = 3) ;only look at logic templates
   		for (j=1 to size(eksdata->tqual[i].qual,5))
   			if (eksdata->tqual[i].qual[j].template_alias = vTemplateAlias)
   				set ndx = j
   			endif
   		endfor
+  	 endif
   	endfor
 	call SubroutineLog(build2('exit GetTemplateByAlias(',vTemplateAlias,')'
   						," Elapsed time in seconds:"
