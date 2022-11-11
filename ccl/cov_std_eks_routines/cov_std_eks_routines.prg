@@ -310,6 +310,36 @@ subroutine  sCallEKSOPSRequest(null)
 	return (vReturnValue)
 end
 
+
+/**********************************************************************************************************************
+** Function GetTemplateByAlias(vTemplateAlias)
+** ---------------------------------------------------------------------------------------
+** Get the index number of the template vTemplateAlias
+**********************************************************************************************************************/
+declare GetTemplateByAlias(vTemplateAlias=vc) = i4 with copy, persist
+subroutine  GetTemplateByAlias (vTemplateAlias)
+	call SubroutineLog(build2('start GetTemplateByAlias(',vTemplateAlias,')'))	
+  	
+  	declare dqbegin_date_time = dq8 with private ,constant (cnvtdatetime (curdate ,curtime3 ) )
+  	declare i = i4 with private, noconstant(0)
+  	declare j = i4 with private, noconstant(0)
+  	declare ndx = i4 with private ,noconstant(0)
+  	declare tdx = i4 with private ,noconstant(0)
+  	
+  	for (i = 1 to size(eksdata->tqual,5))
+  		for (j=1 to size(eksdata->tqual[i].qual,5))
+  			if (eksdata->tqual[i].qual[j].template_alias = vTemplateAlias)
+  				set ndx = j
+  			endif
+  		endfor
+  	endfor
+	call SubroutineLog(build2('exit GetTemplateByAlias(',vTemplateAlias,')'
+  						," Elapsed time in seconds:"
+    					,datetimediff(cnvtdatetime(curdate,curtime3),dqbegin_date_time,5)
+    					))
+  	return (ndx )
+end ;GetBldMsgIndex
+
 call echo(build2("finishing ",trim(cnvtlower(curprog))))
  
 end go
