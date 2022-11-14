@@ -72,6 +72,7 @@ CREATE PROGRAM cov_rule_current_ega2
  EXECUTE dcp_get_final_ega WITH replace ("REQUEST" ,dcp_request ) ,
  replace ("REPLY" ,dcp_reply )
  SET modify = nopredeclare
+ call echorecord(dcp_reply)
  IF ((dcp_reply->status_data.status = "F" ) )
   SET xreply->status_data.status = "F"
   SET xreply->subeventstatus[1 ].operationname = "Execute"
@@ -97,13 +98,67 @@ CREATE PROGRAM cov_rule_current_ega2
   GO TO no_data
  ENDIF
  CALL echo (build ("delivered_ind :" ,dcp_reply->gestation_info[1 ].delivered_ind ) )
+
+/*
+    nEGAWeeks = ega_days / 7
+    nEGADays = mod(ega_days, 7)
+    if (nEGAWeeks = 1)
+        cEGA = "1 week"
+    elseif (nEGAWeeks > 1)
+        cEGA = concat(build(nEGAWeeks), " weeks")
+    endif
+ 
+    if (trim(cEGA) != "")
+        cEGA = concat(trim(cEGA), ",")
+    endif
+ 
+    if (nEGADays = 1)
+        cEGA = concat(trim(cEGA), " 1 day")
+    elseif (nEGADays > 1 or nEGADays = 0)
+        cEGA = concat(trim(cEGA), " ", build(nEGADays), " days")
+    endif
+*/
+
+
+declare nNum = i4 with protect, noconstant(0)
+declare cEGA = vc with protect, noconstant(" ")
+declare cContent = vc with protect, noconstant("")
+ 
+
  IF ((dcp_reply->gestation_info[1 ].delivered_ind > 0 ) )
-  SET log_misc1 = trim (cnvtstring ((dcp_reply->gestation_info[1 ].gest_age_at_delivery / 7 ) ) )
+  ;SET log_misc1 = trim (cnvtstring ((dcp_reply->gestation_info[1 ].gest_age_at_delivery / 7 ) ) )
   SET retval = 100
+  set ega_days = dcp_reply->gestation_info[1 ].gest_age_at_delivery
  ELSE
-  SET log_misc1 = trim (cnvtstring ((dcp_reply->gestation_info[1 ].current_gest_age / 7 ) ) )
+  ;SET log_misc1 = trim (cnvtstring ((dcp_reply->gestation_info[1 ].current_gest_age / 7 ) ) )
   SET retval = 100
+  set ega_days = dcp_reply->gestation_info[1 ].current_gest_age
  ENDIF
+ 
+set nEGAWeeks = ega_days / 7
+set nEGADays = mod(ega_days, 7)
+if (nEGAWeeks = 1)
+	set cEGA = "1 week"
+elseif (nEGAWeeks > 1)
+	set cEGA = concat(build(nEGAWeeks), " weeks")
+endif
+ 
+if (trim(cEGA) != "")
+	set cEGA = concat(trim(cEGA), ",")
+endif
+ 
+if (nEGADays = 1)
+	set cEGA = concat(trim(cEGA), " 1 day")
+elseif (nEGADays > 1 or nEGADays = 0)
+	set cEGA = concat(trim(cEGA), " ", build(nEGADays), " days")
+endif
+
+call echo(build2("nEGAWeeks=",nEGAWeeks))
+call echo(build2("nEGADays=",nEGADays))
+call echo(build2("cEGA=",cEGA))
+
+SET log_misc1 = trim (cEGA) 
+ 
  SUBROUTINE  errorhandler (operationstatus ,targetobjectname ,targetobjectvalue )
   SET error_cnt = size (xreply->status_data.subeventstatus ,5 )
   SET error_cnt = (error_cnt + 1 )
