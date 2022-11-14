@@ -1,5 +1,12 @@
 drop program cov_test_oru_out go
 create program cov_test_oru_out
+
+prompt 
+	"Output to File/Printer/MINE" = "MINE"   ;* Enter or select the printer or file name to send this report to.
+	, "EVENT_ID" = 0 
+
+with OUTDEV, EVENT_ID
+
  
 execute srvrtl
  
@@ -74,8 +81,8 @@ select into "NL:"
 from clinical_event ce
  
 plan ce
-    where ce.event_id =   	 4841564766.00
- ;4841564768.00
+    where ce.event_id =  $EVENT_ID 
+
  
       and ce.valid_until_dt_tm = cnvtdatetime("31-DEC-2100 00:00:00.00")
  
