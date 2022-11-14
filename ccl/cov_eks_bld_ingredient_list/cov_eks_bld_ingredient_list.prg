@@ -162,11 +162,15 @@ endfor
 
 for (i=1 to t_rec->label_cnt)
 	for (j=1 to t_rec->label_qual[i].order_cnt)
-		for (ii=1 to t_rec->label_qual[i].order_qual[j].ingred_cnt)
-			if (t_rec->label_qual[i].order_qual[j].ingredient = t_rec->label_qual[i].order_qual[j].inged_qual[ii].location)
-				set stat = SetBldMsg(t_rec->label_qual[i].msg_label,t_rec->label_qual[i].order_qual[j].inged_qual[ii].mnemonic)
-			endif
-		endfor
+		if (t_rec->label_qual[i].order_qual[j].ingred_cnt > 0)
+			for (ii=1 to t_rec->label_qual[i].order_qual[j].ingred_cnt)
+				if (t_rec->label_qual[i].order_qual[j].ingredient = t_rec->label_qual[i].order_qual[j].inged_qual[ii].location)
+					set stat = SetBldMsg(t_rec->label_qual[i].msg_label,t_rec->label_qual[i].order_qual[j].inged_qual[ii].mnemonic)
+				endif
+			endfor
+		else
+			set stat = SetBldMsg(t_rec->label_qual[i].msg_label,t_rec->label_qual[i].order_qual[j].mnemonic)
+		endif
 	endfor
 endfor
 
@@ -184,7 +188,7 @@ else
 endif
 
 set t_rec->log_message = concat(
-										trim(t_rec->log_message),";",
+										trim(cnvtrectojson(t_rec)),";",
 										trim(cnvtupper(t_rec->return_value)),":",
 										trim(cnvtstring(t_rec->patient.person_id)),"|",
 										trim(cnvtstring(t_rec->patient.encntr_id)),"|"
