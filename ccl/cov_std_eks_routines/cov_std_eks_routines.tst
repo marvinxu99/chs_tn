@@ -48,9 +48,10 @@ detail
 	pPersonID = e.person_id
 with nocounter go
 
+
 set stat = sPopulateEKSOPSRequest(pEncntrID,1) go
 set stat = sAddEKSOPSRequestData("test value") go
-set stat = sCallEKSOPSRequest(null) go
+;set stat = sCallEKSOPSRequest(null) go
 
 call echorecord(EKSOPSREQUEST) go
 
