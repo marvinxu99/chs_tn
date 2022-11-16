@@ -17,7 +17,7 @@ set trigger_personid = sGetPersonID_ByFIN(FIN) go
 set link_personid = trigger_personid go
 set link_encntrid = trigger_encntrid go
 
-call echo(build2("trigger_personid=",encntr_id)) go
-call echo(build2("trigger_encntrid=",person_id)) go
+call echo(build2("trigger_personid=",trigger_encntrid)) go
+call echo(build2("trigger_encntrid=",trigger_personid)) go
 
 execute cov_eks_template go
