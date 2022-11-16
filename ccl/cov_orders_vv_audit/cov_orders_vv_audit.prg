@@ -34,6 +34,7 @@ prompt
 
 with OUTDEV, FACILITY_PMPT
 
+execute cov_std_log_routines
 
 call echo(build("loading script:",curprog))
 set nologvar = 0	;do not create log = 1		, create log = 0
@@ -68,6 +69,9 @@ record t_rec
 	 2 outdev		= vc
 	 2 start_dt_tm	= vc
 	 2 end_dt_tm	= vc
+	 2 sel_fac = i2
+	 2 sel_fac_qual[*]
+	  3 location_cd = f8
 	1 files
 	 2 records_attachment		= vc
 	1 dminfo
@@ -79,11 +83,13 @@ record t_rec
 	 2 start_dt_tm	= dq8
 	 2 end_dt_tm	= dq8
 	1 qual[*]
-	 2 person_id	= f8
-	 2 encntr_id	= f8
-	 2 mrn			= vc
-	 2 fin			= vc
-	 2 name_full_formatted = vc
+	 2 synonym_id	= f8
+	 2 virtual_viewed = vc
+	 2 fac_cnt = i4
+	 2 fac_qual[*]
+	  3 facility_cd = f8
+	  3 facility = vc
+	  3 selected = i4
 )
 
 ;call addEmailLog("chad.cummings@covhlth.com")
@@ -96,14 +102,16 @@ set t_rec->dates.start_dt_tm = cnvtdatetime(curdate,curtime3)
 
 set t_rec->cons.run_dt_tm 		= cnvtdatetime(curdate,curtime3)
 
-; SET FACILITY PROMPT VARIABLE
-if(substring(1,1,reflect(parameter(parameter2($FACILITY_PMPT),0))) = "L")		;multiple values were selected
-	set OPR_FAC_VAR = "in"
-elseif(parameter(parameter2($FACILITY_PMPT),1)= 1.00)							;all (any) values were selected
-	set OPR_FAC_VAR = "!="
-else																			;a single value was selected
-	set OPR_FAC_VAR = "="
-endif
+select into "nl:"
+from
+	code_value cv 
+plan cv
+	where cv.code_value = $FACILITY_PMPT
+detail
+	t_rec->prompts.sel_fac += 1
+	stat = alterlist(t_rec->prompts.sel_fac_qual,t_rec->prompts.sel_fac)
+	t_rec->prompts.sel_fac_qual[t_rec->prompts.sel_fac].location_cd = cv.code_value
+with nocounter
 
 call writeLog(build2("* END   Custom Section  ************************************"))
 call writeLog(build2("************************************************************"))
@@ -112,23 +120,73 @@ call writeLog(build2("**********************************************************
 call writeLog(build2("************************************************************"))
 call writeLog(build2("* START Custom   *******************************************"))
 
-select into t_rec->prompts.outdev
+select into "nl:"
 	 o.catalog_type_cd
-	,o.catalog_cd
-	,f.facility_cd
+	,o.description
+	,o.primary_mnemonic
+	,synonym=ocs.mnemonic
+	,facility=uar_get_code_display(f.facility_cd)
 from
      order_catalog o,
      order_catalog_synonym ocs,
-     ocs_facility_r f
+     ocs_facility_r f,
+     (dummyt d1)
 plan o 
 	where o.active_ind = 1
+	;and o.catalog_type_cd =        2511.00
 join ocs 
 	where ocs.catalog_cd = o.catalog_cd
     and ocs.active_ind = 1
+join d1
 join f 
 	where f.synonym_id = ocs.synonym_id
-	and operator(f.facility_cd, OPR_FAC_VAR, $FACILITY_PMPT)
-with format(date,";;q"),uar_code(d,1),time=60,format,seperator=" "
+order by
+	 ocs.synonym_id
+	,facility
+head report
+	i=0
+	j=0
+	flag=0
+head ocs.synonym_id
+	j=0
+	i += 1
+	stat = alterlist(t_rec->qual,i)
+	t_rec->qual[i].synonym_id = ocs.synonym_id
+head facility
+	j += 1
+	stat = alterlist(t_rec->qual[i].fac_qual,j)
+	if (f.facility_cd = 0)
+		t_rec->qual[i].fac_qual[j].facility_cd = 0.0
+		t_rec->qual[i].fac_qual[j].facility = "<All facilities included>"
+		t_rec->qual[i].fac_qual[j].selected = 1
+	else
+	t_rec->qual[i].fac_qual[j].facility_cd = f.facility_cd
+	t_rec->qual[i].fac_qual[j].facility = uar_get_code_display(f.facility_cd)
+	t_rec->qual[i].fac_qual[j].selected = 
+		locateval(k,1,t_rec->prompts.sel_fac,f.facility_cd,t_rec->prompts.sel_fac_qual[k].location_cd)
+	endif
+foot ocs.synonym_id
+	t_rec->qual[i].fac_cnt = j
+	
+	call SubroutineLog(build("->i=",i))
+	call SubroutineLog(build("starting to review ",o.primary_mnemonic," (",ocs.mnemonic,") ",ocs.synonym_id))
+	call SubroutineLog(build("->fac_cnt=",t_rec->qual[i].fac_cnt))
+	
+	flag = 0
+	for (k=1 to t_rec->qual[i].fac_cnt)
+	 if (t_rec->qual[i].fac_qual[k].selected > 0)
+		if (flag > 0)
+			t_rec->qual[i].virtual_viewed = concat(t_rec->qual[i].virtual_viewed,";")
+		endif
+		t_rec->qual[i].virtual_viewed = concat(t_rec->qual[i].virtual_viewed,t_rec->qual[i].fac_qual[k].facility)
+		flag = 1
+		call SubroutineLog(build("-->adding=",t_rec->qual[i].fac_qual[k].facility))
+	 endif
+	endfor
+	
+foot report
+	t_rec->cnt = i
+with format(date,";;q"),uar_code(d,1),format,separator=" ",outerjoin=d1
 
 
 call writeLog(build2("* END   Custom   *******************************************"))
@@ -137,6 +195,30 @@ call writeLog(build2("**********************************************************
 
 call writeLog(build2("************************************************************"))
 call writeLog(build2("* START Custom   *******************************************"))
+
+select into t_rec->prompts.outdev
+	 oc.catalog_type_cd
+	,oc.description
+	,oc.primary_mnemonic
+	,ocs.mnemonic
+	,hidden=if(ocs.hide_flag = 1) "Yes" endif
+	,virtual_views = substring(1,100,t_rec->qual[d1.seq].virtual_viewed)
+	,synonym_id = ocs.synonym_id
+	
+from
+	 (dummyt d1 with seq=t_rec->cnt)
+	,order_catalog_synonym ocs
+	,order_catalog oc
+plan d1
+join ocs
+	where ocs.synonym_id = t_rec->qual[d1.seq].synonym_id
+join oc
+	where oc.catalog_cd = ocs.catalog_cd
+order by
+	 oc.catalog_type_cd
+	,oc.description
+with format(date,";;q"),uar_code(d,1),format,separator=" "
+
 call writeLog(build2("* END   Custom   *******************************************"))
 call writeLog(build2("************************************************************"))
 
