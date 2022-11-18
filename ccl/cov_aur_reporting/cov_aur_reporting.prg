@@ -134,18 +134,20 @@ call writeLog(build2("* START Custom   *****************************************
 
 
 ;get list of medications
-free record medication_list
-record medication_list
-(
-	1 cnt = i4
-	1 qual[*]
-	 2 v =  vc
-)
+set stat = cnvtjsontorec(sGetNSHNMedications(null))
+;call echorecord(medication_list)
 
 ;get list of routes
-;get list of locations
-;get list of admins
+set stat = cnvtjsontorec(sGetNSHNRoutes(null))
+;call echorecord(route_list)
 
+;get list of locations
+set stat = cnvtjsontorec(sGetNSHNLocations(null))
+;call echorecord(location_list)
+
+;get list of admins
+set stat = cnvtjsontorec(sGetMedAdmins(null))
+call echorecord(admin_list)
 ;get denominator
 
 ;create output_data

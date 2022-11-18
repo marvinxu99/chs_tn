@@ -45,7 +45,6 @@ declare k=i4 with noconstant(0), protect
 
 declare BuildParams  (null) = i2 with copy, persist
 subroutine BuildParams(null)
-subroutine BuildParams(null)
 		call echo("Starting BuildParams.....")
 		declare iCnt  = i4  with protect, noconstant(0)
 		declare sTemp = vc  with protect
@@ -122,8 +121,8 @@ subroutine BuildParams(null)
 		call echo("Ending BuildParams.....")
 		call echo(build("sTemp...",sTemp,"...ENDsTemp"))
 		return ( 1 )
-	end ; subroutine BuildParams
-end
+end ; subroutine BuildParams
+
 
 
 declare OpenPage(sFile = vc,sOutdev = vc) = i2 with copy, persist
@@ -190,7 +189,187 @@ subroutine OpenPage(sFile,sOutdev)
 	return ( 1 )
 end ; subroutine OpenPage()
 
-subroutine sGetNSHNMedications(null) = vc with copy,persist
+
+declare sGetNSHNMedications(null) = vc with copy,persist
+subroutine sGetNSHNMedications(null)
+
+	free record medication_list
+	record medication_list
+	(
+		1 cnt = i4
+		1 qual[*]
+		 2 nhsndrugingredientcode = vc
+		 2 nhsndrugingredientname = vc
+	)
+
+	select into "nl:"
+	from
+		cust_au_nhsndrugingredcode an
+	plan an
+		where an.nhsndrugingredientcodesystem = "ANTIBIOTICS"
+	order by
+		an.nhsndrugingredientname
+	detail
+		medication_list->cnt += 1
+		stat = alterlist(medication_list->qual,medication_list->cnt)
+		medication_list->qual[medication_list->cnt].nhsndrugingredientcode	= an.nhsndrugingredientcode
+		medication_list->qual[medication_list->cnt].nhsndrugingredientname = an.nhsndrugingredientname
+	with nocounter
+	
+	return (cnvtrectojson(medication_list))
+
+end
+
+
+declare sGetNSHNRoutes(null) = vc with copy,persist
+subroutine sGetNSHNRoutes(null)
+
+	free record route_list
+	record route_list
+	(
+		1 cnt = i4
+		1 qual[*]
+		 2 medicationformcode = vc
+		 2 medicationroutecode = vc
+		 2 nhsnmedicationroutecode = vc
+		 2 nhsnmedicationroutename= vc
+	)
+
+	select into "nl:"
+	from
+		cust_au_routeofadminmapping ar
+	plan ar
+		where ar.nhsnmedicationroutecode != "0"
+	order by
+		ar.medicationroutecode
+	detail
+		route_list->cnt += 1
+		stat = alterlist(route_list->qual,route_list->cnt)
+		route_list->qual[route_list->cnt].medicationformcode		= ar.medicationformcode
+		route_list->qual[route_list->cnt].medicationroutecode		= ar.medicationroutecode
+		route_list->qual[route_list->cnt].nhsnmedicationroutecode	= ar.nhsnmedicationroutecode
+		route_list->qual[route_list->cnt].nhsnmedicationroutename	= ar.nhsnmedicationroutename
+	with nocounter
+	
+	return (cnvtrectojson(route_list))
+
+end
+
+
+declare sGetNSHNLocations(null) = vc with copy,persist
+subroutine sGetNSHNLocations(null)
+
+	free record location_list
+	record location_list
+	(
+		1 cnt = i4
+		1 qual[*]
+		 2 nhsnlocationtypecode = vc
+		 2 nhsnlocationtypename = vc
+		 2 wardid = vc
+		 2 wardname = vc
+		 2 facilityname = vc
+		 2 facilityid = vc
+	)
+
+	select into "nl:"
+	from 
+		 cust_au_nhsnloctypecode an
+		,cust_au_adtwardmapping aa
+		,cust_au_dim_facility adf
+	plan an
+	join aa
+		where aa.nhsnlocationtypecode = an.nhsnlocationtypecode
+	join adf
+		where adf.facilityid = aa.facilityid
+	detail
+		location_list->cnt += 1
+		stat = alterlist(location_list->qual,location_list->cnt)
+		location_list->qual[location_list->cnt].facilityid				= adf.facilityid
+		location_list->qual[location_list->cnt].facilityname			= adf.facilityname
+		location_list->qual[location_list->cnt].nhsnlocationtypecode	= an.nhsnlocationtypecode
+		location_list->qual[location_list->cnt].nhsnlocationtypename	= an.nhsnlocationtypename
+		location_list->qual[location_list->cnt].wardid					= aa.wardid
+		location_list->qual[location_list->cnt].wardname				= aa.wardname
+	with nocounter
+	
+	return (cnvtrectojson(location_list
+	))
+
+end
+
+
+
+declare sGetMedAdmins(null) = vc with copy,persist
+subroutine sGetMedAdmins(null)
+
+	free record admin_list
+	record admin_list
+	(
+		1 cnt = i4
+		1 qual[*]
+		 2 medicationadministrationid = f8
+		 2 facilityid = vc
+		 2 wardid = vc
+		 2 localdrugingredientname = vc
+		 2 nhsndrugingredientcode = vc
+		 2 nhsnmedicationroutecode = vc
+		 2 nhsnmedicationroutename = vc
+		 2 administrationstatuscode = vc
+		 2 administrationdatetime = vc
+		 2 administrationdate = vc
+		 2 wardname = vc
+		 2 nhsnlocationtypecode = vc
+		 2 nhsnlocationtypename = vc
+	)
+
+	select into "nl:"
+	from 
+		 cust_au_medadmin am
+		,cust_au_dim_facility adf
+		,cust_au_localdrugingredcode al
+		,cust_au_drugingredmapping ad
+		,cust_au_routeofadminmapping ar
+		,cust_au_nhsndrugingredcode an
+		,cust_au_adtwardmapping aa
+		,cust_au_nhsnloctypecode an2
+	plan am
+	join adf
+		where adf.facilityid = am.facilityid
+	join al
+		where al.localdrugingredientcode = am.localdrugingredientcode
+	join ad
+		where ad.localdrugingredientcode = am.localdrugingredientcode
+	join ar
+		where ar.medicationformcode = am.medicationformcode
+	join an
+		where an.nhsndrugingredientcode = ad.nhsndrugingredientcode
+	join aa
+		where aa.facilityid = am.facilityid
+		and   aa.wardid = am.wardid
+	join an2
+		where an2.nhsnlocationtypecode = aa.nhsnlocationtypecode
+	detail
+		admin_list->cnt += 1
+		stat = alterlist(admin_list->qual,admin_list->cnt)
+		admin_list->qual[admin_list->cnt].medicationadministrationid	= am.medicationadministrationid
+		admin_list->qual[admin_list->cnt].facilityid					= am.facilityid
+		admin_list->qual[admin_list->cnt].wardid						= am.wardid
+		admin_list->qual[admin_list->cnt].localdrugingredientname		= al.localdrugingredientname
+		admin_list->qual[admin_list->cnt].nhsndrugingredientcode		= ad.nhsndrugingredientcode
+		admin_list->qual[admin_list->cnt].nhsnmedicationroutecode		= ar.nhsnmedicationroutecode
+		admin_list->qual[admin_list->cnt].nhsnmedicationroutename		= ar.nhsnmedicationroutename
+		admin_list->qual[admin_list->cnt].administrationstatuscode		= am.administrationstatuscode
+		admin_list->qual[admin_list->cnt].administrationdatetime		= am.administrationdatetime
+		admin_list->qual[admin_list->cnt].administrationdate			= am.administrationdate
+		admin_list->qual[admin_list->cnt].wardname						= aa.wardname
+		admin_list->qual[admin_list->cnt].nhsnlocationtypecode			= an2.nhsnlocationtypecode
+		admin_list->qual[admin_list->cnt].nhsnlocationtypename			= an2.nhsnlocationtypename
+	with nocounter
+	
+	return (cnvtrectojson(admin_list))
+
+end
 
 call echo(build2("finishing ",trim(cnvtlower(curprog))))
  
