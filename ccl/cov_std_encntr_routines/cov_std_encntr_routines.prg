@@ -106,6 +106,38 @@ subroutine sGetEncntrID_ByFIN(vFIN)
 
 end
 
+/**********************************************************************************************************************
+** Function sGetPersonID_ByCMRN()
+** ---------------------------------------------------------------------------------------
+** Returns the encounter ID for the cMRN supplied
+**********************************************************************************************************************/
+declare sGetPersonID_ByCMRN(cMRN=vc) = f8  with copy, persist
+subroutine sGetPersonID_ByCMRN(cMRN)
+
+	declare vReturnPersonID = f8 with protect
+	
+	select into "nl:"
+	from
+		person_alias ea
+	plan ea
+		where ea.alias = cMRN
+		and   ea.person_id > 0.0
+		and   ea.active_ind = 1
+		and   ea.person_alias_type_cd = value(uar_get_code_by("MEANING",4,"CMRN"))
+		and   cnvtdatetime(curdate,curtime3) between ea.beg_effective_dt_tm and ea.end_effective_dt_tm
+	order by
+		 ea.person_id
+		,ea.beg_effective_dt_tm desc
+	head report
+		i = 0
+	head ea.person_id
+		vReturnPersonID = ea.person_id
+	with nocounter
+	
+	return (vReturnPersonID)
+
+end
+
 
 
 /**********************************************************************************************************************
