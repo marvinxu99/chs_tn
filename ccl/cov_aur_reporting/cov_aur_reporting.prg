@@ -32,9 +32,10 @@ prompt
 	"Output to File/Printer/MINE" = "MINE"
 	, "Report Type" = "AU"
 	, "File Location:" = "\\client\c$"
-	, "Output:" = 0 
+	, "Output:" = 0
+	, "Debug Reports" = "" 
 
-with OUTDEV, REPORT_TYPE, FILE, CSV
+with OUTDEV, REPORT_TYPE, FILE, CSV, DEBUG
 
 
 call echo(build("loading script:",curprog))
@@ -71,6 +72,7 @@ record t_rec
 	 2 report_type		= vc
 	 2 file				= vc
 	 2 csv				= i4
+	 2 debug			= vc
 	1 files
 	 2 records_attachment		= vc
 	1 dminfo
@@ -119,9 +121,14 @@ set t_rec->prompts.outdev = $OUTDEV
 set t_rec->prompts.report_type = $REPORT_TYPE
 set t_rec->prompts.file = $FILE
 set t_rec->prompts.csv = $CSV
-
+set t_rec->prompts.debug = $DEBUG
 
 set t_rec->cons.run_dt_tm 		= cnvtdatetime(curdate,curtime3)
+
+
+if (t_rec->prompts.debug > "")
+	set t_rec->prompts.csv = -1
+endif	
 
 call writeLog(build2("* END   Custom Section  ************************************"))
 call writeLog(build2("************************************************************"))
@@ -134,17 +141,206 @@ call writeLog(build2("* START Custom   *****************************************
 
 
 ;get list of medications
-free record medication_list
-record medication_list
-(
-	1 cnt = i4
-	1 qual[*]
-	 2 v =  vc
-)
+set stat = cnvtjsontorec(sGetNSHNMedications(null))
+;call echorecord(medication_list)
 
 ;get list of routes
+set stat = cnvtjsontorec(sGetNSHNRoutes(null))
+;call echorecord(route_list)
+
 ;get list of locations
+set stat = cnvtjsontorec(sGetNSHNLocations(null))
+;call echorecord(location_list)
+
 ;get list of admins
+set stat = cnvtjsontorec(sGetMedAdmins(null))
+call echorecord(admin_list)
+
+
+free record temp_reply
+ record temp_reply (
+   1 admin_date [* ]
+     2 admin_dt_tm = dq8
+     2 units [* ]
+       3 unit_cds = vc
+       3 unit_disp = vc
+       3 person [* ]
+         4 person_id = vc
+         4 meds [* ]
+           5 temp_med_cd = vc
+           5 temp_med_disp = vc
+           5 nhsn_med_cd = vc
+           5 med_disp = vc
+           5 med_total = i4
+           5 nhsn_med_ind = i2
+           5 routes [* ]
+             6 nhsn_route_cd = vc
+             6 temp_route_cd = vc
+             6 routes_count = i4
+             6 route_disp = vc
+ )
+
+/*
+record admin_list
+	(
+		1 cnt = i4
+		1 qual[*]
+		 2 medicationadministrationid = f8
+		 2 facilityid = vc
+		 2 wardid = vc
+		 2 patientid = vc
+		 2 localdrugingredientname = vc
+		 2 nhsndrugingredientcode = vc
+		 2 nhsnmedicationroutecode = vc
+		 2 nhsnmedicationroutename = vc
+		 2 administrationstatuscode = vc
+		 2 administrationdatetime = vc
+		 2 administrationdate = vc
+		 2 wardname = vc
+		 2 nhsnlocationtypecode = vc
+		 2 nhsnlocationtypename = vc
+	)
+*/
+
+DECLARE location_cnt = i4 WITH protect ,noconstant (0 )
+DECLARE medication_cnt = i4 WITH protect ,noconstant (0 )
+DECLARE temp_route_cnt = i4 WITH protect ,noconstant (0 )
+DECLARE admin_dt_cnt = i4 WITH protect ,noconstant (0 )
+DECLARE unit_cnt = i4 WITH protect ,noconstant (0 )
+DECLARE med_cnt = i4 WITH protect ,noconstant (0 )
+DECLARE person_cnt = i4 WITH protect ,noconstant (0 )
+DECLARE route_cnt = i4 WITH protect ,noconstant (0 )
+DECLARE admin_route_cnt = i4 WITH protect ,noconstant (0 )
+DECLARE exist_route_cnt = i4 WITH protect ,noconstant (0 )
+DECLARE admin_med_cnt = i4 WITH protect ,noconstant (0 )
+DECLARE med_size = i4 WITH protect ,noconstant (0 )
+DECLARE route_size = i4 WITH protect ,noconstant (0 )
+DECLARE temp_route_size = i4 WITH protect ,noconstant (0 )
+DECLARE nhsn_route_size = i4 WITH protect ,noconstant (0 )
+
+
+ select into "nl:"
+    admin_date = admin_list->qual[d1.seq].administrationdate
+   ,nurse_unit_cd = admin_list->qual[d1.seq].wardid
+   ,person_id = admin_list->qual[d1.seq].patientid
+   ,catalog_cd = admin_list->qual[d1.seq].nhsndrugingredientcode
+   ,route_cd = admin_list->qual[d1.seq].nhsnmedicationroutecode
+   from 
+   	(dummyt d1 with seq=admin_list->cnt)
+   plan d1
+   order by 
+   	 admin_date
+   	,nurse_unit_cd
+    ,person_id
+    ,catalog_cd
+    ,route_cd
+   head report
+    nhsn_route_size = route_list->cnt
+    admin_dt_cnt = 0
+   head admin_date
+    unit_cnt = 0
+    admin_dt_cnt = (admin_dt_cnt + 1)
+    
+	stat = alterlist (temp_reply->admin_date,admin_dt_cnt)
+    temp_reply->admin_date[admin_dt_cnt ].admin_dt_tm = cnvtdatetime(admin_list->qual[d1.seq].administrationdatetime)
+    
+   head nurse_unit_cd
+    person_cnt = 0
+    unit_cnt = (unit_cnt + 1 )
+    stat = alterlist (temp_reply->admin_date[admin_dt_cnt ].units,unit_cnt)
+    
+    temp_reply->admin_date[admin_dt_cnt ].units[unit_cnt ].unit_cds = nurse_unit_cd 
+    temp_reply->admin_date[admin_dt_cnt ].units[unit_cnt ].unit_disp = admin_list->qual[d1.seq].wardname
+    
+   head person_id
+    med_cnt = 0
+    med_pos = 0
+    admin_med_cnt = 0
+    person_cnt = (person_cnt + 1 )
+    
+    stat = alterlist (temp_reply->admin_date[admin_dt_cnt ].units[unit_cnt ].person ,person_cnt)
+    temp_reply->admin_date[admin_dt_cnt ].units[unit_cnt ].person[person_cnt ].person_id = person_id
+    
+   head catalog_cd
+    route_cnt = 0
+    admin_route_cnt = 0
+    exist_route_cnt = 0
+    med_cnt = (med_cnt + 1 )
+    
+    stat = alterlist (temp_reply->admin_date[admin_dt_cnt ].units[unit_cnt ].person[person_cnt ].meds,med_cnt)
+    temp_reply->admin_date[admin_dt_cnt ].units[unit_cnt ].person[person_cnt ].meds[med_cnt ].temp_med_cd = catalog_cd
+    temp_reply->admin_date[admin_dt_cnt ].units[unit_cnt ].person[person_cnt ].meds[med_cnt ].temp_med_disp = 
+    	admin_list->qual[d1.seq].localdrugingredientname
+    
+    med_size = medication_list->cnt
+    med_pos = locateval (admin_med_cnt ,1 ,med_size ,catalog_cd ,medication_list->qual[admin_med_cnt ].nhsndrugingredientcode ) 
+    
+    if ((med_pos > 0 ) ) 
+    	temp_reply->admin_date[admin_dt_cnt ].units[unit_cnt ].person[person_cnt ].meds[med_cnt ].med_disp 
+    		= medication_list->qual[med_pos ].nhsndrugingredientname
+    	temp_reply->admin_date[admin_dt_cnt ].units[unit_cnt ].person[person_cnt ].meds[med_cnt ].nhsn_med_cd
+    		= medication_list->qual[med_pos ].nhsndrugingredientcode
+    	temp_reply->admin_date[admin_dt_cnt ].units[unit_cnt ].person[person_cnt ].meds[med_cnt ].nhsn_med_ind = 1
+    endif
+   
+   head route_cd
+    route_pos = 0
+    
+   detail
+    if ((route_pos = 0 ) )
+     FOR (route_index = 1 TO nhsn_route_size )
+      route_size = route_list->cnt
+      route_pos = locateval (admin_route_cnt ,1 ,route_size ,route_cd ,route_list->qual[route_index].nhsnmedicationroutecode)
+      
+      /*
+		free record route_list
+		record route_list
+		(
+			1 cnt = i4
+			1 qual[*]
+			 2 medicationformcode = vc
+			 2 medicationroutecode = vc
+			 2 nhsnmedicationroutecode = vc
+			 2 nhsnmedicationroutename= vc
+		)
+	*/
+      if ((route_pos > 0 ) ) 
+      	temp_route_size = size (temp_reply->admin_date[admin_dt_cnt ].units[unit_cnt ].person[person_cnt ].meds[med_cnt ].routes ,5 )
+       	
+       	if ((locateval (exist_route_cnt ,1 ,temp_route_size ,route_list->nhsnroute_cds[route_index ].nhsnroute_cd ,temp_reply->admin_date[admin_dt_cnt ].units[unit_cnt ].person[person_cnt ].meds[med_cnt ].routes[exist_route_cnt ].nhsn_route_cd ) = 0 ) ) 
+			route_cnt = (route_cnt + 1 )
+       		
+			stat = alterlist (temp_reply->admin_date[admin_dt_cnt ].units[unit_cnt ].person[person_cnt ].meds[med_cnt ].routes ,route_cnt)
+        	temp_reply->admin_date[admin_dt_cnt ].units[unit_cnt ].person[person_cnt ].meds[med_cnt ].routes[route_cnt ].route_disp 
+        		= route_list->nhsnroute_cds[route_index ].nhsnroute_disp
+        	
+        	temp_reply->admin_date[admin_dt_cnt ].units[unit_cnt ].person[person_cnt ].meds[med_cnt ].routes[route_cnt ].routes_count = 1
+        	temp_reply->admin_date[admin_dt_cnt ].units[unit_cnt ].person[person_cnt ].meds[med_cnt ].routes[route_cnt ].nhsn_route_cd 
+        		= route_list->nhsnroute_cds[route_index ].nhsnroute_cd
+        	temp_reply->admin_date[admin_dt_cnt ].units[unit_cnt ].person[person_cnt ].meds[med_cnt ].routes[route_cnt ].temp_route_cd = mae.route_cd
+        	route_index = (nhsn_route_size + 1 )
+       else 
+       		route_index = (nhsn_route_size + 1 )
+       endif
+      endif
+     endfor
+    endif
+   FOOT  mae.route_cd
+    donothing = 0
+   FOOT  mae.catalog_cd
+    stat = alterlist (temp_reply->admin_date[admin_dt_cnt ].units[unit_cnt ].person[person_cnt ].
+     meds[med_cnt ].routes ,route_cnt )
+   FOOT  ce.person_id
+    stat = alterlist (temp_reply->admin_date[admin_dt_cnt ].units[unit_cnt ].person[person_cnt ].meds
+      ,med_cnt )
+   FOOT  mae.nurse_unit_cd
+    stat = alterlist (temp_reply->admin_date[admin_dt_cnt ].units[unit_cnt ].person ,person_cnt )
+   FOOT  admin_date
+    stat = alterlist (temp_reply->admin_date[admin_dt_cnt ].units ,unit_cnt )
+   FOOT REPORT
+    stat = alterlist (temp_reply->admin_date ,admin_dt_cnt )
+   WITH nocounter ,expand = 1
+  ;end select
 
 ;get denominator
 
@@ -299,6 +495,69 @@ endfor
 call writeLog(build2("* END   Creating Audit *************************************"))
 call writeLog(build2("************************************************************"))
 */
+
+
+if (t_rec->prompts.debug > "")
+ if (t_rec->prompts.debug = "MED_ADMIN")
+	select into t_rec->prompts.outdev
+		 am.medicationadministrationid
+		,am.facilityid
+		,am.wardid
+		,am.patientid
+		,al.localdrugingredientname
+		,ad.nhsndrugingredientcode
+		,ar.nhsnmedicationroutecode
+		,ar.nhsnmedicationroutename
+		,am.administrationstatuscode
+		,am.administrationdatetime
+		,am.administrationdate
+		,aa.wardname
+		,an2.nhsnlocationtypecode
+		,an2.nhsnlocationtypename 
+	from 
+		 cust_au_medadmin am
+		,cust_au_dim_facility adf
+		,cust_au_localdrugingredcode al
+		,cust_au_drugingredmapping ad
+		,cust_au_routeofadminmapping ar
+		,cust_au_nhsndrugingredcode an
+		,cust_au_adtwardmapping aa
+		,cust_au_nhsnloctypecode an2
+	plan am
+	join adf
+		where adf.facilityid = am.facilityid
+	join al
+		where al.localdrugingredientcode = am.localdrugingredientcode
+	join ad
+		where ad.localdrugingredientcode = am.localdrugingredientcode
+	join ar
+		where ar.medicationformcode = am.medicationformcode
+	join an
+		where an.nhsndrugingredientcode = ad.nhsndrugingredientcode
+	join aa
+		where aa.facilityid = am.facilityid
+		and   aa.wardid = am.wardid
+	join an2
+		where an2.nhsnlocationtypecode = aa.nhsnlocationtypecode
+	with nocounter,separator= " ", format
+	
+ elseif (t_rec->prompts.debug = "LOCATION_MAP")
+	
+	select into t_rec->prompts.outdev
+		*
+	from 
+		 cust_au_nhsnloctypecode an
+		,cust_au_adtwardmapping aa
+		,cust_au_dim_facility adf
+	plan an
+	join aa
+		where aa.nhsnlocationtypecode = an.nhsnlocationtypecode
+	join adf
+		where adf.facilityid = aa.facilityid
+	with nocounter,separator= " ", format
+	
+ endif
+endif	
 
 #exit_script
 

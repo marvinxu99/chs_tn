@@ -95,7 +95,7 @@ set t_rec->cons.run_dt_tm 		= cnvtdatetime(curdate,curtime3)
 call writeLog(build2("* END   Custom Section  ************************************"))
 call writeLog(build2("************************************************************"))
 
-declare create_cust_au_adtwardmapping(p1=vc) = i2 with copy
+declare create_cust_au_adtwardmapping(p1=vc) = i2 with copy,persist
 subroutine create_cust_au_adtwardmapping(p1)
 		;FacilityID	WardTypeCode	WardID	WardName	NHSNLocationTypeCode
 		
@@ -118,7 +118,7 @@ subroutine create_cust_au_adtwardmapping(p1)
 	return (TRUE)
 end
 
-declare pop_cust_au_adtwardmapping(p1=vc) = i2 with copy
+declare pop_cust_au_adtwardmapping(p1=vc) = i2 with copy,persist
 subroutine pop_cust_au_adtwardmapping(p1)
 
 	if(findfile(p1) = 0)
@@ -184,7 +184,7 @@ subroutine pop_cust_au_adtwardmapping(p1)
 end
 
 
-declare create_cust_au_dim_facility(p1=vc) = i2 with copy
+declare create_cust_au_dim_facility(p1=vc) = i2 with copy,persist
 subroutine create_cust_au_dim_facility(p1)
 		;FacilityID	FacilityName
 		
@@ -203,7 +203,7 @@ subroutine create_cust_au_dim_facility(p1)
 	return (TRUE)
 end
 
-declare pop_cust_au_dim_facility(p1=vc) = i2 with copy
+declare pop_cust_au_dim_facility(p1=vc) = i2 with copy,persist
 subroutine pop_cust_au_dim_facility(p1)
 
 	if(findfile(p1) = 0)
@@ -259,7 +259,7 @@ subroutine pop_cust_au_dim_facility(p1)
 	return (TRUE)
 end
 
-declare create_cust_au_nhsnloctypecode(p1=vc) = i2 with copy
+declare create_cust_au_nhsnloctypecode(p1=vc) = i2 with copy,persist
 subroutine create_cust_au_nhsnloctypecode(p1)
 		;NHSNLocationTypeCode,NHSNLocationTypeName
 		
@@ -278,7 +278,7 @@ subroutine create_cust_au_nhsnloctypecode(p1)
 	return (TRUE)
 end
 
-declare pop_cust_au_nhsnloctypecode(p1=vc) = i2 with copy
+declare pop_cust_au_nhsnloctypecode(p1=vc) = i2 with copy,persist
 subroutine pop_cust_au_nhsnloctypecode(p1)
 
 	if(findfile(p1) = 0)
@@ -335,7 +335,7 @@ subroutine pop_cust_au_nhsnloctypecode(p1)
 end
 
 
-declare create_cust_au_localdrugingredcode(p1=vc) = i2 with copy
+declare create_cust_au_localdrugingredcode(p1=vc) = i2 with copy,persist
 subroutine create_cust_au_localdrugingredcode(p1)
 		;LocalDrugIngredientCode,LocalDrugIngredientName
 		
@@ -354,7 +354,7 @@ subroutine create_cust_au_localdrugingredcode(p1)
 	return (TRUE)
 end
 
-declare pop_cust_au_localdrugingredcode(p1=vc) = i2 with copy
+declare pop_cust_au_localdrugingredcode(p1=vc) = i2 with copy,persist
 subroutine pop_cust_au_localdrugingredcode(p1)
 
 	if(findfile(p1) = 0)
@@ -411,7 +411,7 @@ subroutine pop_cust_au_localdrugingredcode(p1)
 end
 
 
-declare create_cust_au_nhsndrugingredcode(p1=vc) = i2 with copy
+declare create_cust_au_nhsndrugingredcode(p1=vc) = i2 with copy,persist
 subroutine create_cust_au_nhsndrugingredcode(p1)
 		;NHSNDrugIngredientCode,NHSNDrugIngredientCodeSystem,NHSNDrugIngredientName
 		
@@ -431,7 +431,7 @@ subroutine create_cust_au_nhsndrugingredcode(p1)
 	return (TRUE)
 end
 
-declare pop_cust_au_nhsndrugingredcode(p1=vc) = i2 with copy
+declare pop_cust_au_nhsndrugingredcode(p1=vc) = i2 with copy,persist
 subroutine pop_cust_au_nhsndrugingredcode(p1)
 
 	if(findfile(p1) = 0)
@@ -493,7 +493,7 @@ end
 
 
 
-declare create_cust_au_drugingredmapping(p1=vc) = i2 with copy
+declare create_cust_au_drugingredmapping(p1=vc) = i2 with copy,persist
 subroutine create_cust_au_drugingredmapping(p1)
 		;LocalDrugIngredientCode,NHSNDrugIngredientCode
 		
@@ -512,7 +512,7 @@ subroutine create_cust_au_drugingredmapping(p1)
 	return (TRUE)
 end
 
-declare pop_cust_au_drugingredmapping(p1=vc) = i2 with copy
+declare pop_cust_au_drugingredmapping(p1=vc) = i2 with copy,persist
 subroutine pop_cust_au_drugingredmapping(p1)
 
 	if(findfile(p1) = 0)
@@ -569,7 +569,7 @@ subroutine pop_cust_au_drugingredmapping(p1)
 end
 
 
-declare create_cust_au_dim_wardtype(p1=vc) = i2 with copy
+declare create_cust_au_dim_wardtype(p1=vc) = i2 with copy,persist
 subroutine create_cust_au_dim_wardtype(p1)
 		;WardTypeCode,WardTypeName
 		
@@ -588,7 +588,7 @@ subroutine create_cust_au_dim_wardtype(p1)
 	return (TRUE)
 end
 
-declare pop_cust_au_dim_wardtype(p1=vc) = i2 with copy
+declare pop_cust_au_dim_wardtype(p1=vc) = i2 with copy,persist
 subroutine pop_cust_au_dim_wardtype(p1)
 
 	if(findfile(p1) = 0)
@@ -647,7 +647,7 @@ end
 
 
 
-declare create_cust_au_routeofadminmapping(p1=vc) = i2 with copy
+declare create_cust_au_routeofadminmapping(p1=vc) = i2 with copy,persist
 subroutine create_cust_au_routeofadminmapping(p1)
 		;MedicationFormCode,MedicationRouteCode,NHSNMedicationRouteCode,NHSNMedicationRouteCodeSystem,NHSNMedicationRouteName
 		
@@ -669,7 +669,7 @@ subroutine create_cust_au_routeofadminmapping(p1)
 	return (TRUE)
 end
 
-declare pop_cust_au_routeofadminmapping(p1=vc) = i2 with copy
+declare pop_cust_au_routeofadminmapping(p1=vc) = i2 with copy,persist
 subroutine pop_cust_au_routeofadminmapping(p1)
 
 	if(findfile(p1) = 0)
@@ -737,7 +737,7 @@ end
 
 
 ;au_sds_prod_medicationadministration.csv
-declare create_cust_au_medadmin(p1=vc) = i2 with copy
+declare create_cust_au_medadmin(p1=vc) = i2 with copy,persist
 subroutine create_cust_au_medadmin(p1)
 		;MedicationAdministrationID,FacilityID,PatientID,LocalDrugIngredientCode,
 		;AdministrationDateTime,MedicationFormCode,MedicationRouteCode,WardID,AdministrationStatusCode
@@ -765,7 +765,7 @@ subroutine create_cust_au_medadmin(p1)
 	return (TRUE)
 end
 
-declare pop_cust_au_medadmin(p1=vc) = i2 with copy
+declare pop_cust_au_medadmin(p1=vc) = i2 with copy,persist
 subroutine pop_cust_au_medadmin(p1)
 
 	if(findfile(p1) = 0)
@@ -850,7 +850,7 @@ end
 
 
 ;au_sds_prod_adtmovement.csv
-declare create_cust_au_adtmovement(p1=vc) = i2 with copy
+declare create_cust_au_adtmovement(p1=vc) = i2 with copy,persist
 subroutine create_cust_au_adtmovement(p1)
 		;ADTMovementID,FacilityID,PatientID,AdmissionID,MovementID,MovementDateTime,PreviousMovementID,
 		;MovementTypeCode,DischargeDisposition,BedSectionID,WardID,RoomBedID
@@ -879,7 +879,7 @@ subroutine create_cust_au_adtmovement(p1)
         
 	return (TRUE)
 end
-declare pop_cust_au_adtmovement(p1=vc) = i2 with copy
+declare pop_cust_au_adtmovement(p1=vc) = i2 with copy,persist
 subroutine pop_cust_au_adtmovement(p1)
 
 	if(findfile(p1) = 0)
