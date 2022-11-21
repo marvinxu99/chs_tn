@@ -114,7 +114,7 @@ select into "nl:"
 	and   ce3.valid_until_dt_tm >= cnvtdatetime(curdate, curtime3)
 	and   ce3.event_tag        != "Date\Time Correction"
 	and   ce3.person_id not in(select pr.person_id from problem pr where pr.person_id = ce3.person_id
-								and pr.nomenclature_id =      7777483.00
+								and pr.nomenclature_id in(      7777483.00,   301002284.00)
 								and pr.life_cycle_status_cd =        3301.00	;	Active
 								and pr.active_ind = 1 and cnvtdatetime(curdate,curtime3) between
 								pr.beg_effective_dt_tm and pr.end_effective_dt_tm)
