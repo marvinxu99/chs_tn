@@ -286,7 +286,7 @@ JOIN sed17 WHERE sed17.sch_event_id = outerjoin (se.sch_event_id )
 	AND sed17.version_dt_tm = outerjoin (cnvtdatetime ("31-DEC-2100 00:00:00.00" ) )
 	AND sed17.active_ind = outerjoin (1 )
 join sec WHERE sec.sch_event_id = outerjoin (se.sch_event_id )
-	AND sec.sub_text_meaning = outerjoin ("SURGPRIVATE" )
+	AND sec.sub_text_meaning = outerjoin ("REMOVED" )
 	AND sec.version_dt_tm = outerjoin (cnvtdatetime ("31-DEC-2100 00:00:00.00" ))
     AND sec.active_ind = outerjoin (1 )
 JOIN l WHERE l.long_text_id = outerjoin (sec.text_id )
@@ -537,16 +537,16 @@ Foot CASE_NUMBER
 	row +1
 	SURGCOMMENT=TRIM(SURGCOMMENT,3)
 	y_pos=y_pos+2
-	CALL print (calcpos (40 ,(y_pos  ) ) ),"COMMENT: ",
-	call parse_text(SURGCOMMENT,108)
-	for (z=1 to line_text->line_cnt)
-		CALL print (calcpos (96 ,(y_pos  ) ) ),line_text->lns [z].line
-		ROW+1
-		y_pos=y_pos+8
-	endfor
-	if (line_text->line_cnt>0)
-		y_pos=y_pos-8
-	endif
+	;CALL print (calcpos (40 ,(y_pos  ) ) ),"COMMENT: ",
+	;call parse_text(SURGCOMMENT,108)
+	;for (z=1 to line_text->line_cnt)
+	;	CALL print (calcpos (96 ,(y_pos  ) ) ),line_text->lns [z].line
+	;	ROW+1
+	;	y_pos=y_pos+8
+	;endfor
+	;if (line_text->line_cnt>0)
+	;	y_pos=y_pos-8
+	;endif
 	row+1
 	y_pos=y_pos+24
 	eyp=y_pos
