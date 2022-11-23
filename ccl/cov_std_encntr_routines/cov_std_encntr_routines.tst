@@ -12,10 +12,10 @@ set person_id = sGetPersonID_ByFIN(FIN) go
 call echo(build2("encntr_id=",encntr_id)) go
 call echo(build2("person_id=",person_id)) go
 
-call echo(sGetAppts_ByPersonID(person_id,365,"past")) go
+;call echo(sGetAppts_ByPersonID(person_id,365,"past")) go
 
-call echo(build2("facility description=",sGetFacility_ByEncntrID(sGetEncntrID_ByFIN(FIN),"description"))) go
-call echo(build2("facility display=",sGetFacility_ByEncntrID(sGetEncntrID_ByFIN(FIN),"adf"))) go
-call echo(build2("cmg_locations=",sGetCMGLocations(null))) go
-set stat = cnvtjsontorec(sGetCMGLocations(null)) go
-call echorecord(cmg_locations) go
+;call echo(build2("facility description=",sGetFacility_ByEncntrID(sGetEncntrID_ByFIN(FIN),"description"))) go
+;call echo(build2("facility display=",sGetFacility_ByEncntrID(sGetEncntrID_ByFIN(FIN),"adf"))) go
+;call echo(build2("cmg_locations=",sGetCMGLocations(null))) go
+;set stat = cnvtjsontorec(sGetCMGLocations(null)) go
+;call echorecord(cmg_locations) go

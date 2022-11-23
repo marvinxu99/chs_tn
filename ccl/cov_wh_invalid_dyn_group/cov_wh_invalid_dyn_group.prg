@@ -138,7 +138,7 @@ select into "nl:"
 								)
 	and   ce3.valid_until_dt_tm >= cnvtdatetime(curdate, curtime3)
 	and   ce3.event_tag        != "Date\Time Correction"
-	and   ce3.person_id not in(select person_id from problem where nomenclature_id =      7777483.00
+	and   ce3.person_id not in(select person_id from problem where nomenclature_id in(   308975705.00,7777483.00)
 								and active_ind = 1 and cnvtdatetime(curdate,curtime3) between
 								beg_effective_dt_tm and end_effective_dt_tm)
 	join cdl

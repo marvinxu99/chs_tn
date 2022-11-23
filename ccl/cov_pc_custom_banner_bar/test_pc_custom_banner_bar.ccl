@@ -1,0 +1,29 @@
+
+select *
+	from encounter e
+	, encntr_plan_reltn ep
+	, health_plan hp
+ 
+	plan e
+		where  e.encntr_id = 120730058
+			and e.loc_nurse_unit_cd not in (select code_value
+											from code_value_extension
+											where code_set = 220
+												and field_name = "Display_Insurance"
+												and field_value = "No")
+	join ep
+		where ep.encntr_id = e.encntr_id
+			and ep.active_ind = 1
+			and ep.active_status_cd = value(uar_get_code_by_cki("CKI.CODEVALUE!2669"))
+			and ep.beg_effective_dt_tm < cnvtdatetime(curdate,curtime3)
+			and ep.end_effective_dt_tm > cnvtdatetime(curdate,curtime3)
+			and ep.priority_seq = 1 ;v.6
+/*			and ep.encntr_plan_reltn_id =
+				(select max(ep2.encntr_plan_reltn_id)
+				from encntr_plan_reltn ep2
+				where ep2.encntr_id = request->encntr_id)*/ ;v.6
+	join hp
+		where hp.health_plan_id = ep.health_plan_id
+ 
+	order by ep.encntr_plan_reltn_id desc
+go
