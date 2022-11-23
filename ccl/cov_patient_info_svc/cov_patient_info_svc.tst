@@ -71,7 +71,7 @@ execute VCCL_RUN_PROGRAM go
 */
 
 set debug_ind = 1 go 
-execute cov_patient_info_svc ^nl:^,^21640189^  go
+execute cov_patient_info_svc ^nl:^,^21640189999999^  go
 ;execute cov_patient_info_svc ^nl:^,^5223500007^,^FIN^  go
 
  

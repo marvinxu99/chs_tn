@@ -94,9 +94,9 @@ record t_rec
 
 set t_rec->files.records_attachment = concat(trim(cnvtlower(curprog)),"_rec_",trim(format(sysdate,"yyyy_mm_dd_hh_mm_ss;;d")),".dat")
 
-set t_rec->prompts.outdev = $OUTDEV
-set t_rec->prompts.alias = $ALIAS
-set t_rec->prompts.alias_type = cnvtupper($ALIAS_TYPE)
+set t_rec->prompts.outdev 		= $OUTDEV
+set t_rec->prompts.alias 		= $ALIAS
+set t_rec->prompts.alias_type 	= cnvtupper($ALIAS_TYPE)
 
 set t_rec->cons.run_dt_tm 		= cnvtdatetime(curdate,curtime3)
 
@@ -128,6 +128,9 @@ call writeLog(build2("**********************************************************
 
 call writeLog(build2("************************************************************"))
 call writeLog(build2("* START Custom   *******************************************"))
+
+set _MEMORY_REPLY_STRING = cnvtrectojson(cov_patient_info)
+
 call writeLog(build2("* END   Custom   *******************************************"))
 call writeLog(build2("************************************************************"))
 
