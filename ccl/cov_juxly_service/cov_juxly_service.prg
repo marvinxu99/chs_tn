@@ -43,6 +43,8 @@ record t_rec
 	 2 gender = vc
 	 2 dob = vc
 	 2 postal_code = vc
+	 2 prim_plan_name = vc
+	 2 prim_member_nbr = vc
 	1 prsnl
 	 2 username = vc
 	 2 position = vc
@@ -105,7 +107,6 @@ set stat = cnvtjsontorec(sGetInsuranceByEncntrID(t_rec->patient.encntr_id))
 set stat = cnvtjsontorec(sGetPatientDemo(t_rec->patient.person_id,t_rec->patient.encntr_id))
 
 call echorecord(insurance_list)
-call echorecord(cov_patient_info)
 
 set t_rec->patient.name_last = cov_patient_info->demographics.patient_info.patient_name.name_last
 set t_rec->patient.name_first = cov_patient_info->demographics.patient_info.patient_name.name_first
@@ -115,8 +116,47 @@ set t_rec->patient.dob = datetimezoneformat(
 												,cov_patient_info->demographics.patient_info.birth_tz
 												,"@SHORTDATETIME"
 											)
+set stat = cnvtjsontorec(sGetPatientInfo(t_rec->patient.person_id,t_rec->patient.encntr_id))
+
+call echorecord(cov_patient_info)
+
+for (i=1 to size(cov_patient_info->addresses,5))
+	if (t_rec->patient.postal_code = "")
+		if (cov_patient_info->addresses[i].zipcode > "")
+			set t_rec->patient.postal_code = cov_patient_info->addresses[i].zipcode
+		endif
+	endif
+endfor
+
+for (i=1 to size(cov_patient_info->health_plans,5))
+	if (t_rec->patient.prim_plan_name = "")
+		if (cov_patient_info->health_plans[i].priority = 1)
+			set t_rec->patient.prim_plan_name = cov_patient_info->health_plans[i].plan_name
+			set t_rec->patient.prim_member_nbr = cov_patient_info->health_plans[i].plan_number
+		endif
+	endif
+endfor
 
 /*
+
+>>>Begin EchoRecord COV_PATIENT_INFO   ;COV_PATIENT_INFO
+ 1 PERSON_NAME=VC16   {ZZZMOCK, HENRY C}
+ 1 ADDRESSES[1,1*]
+  2 ADDRESS_TYPE=VC4   {Home}
+  2 STREET_ADDRESS=VC21   {1410 CENTERPOINT BLVD}
+  2 STREET_ADDRESS2=VC0   {}
+  2 STREET_ADDRESS3=VC0   {}
+  2 STREET_ADDRESS4=VC0   {}
+  2 CITY=VC9   {KNOXVILLE}
+  2 STATE=VC2   {TN}
+  2 ZIPCODE=VC5   {37932}
+ 1 CONTACT_INFORMATION
+  2 PHONE[1,6*]
+1 HEALTH_PLANS[1,2*]
+  2 PRIORITY= I4   {1}
+  2 PLAN_TYPE=VC5   {Other}
+  2 PLAN_NAME=VC16   {Tricare for Life}
+  2 PLAN_NUMBER=VC11   {00406186200}  
 >>>Begin EchoRecord COV_PATIENT_INFO   ;COV_PATIENT_INFO
  1 DEMOGRAPHICS
   2 PATIENT_INFO
