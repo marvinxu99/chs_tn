@@ -521,6 +521,36 @@ end
 
 
 /**********************************************************************************************************************
+** Function sGetPatientInfo(PERSON_ID,ENCNTR_ID)
+** ---------------------------------------------------------------------------------------
+** Returns a JSON object that is convertable to a record structure containting all the insurance information for the
+** encounter supplied.  
+** 
+** COV_PATIENT_INFO
+
+** 
+** NOTE: The record structure is destroyed on execution. 
+**
+**********************************************************************************************************************/
+declare sGetPatientInfo(vPersonID=f8,vEncntrID=f8) = vc  with copy, persist
+subroutine sGetPatientInfo(vPersonID,vEncntrID)
+
+call SubroutineLog(build2('start sGetPatientDemo(',vPersonID,',',vEncntrID,')'))	
+ 	free record cov_patient_info
+ 	
+ 	declare _memory_reply_string = vc with noconstant(" "), protect
+ 	execute mp_get_patient_info_wf ~MINE~,vPersonID,vEncntrID,1,1,1,1,0,0.0 
+ 	
+ 	set stat = cnvtjsontorec(_memory_reply_string)
+ 	set stat = copyrec(record_data,cov_patient_info,1)
+ 	
+ 	call SubroutineLog(build2('end sGetPatientDemo(',vPersonID,',',vEncntrID,')'))
+ 	return (cnvtrectojson(cov_patient_info))
+end 
+
+
+
+/**********************************************************************************************************************
 ** Function sGetPatientDemo(PERSON_ID,ENCNTR_ID)
 ** ---------------------------------------------------------------------------------------
 ** Returns a JSON object that is convertable to a record structure containting all the insurance information for the
@@ -547,6 +577,8 @@ call SubroutineLog(build2('start sGetPatientDemo(',vPersonID,',',vEncntrID,')'))
  	call SubroutineLog(build2('end sGetPatientDemo(',vPersonID,',',vEncntrID,')'))
  	return (cnvtrectojson(cov_patient_info))
 end 
+
+
 
 
 /**********************************************************************************************************************

@@ -52,4 +52,6 @@ set curindex = 1 go
 call echo(build2("trigger_personid=",trigger_encntrid)) go
 call echo(build2("trigger_encntrid=",trigger_personid)) go
 
-execute cov_juxly_service go
+;execute cov_juxly_service go
+;execute mp_get_visit_detail_data "mine",trigger_personid,0.0,0.0,0 go
+execute mp_get_patient_info_wf ^nl:^,trigger_personid,trigger_encntrid,1,1,1,1,0,0.0 go

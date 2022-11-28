@@ -38,6 +38,11 @@ record t_rec
 	1 patient
 	 2 encntr_id = f8
 	 2 person_id = f8
+	 2 name_last = vc
+	 2 name_first = vc
+	 2 gender = vc
+	 2 dob = vc
+	 2 postal_code = vc
 	1 prsnl
 	 2 username = vc
 	 2 position = vc
@@ -96,10 +101,40 @@ if (t_rec->prsnl.position = " ")
 	go to exit_script
 endif
 
+set stat = cnvtjsontorec(sGetInsuranceByEncntrID(t_rec->patient.encntr_id))
+set stat = cnvtjsontorec(sGetPatientDemo(t_rec->patient.person_id,t_rec->patient.encntr_id))
 
+call echorecord(insurance_list)
+call echorecord(cov_patient_info)
 
-set stat = cnvtjsontorec(sGetInsuranceByEncntrID(t_rec->encntr_id))
+set t_rec->patient.name_last = cov_patient_info->demographics.patient_info.patient_name.name_last
+set t_rec->patient.name_first = cov_patient_info->demographics.patient_info.patient_name.name_first
+set t_rec->patient.gender = uar_get_code_display(cov_patient_info->demographics.patient_info.sex_cd)
+set t_rec->patient.dob = datetimezoneformat(
+												 cov_patient_info->demographics.patient_info.birth_date
+												,cov_patient_info->demographics.patient_info.birth_tz
+												,"@SHORTDATETIME"
+											)
 
+/*
+>>>Begin EchoRecord COV_PATIENT_INFO   ;COV_PATIENT_INFO
+ 1 DEMOGRAPHICS
+  2 PATIENT_INFO
+   3 PERSON_ID=F8   {16225966.0000000000                     }
+   3 SEX_CD=F8   {363.0000000000                          }
+   3 BIRTH_DT_TM=VC20   {1941-06-01T05:00:00Z}
+   3 LOCAL_BIRTH_DT_TM=VC20   {1941-06-01T04:00:00Z}
+   3 ABS_BIRTH_DT_TM=VC20   {1941-06-01T00:00:00Z}
+   3 BIRTH_DATE=DQ8   {44628336000000000    (1941-06-01 04:00:00.00) utc(1)}
+   3 BIRTH_TZ= I4   {126}
+   3 LOCAL_DECEASED_DT_TM=VC0   {}
+   3 DECEASED_DT_TM=VC0   {}
+   3 PATIENT_NAME
+    4 NAME_FIRST=VC5   {HENRY}
+    4 NAME_MIDDLE=VC1   {C}
+    4 NAME_LAST=VC7   {ZZZMOCK}
+    4 NAME_FULL=VC16   {ZZZMOCK, HENRY C}
+*/
 set t_rec->uri_put = 	concat(
 								t_rec->uri_base
 								,^?method=^,					t_rec->uri_method
