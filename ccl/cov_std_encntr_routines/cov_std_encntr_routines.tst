@@ -4,7 +4,7 @@ execute cov_std_encntr_routines go
 declare person_id = f8 with protect go
 declare encntr_id = f8 with protect go
 
-declare FIN = vc with constant("2303518142") go
+declare FIN = vc with constant("1922000001") go
 		
 set encntr_id = sGetEncntrID_ByFIN(FIN) go
 set person_id = sGetPersonID_ByFIN(FIN) go
@@ -19,3 +19,5 @@ call echo(build2("person_id=",person_id)) go
 ;call echo(build2("cmg_locations=",sGetCMGLocations(null))) go
 ;set stat = cnvtjsontorec(sGetCMGLocations(null)) go
 ;call echorecord(cmg_locations) go
+set stat = cnvtjsontorec(sGetPatientDemo(person_id,encntr_id)) go
+call echorecord(cov_patient_info) go
