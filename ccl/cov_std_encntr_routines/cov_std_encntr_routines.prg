@@ -567,12 +567,147 @@ subroutine sGetPatientDemo(vPersonID,vEncntrID)
 
 call SubroutineLog(build2('start sGetPatientDemo(',vPersonID,',',vEncntrID,')'))	
  	free record cov_patient_info
- 	
+ 	record cov_patient_info
+ 	(
+		1 demographics
+				2 patient_info
+					3 person_id = f8
+					3 sex_cd = f8
+					3 birth_dt_tm = vc
+					3 local_birth_dt_tm = vc
+					3 abs_birth_dt_tm = vc
+					3 birth_date = dq8
+					3 birth_tz = i4
+					3 local_deceased_dt_tm = vc
+					3 deceased_dt_tm = vc
+					3 patient_name
+						4 name_first = vc
+						4 name_middle = vc
+						4 name_last = vc
+						4 name_full = vc
+					3 alias[*]
+						4 alias_type_cd = f8
+						4 alias = vc
+						4 formatted_alias = vc
+					3 patient_provider[*]
+						4 reltn_code = f8
+						4 prsnl_id = f8
+				2 encounter_info[*]
+					3 encounter_id = f8
+					3 type_code = f8
+					3 reason_visit = vc
+					3 provider[*]
+						4 reltn_code = f8
+						4 prsnl_id = f8
+					3 alias[*]
+						4 alias_type_cd = f8
+						4 alias = vc
+						4 formatted_alias = vc
+					3 arrive_dt_tm = vc
+					3 arrive_date = dq8
+					3 depart_dt_tm = vc
+					3 depart_date = dq8
+					3 reg_dt_tm = vc
+					3 reg_date = dq8
+					3 discharge_dt_tm = vc
+					3 discharge_date = dq8
+					3 isolation_cd = f8
+					3 location_cd = f8
+					3 loc_facility_cd = f8
+					3 loc_building_cd = f8
+					3 loc_nurse_unit_cd = f8
+					3 loc_room_cd = f8
+					3 loc_bed_cd = f8
+				2 addresses[*]
+				    3 address_type = vc
+				    3 street_address = vc
+				    3 street_address2 = vc
+				    3 street_address3 = vc
+				    3 street_address4 = vc
+				    3 city = vc
+				    3 state = vc
+				    3 zipcode = vc
+				 2 health_plans[*]
+				    3 priority = i4
+				    3 plan_type = vc
+				    3 plan_name = vc
+				    3 plan_number = vc
+				 2 emergency_contact_list[*]
+				    3 name = vc
+				    3 relationship_to_person = vc
+				    3 contact_phone[*]
+				      4 phone_type = vc
+				      4 phone_number = vc
+				      4 phone_type_code = f8
+				 2 contact_information
+				    3 phone[*]
+				      4 phone_type = vc
+				      4 phone_num = vc
+				      4 phone_type_cd = f8
+				    3 emails[*]
+				      4 email = vc
+				  	3 preferred_method_of_contact = vc
+				 
+		1 codes[*]
+			2 sequence	= i4
+			2 code		= f8
+			2 code_set	= f8
+			2 display	= vc
+			2 description	= vc
+			2 meaning 	= vc 	
+ 		1 prsnl[*]
+			2 id = f8
+			2 person_name_id = f8
+			2 active_date = dq8
+			2 beg_effective_dt_tm = dq8
+			2 end_effective_dt_tm = dq8
+			2 provider_name
+				3 name_full = vc
+				3 name_first = vc
+				3 name_middle = vc
+				3 name_last = vc
+				3 username = vc
+				3 initials = vc
+				3 title = vc
+%i cclsource:status_block.inc	
+ 	)
  	declare _memory_reply_string = vc with noconstant(" "), protect
- 	execute mp_get_patient_demo ~MINE~,vPersonID,vEncntrID,0 
+ 	execute mp_get_patient_demo ~MINE~,vPersonID,vEncntrID,0 ;with replace("REPORT_DATA",cov_patient_info)
+ 	
+ 	free record temp_patient_info
+ 	set stat = cnvtjsontorec(_memory_reply_string)
+ 	set stat = copyrec(record_data,temp_patient_info,1)
+ 	call echorecord(temp_patient_info)
+ 	
+ 	set stat = moverec(temp_patient_info->demographics.patient_info,cov_patient_info->demographics.patient_info)
+ 	set stat = moverec(temp_patient_info->demographics.encounter_info,cov_patient_info->demographics.encounter_info)
+ 	set stat = moverec(temp_patient_info->codes,cov_patient_info->codes)
+ 	set stat = moverec(temp_patient_info->prsnl,cov_patient_info->prsnl)
+ 	
+ 	free record record_data
+ 	free record temp_patient_info
+ 	
+ 	execute mp_get_patient_info_wf ~MINE~,vPersonID,vEncntrID,1,1,1,1,0,0.0 
  	
  	set stat = cnvtjsontorec(_memory_reply_string)
- 	set stat = copyrec(record_data,cov_patient_info,1)
+ 	set stat = copyrec(record_data,temp_patient_info,1)
+ 	
+ 	
+ 	set stat = moverec(temp_patient_info->addresses,cov_patient_info->demographics.addresses)
+ 	set stat = moverec(temp_patient_info->contact_information.phone,cov_patient_info->demographics.contact_information.phone)
+ 	set stat = moverec(temp_patient_info->health_plans,cov_patient_info->demographics.health_plans)
+ 	set stat = moverec(temp_patient_info->emergency_contact_list,cov_patient_info->demographics.emergency_contact_list)
+ 	
+ 	set cov_patient_info->demographics.contact_information.preferred_method_of_contact 
+ 		= temp_patient_info->contact_information.preferred_method_of_contact
+ 	
+ 	for (i=1 to size(temp_patient_info->contact_information.emails,5))
+ 		set stat = alterlist(cov_patient_info->demographics.contact_information.emails,i)
+ 		set cov_patient_info->demographics.contact_information.emails[i].email = 
+ 			temp_patient_info->contact_information.emails[i].email
+ 	endfor
+ 	
+ 	set cov_patient_info->status_data.status = "S"
  	
  	call SubroutineLog(build2('end sGetPatientDemo(',vPersonID,',',vEncntrID,')'))
  	return (cnvtrectojson(cov_patient_info))

@@ -19,4 +19,5 @@ call echo(build2("person_id=",person_id)) go
 ;call echo(build2("cmg_locations=",sGetCMGLocations(null))) go
 ;set stat = cnvtjsontorec(sGetCMGLocations(null)) go
 ;call echorecord(cmg_locations) go
-call echo(sGetPatientDemo(person_id,encntr_id)) go
+set stat = cnvtjsontorec(sGetPatientDemo(person_id,encntr_id)) go
+call echorecord(cov_patient_info) go
