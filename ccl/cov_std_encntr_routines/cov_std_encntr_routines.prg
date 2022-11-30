@@ -692,11 +692,47 @@ call SubroutineLog(build2('start sGetPatientDemo(',vPersonID,',',vEncntrID,')'))
  	set stat = cnvtjsontorec(_memory_reply_string)
  	set stat = copyrec(record_data,temp_patient_info,1)
  	
+ 	call echorecord(temp_patient_info)
  	
- 	set stat = moverec(temp_patient_info->addresses,cov_patient_info->demographics.addresses)
- 	set stat = moverec(temp_patient_info->contact_information.phone,cov_patient_info->demographics.contact_information.phone)
- 	set stat = moverec(temp_patient_info->health_plans,cov_patient_info->demographics.health_plans)
- 	set stat = moverec(temp_patient_info->emergency_contact_list,cov_patient_info->demographics.emergency_contact_list)
+ 	if (size(temp_patient_info->addresses,5) > 5)
+ 		set stat = moverec(temp_patient_info->addresses,cov_patient_info->demographics.addresses)
+ 	endif
+ 	
+ 	if (size(temp_patient_info->contact_information.phone,5) > 0)
+ 		set stat = moverec(temp_patient_info->contact_information.phone,cov_patient_info->demographics.contact_information.phone)
+ 	endif
+ 	
+ 	if (size(temp_patient_info->health_plans,5) > 0)
+ 		set stat = moverec(temp_patient_info->health_plans,cov_patient_info->demographics.health_plans)
+ 	endif
+ 	
+ 	for (i=1 to size(temp_patient_info->emergency_contact_list,5))
+ 		set stat = alterlist(cov_patient_info->demographics.emergency_contact_list,i)
+ 		set cov_patient_info->demographics.emergency_contact_list[i].name =
+ 			temp_patient_info->emergency_contact_list[i].name
+ 		set cov_patient_info->demographics.emergency_contact_list[i].relationship_to_person = 
+ 			temp_patient_info->emergency_contact_list[i].relationship_to_person
+ 		for (j=1 to size(cov_patient_info->demographics.emergency_contact_list[i].contact_phone,5))
+ 			set stat = alterlist(cov_patient_info->demographics.emergency_contact_list[i].contact_phone,j)
+ 			set cov_patient_info->demographics.emergency_contact_list[i].contact_phone[j].phone_number =
+ 				temp_patient_info->emergency_contact_list[i].contact_phone[j].phone_number
+ 			set cov_patient_info->demographics.emergency_contact_list[i].contact_phone[j].phone_type = 
+ 				temp_patient_info->emergency_contact_list[i].contact_phone[j].phone_type
+ 			set cov_patient_info->demographics.emergency_contact_list[i].contact_phone[j].phone_type_code = 
+ 				temp_patient_info->emergency_contact_list[i].contact_phone[j].phone_type_code
+ 		endfor
+ 	endfor
+ 	
+ 	/*
+ 	1 emergency_contact_list[*]
+    2 name = vc
+    2 relationship_to_person = vc
+    2 contact_phone[*]
+      3 phone_type = vc
+      3 phone_number = vc
+      3 phone_type_code = f8
+    */
+ 	
  	
  	set cov_patient_info->demographics.contact_information.preferred_method_of_contact 
  		= temp_patient_info->contact_information.preferred_method_of_contact
