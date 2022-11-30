@@ -18,7 +18,7 @@ CREATE PROGRAM cov_rules_wh_fetalneodeath :dba
  DECLARE sscript_version = c21 WITH protect ,constant ("000 03/05/21 NT5990" )
  CALL echo (build2 ("  starting script (" ,sscript_name ," - " ,sscript_version ,")..." ) )
  SET log_accessionid = link_accessionid
- SET log_orderid = link_orderid
+ SET log_orderid = link_orderid			
  SET log_encntrid = link_encntrid
  SET log_personid = link_personid
  SET log_taskassaycd = link_taskassaycd
