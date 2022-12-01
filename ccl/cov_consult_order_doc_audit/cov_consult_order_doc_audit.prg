@@ -33,10 +33,10 @@ prompt
 	, "Start Date and Time" = "SYSDATE"
 	, "End Date and Time" = "SYSDATE"
 	;<<hidden>>"Activity Type" = 0
-	, "Orderables" = 0.0
+	, "Orderables" = 0
 	, "Report Type" = 0
-	, "Priority" = 0
-	, "Facility" = 0 
+	, "Priority" = VALUE(1.0           )
+	, "Facility" = VALUE(1.0           ) 
 
 with OUTDEV, beg_dt_tm, end_dt_tm, catalog_cd, report_type, priority, 
 	facilitiy_prompt
@@ -112,18 +112,13 @@ record t_rec
 	 2 fin = vc
 	 2 mrn = vc
 	 2 name = vc
-	 2 event_id = f8
-	 2 note_dt_tm = dq8
-	 2 note_author = vc
-	 2 note_type = vc
-	 2 surg_event_id = f8
-	 2 surg_note_dt_tm = dq8
-	 2 surg_note_author = vc
-	 2 surg_note_type = vc
+	 2 note_cnt = i4
+	 2 note_qual[*]
+	  3 event_id = f8
+	  3 note_dt_tm = dq8
+	  3 note_author = vc
+	  3 note_type = vc
 )
-
-call echo(sGet_PromptValues(parameter2($CATALOG_CD)))
-
 
 set t_rec->prompts.outdev = $OUTDEV
 set t_rec->prompts.beg_dt_tm = $BEG_DT_TM
@@ -160,17 +155,14 @@ call writeLog(build2("**********************************************************
 
 
 call writeLog(build2("************************************************************"))
-call writeLog(build2("* START Custom   *******************************************"))
+call writeLog(build2("* START Order Catalog Items   *******************************************"))
 
-if(substring(1,1,reflect(parameter(parameter2($CATALOG_CD),0))) = "L")	;multiple values were selected
-	set t_rec->cons.opr_catalog_var = "in"
-elseif(parameter(parameter2($CATALOG_CD),1)= 0.0)						;selected 
-	set t_rec->cons.opr_catalog_var = "!="
-else																	;a single value was selected
-	set t_rec->cons.opr_catalog_var = "="
+set stat = cnvtjsontorec(sGet_PromptValues(parameter2($CATALOG_CD)))
+if (prompt_values->value_cnt = 0)
+	set t_rec->cons.opr_catalog_var = "1=1"
+else
+	set t_rec->cons.opr_catalog_var = "expand(i,1,prompt_values->value_cnt,oc.catalog_cd,prompt_values->value_qual[i].value_f8)"
 endif
-
-call echo(reflect(parameter(parameter2($CATALOG_CD),0)))
 
 select into "nl;"
 from
@@ -185,7 +177,7 @@ join ocs
 join oc
 	where oc.catalog_cd = ocs.catalog_cd
 	and   oc.active_ind = 1
-	and   operator(oc.catalog_cd, t_rec->cons.opr_catalog_var, $CATALOG_CD)
+	and   parser(t_rec->cons.opr_catalog_var)
 order by
 	 oc.primary_mnemonic
 	,oc.catalog_cd
@@ -201,11 +193,11 @@ foot report
 with nocounter
 	
 	
-call writeLog(build2("* END   Custom   *******************************************"))
+call writeLog(build2("* END   Order Catalog Items   *******************************************"))
 call writeLog(build2("************************************************************"))
 
 call writeLog(build2("************************************************************"))
-call writeLog(build2("* START Custom   *******************************************"))
+call writeLog(build2("* START Order Data Collection   *******************************************"))
 
 select into "nl:"
 from
@@ -252,12 +244,63 @@ foot report
 	t_rec->cnt = j
 with nocounter
 
-call writeLog(build2("* END   Custom   *******************************************"))
+call writeLog(build2("* END   Order Data Collection   *******************************************"))
 call writeLog(build2("************************************************************"))
 
+call writeLog(build2("************************************************************"))
+call writeLog(build2("* START Getting Notes   *******************************************"))
+ 
+select into "nl:"
+	 encntr_id = t_rec->qual[d2.seq].encntr_id
+	,order_id = t_rec->qual[d2.seq].order_id
+from
+	 (dummyt d2 with seq=t_rec->cnt)
+	,clinical_event ce
+	,code_value cv1
+	,prsnl p
+plan d2
+join ce
+	where ce.encntr_id = t_rec->qual[d2.seq].encntr_id
+	and   ce.valid_from_dt_tm <= cnvtdatetime(curdate,curtime3)
+	and	  ce.result_status_cd in(
+									  value(uar_get_code_by("MEANING",8,"AUTH"))
+									 ,value(uar_get_code_by("MEANING",8,"MODIFIED"))
+									 ,value(uar_get_code_by("MEANING",8,"ALTERED"))
+								)
+	and   ce.valid_until_dt_tm >= cnvtdatetime(curdate, curtime3)
+	and   ce.event_tag        != "Date\Time Correction"
+	and   ce.event_end_dt_tm >= cnvtdatetime(t_rec->qual[d2.seq].orig_order_dt_tm)
+join cv1
+	where cv1.code_value = ce.event_cd
+	and   cv1.display in ("*Consultation*")
+join p
+	where p.person_id = ce.verified_prsnl_id
+order by
+	 encntr_id
+	,order_id
+	,ce.event_end_dt_tm
+	,ce.event_id
+head report
+	i=0
+head encntr_id
+	null
+head order_id
+	i=0
+head ce.event_id
+	i += 1
+	stat = alterlist(t_rec->qual[d2.seq].note_qual,i)
+	
+	t_rec->qual[d2.seq].note_qual[i].event_id = ce.event_id
+	t_rec->qual[d2.seq].note_qual[i].note_dt_tm = ce.event_end_dt_tm
+	t_rec->qual[d2.seq].note_qual[i].note_author = p.name_full_formatted
+	t_rec->qual[d2.seq].note_qual[i].note_type = uar_get_code_display(ce.event_cd)
+
+foot order_id
+	t_rec->qual[d2.seq].note_cnt = i	
+with nocounter
 
 call writeLog(build2("************************************************************"))
-call writeLog(build2("* START Custom   *******************************************"))
+call writeLog(build2("* START Getting Notes   *******************************************"))
 
 select into "nl:"
 	 catalog_cd = t_rec->catalog_qual[d1.seq].catalog_cd
@@ -282,7 +325,7 @@ foot catalog_cd
 with nocounter,outerjoin=d2
 
 
-call writeLog(build2("* END   Custom   *******************************************"))
+call writeLog(build2("* END   Getting Notes   *******************************************"))
 call writeLog(build2("************************************************************"))
 
 
@@ -303,24 +346,36 @@ else
 	call get_fin(null)
 	call get_mrn(null)
 	
-	select into t_rec->prompts.outdev
+		select into t_rec->prompts.outdev
 		 facility = substring(1,50,t_rec->qual[d1.seq].facility)
-		,orderable = substring(1,100,t_rec->qual[d1.seq].mnemonic)
-		,priority = substring(1,10,t_rec->qual[d1.seq].priority)
-		,order_date = format(t_rec->qual[d1.seq].orig_order_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
 		,unit = substring(1,50,t_rec->qual[d1.seq].unit)
 		,mrn = substring(1,20,t_rec->qual[d1.seq].mrn)
 		,fin = substring(1,20,t_rec->qual[d1.seq].fin)
 		,name = substring(1,100,t_rec->qual[d1.seq].name)
-		,t_rec->qual[d1.seq].order_id	
+		,orderable = substring(1,100,t_rec->qual[d1.seq].mnemonic)
+		,priority = substring(1,10,t_rec->qual[d1.seq].priority)
+		,order_status = substring(1,20,t_rec->qual[d1.seq].order_status)
+		,order_date = format(t_rec->qual[d1.seq].orig_order_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
+		;,note_date = format(t_rec->qual[d1.seq].note_qual[d2.seq].note_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
+		;,note_author = substring(1,100,t_rec->qual[d1.seq].note_qual[d2.seq].note_author)
+		;,note_type = substring(1,100,t_rec->qual[d1.seq].note_qual[d2.seq].note_type)	
+		,order_id=t_rec->qual[d1.seq].order_id
+		,encntr_id=t_rec->qual[d1.seq].encntr_id
+		,event_id=t_rec->qual[d1.seq].note_qual[d2.seq].event_id
+		,note_cnt = t_rec->qual[d1.seq].note_cnt
 	from
 		(dummyt d1 with seq=t_rec->cnt)
+		,(dummyt d2)
 	plan d1
+		where maxrec(d2,size(t_rec->qual[d1.seq].note_qual,5))
+	join d2
 	order by
 		 t_rec->qual[d1.seq].facility
 		,t_rec->qual[d1.seq].priority
+		,t_rec->qual[d1.seq].name
 		,t_rec->qual[d1.seq].mnemonic
-	with nocounter, format, separator = " "
+		;,t_rec->qual[d1.seq].note_qual[d2.seq].note_type
+	with nocounter, format, separator = " ",outerjoin=d2
 endif
 
 #exit_script

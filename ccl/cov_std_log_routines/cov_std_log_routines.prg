@@ -311,6 +311,8 @@ subroutine sGet_PromptValues(pPromptNum)
 	
 	call SubroutineLog("prompt_values","RECORD")
 	
+	return(cnvtrectojson(prompt_values))
+	
 end ;add_log_message
 
 call echo(build2("finishing ",trim(cnvtlower(curprog))))
