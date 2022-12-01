@@ -575,9 +575,9 @@ if (reply->status_data.status in("Z","S"))
 endif
 ;001 end
  
-if (t_rec->ord_process_ind = 1)
-	call addEmailLog("chad.cummings@covhlth.com")
-endif
+;if (t_rec->ord_process_ind = 1)
+;	call addEmailLog("chad.cummings@covhlth.com")
+;endif
  
 call echojson(t_rec, concat("cclscratch:",t_rec->files.records_attachment) , 1)
 call addAttachment(program_log->files.file_path, replace(t_rec->files.records_attachment,"cclscratch:",""))
