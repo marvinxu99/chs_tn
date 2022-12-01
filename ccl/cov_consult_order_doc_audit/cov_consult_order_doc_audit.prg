@@ -362,7 +362,6 @@ else
 		,order_id=t_rec->qual[d1.seq].order_id
 		,encntr_id=t_rec->qual[d1.seq].encntr_id
 		,event_id=t_rec->qual[d1.seq].note_qual[d2.seq].event_id
-		,note_cnt = t_rec->qual[d1.seq].note_cnt
 	from
 		(dummyt d1 with seq=t_rec->cnt)
 		,(dummyt d2)
@@ -375,7 +374,7 @@ else
 		,t_rec->qual[d1.seq].name
 		,t_rec->qual[d1.seq].mnemonic
 		;,t_rec->qual[d1.seq].note_qual[d2.seq].note_type
-	with nocounter, format, separator = " ",outerjoin=d2
+	with nocounter, format, separator = " "
 endif
 
 #exit_script
