@@ -41,6 +41,7 @@ prompt
 with OUTDEV, beg_dt_tm, end_dt_tm, catalog_cd, report_type, priority, 
 	facilitiy_prompt
 
+execute cov_std_log_routines
 
 call echo(build("loading script:",curprog))
 set nologvar = 0	;do not create log = 1		, create log = 0
@@ -121,7 +122,8 @@ record t_rec
 	 2 surg_note_type = vc
 )
 
-execute ccl_parameter_exam2 
+call echo(sGet_PromptValues(parameter2($CATALOG_CD)))
+
 
 set t_rec->prompts.outdev = $OUTDEV
 set t_rec->prompts.beg_dt_tm = $BEG_DT_TM
@@ -330,7 +332,7 @@ endif
 
 
 call exitScript(null)
-;call echorecord(t_rec)
+call echorecord(t_rec)
 ;call echorecord(code_values)
 ;call echorecord(program_log)
 
