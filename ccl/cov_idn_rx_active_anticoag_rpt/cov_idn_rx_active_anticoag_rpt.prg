@@ -26,16 +26,16 @@ DROP PROGRAM cov_idn_rx_active_anticoag_rpt :dba GO
 CREATE PROGRAM cov_idn_rx_active_anticoag_rpt :dba
  
 prompt 
-	"Output to File/Printer/MINE" = "MINE"
-	, 'Select facility' = value ("*                                       " )
-	, 'Select unit' = value ("*                                       " ) 
+	"Output to File/Printer/MINE" = "MINE"                                ;* Enter or select the printer or file name to send this
+	, "Select facility" = VALUE("*", "PW")
+	, "Select unit" = VALUE("*                                       ") 
 
 with OUTDEV, FACILITY, UNIT
  
 DECLARE fac_cnt 		= i4
 DECLARE med_qual_str	= cvc
  
-SET med_qual_str 	= cnvtupper(trim( $MED_STR))
+
 SET cpharm 			= uar_get_code_by("MEANING" ,6000 ,"PHARMACY")
 SET cpharmact 		= uar_get_code_by("MEANING" ,106 ,"PHARMACY")
 SET cfin 			= uar_get_code_by("MEANING" ,319 ,"FIN NBR")
@@ -114,6 +114,17 @@ JOIN oi
 		AND oi.action_sequence = 1
 join oc	
 	where oc.catalog_cd = o.catalog_cd
+	and oc.primary_mnemonic in(
+	"enoxaparin",
+	"dalteparin",
+	"fondaparinux",
+	"eptifibatide",
+	"tirofiban",
+	"bivalirudin",
+	"heparin",
+	"warfarin",
+	"argatroban"
+	)
 JOIN ocs
 	WHERE ocs.catalog_cd = oi.catalog_cd
 		AND ocs.mnemonic_type_cd = cprimary
