@@ -356,25 +356,28 @@ else
 		,priority = substring(1,10,t_rec->qual[d1.seq].priority)
 		,order_status = substring(1,20,t_rec->qual[d1.seq].order_status)
 		,order_date = format(t_rec->qual[d1.seq].orig_order_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
-		;,note_date = format(t_rec->qual[d1.seq].note_qual[d2.seq].note_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
-		;,note_author = substring(1,100,t_rec->qual[d1.seq].note_qual[d2.seq].note_author)
-		;,note_type = substring(1,100,t_rec->qual[d1.seq].note_qual[d2.seq].note_type)	
+		,note_date = format(t_rec->qual[d1.seq].note_qual[d2.seq].note_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
+		,note_author = substring(1,100,t_rec->qual[d1.seq].note_qual[d2.seq].note_author)
+		,note_type = substring(1,100,t_rec->qual[d1.seq].note_qual[d2.seq].note_type)	
 		,order_id=t_rec->qual[d1.seq].order_id
 		,encntr_id=t_rec->qual[d1.seq].encntr_id
 		,event_id=t_rec->qual[d1.seq].note_qual[d2.seq].event_id
 	from
 		(dummyt d1 with seq=t_rec->cnt)
 		,(dummyt d2)
+		,(dummyt d3)
 	plan d1
 		where maxrec(d2,size(t_rec->qual[d1.seq].note_qual,5))
+	join d3
 	join d2
 	order by
 		 t_rec->qual[d1.seq].facility
 		,t_rec->qual[d1.seq].priority
 		,t_rec->qual[d1.seq].name
 		,t_rec->qual[d1.seq].mnemonic
-		;,t_rec->qual[d1.seq].note_qual[d2.seq].note_type
-	with nocounter, format, separator = " "
+		,t_rec->qual[d1.seq].note_qual[d2.seq].note_type
+	with nocounter, format, separator = " ",outerjoin=d3
+
 endif
 
 #exit_script
