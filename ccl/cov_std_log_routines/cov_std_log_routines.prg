@@ -247,6 +247,74 @@ subroutine add_eks_log_message(vMessage)
 									)
 end ;add_log_message
 
+/**********************************************************************************************************************
+** Function sGet_PromptValues(null)
+** ---------------------------------------------------------------------------------------
+** 
+**********************************************************************************************************************/
+
+declare sGet_PromptValues(pPromptNum = i2) = vc with copy, persist
+subroutine sGet_PromptValues(pPromptNum)
+	
+	declare par = c20 with private
+	declare lnum = i2 with private
+	declare cnt2 = i2 with private
+
+	free record prompt_values
+	record prompt_values
+	(
+		1 prompt_num = i2
+		1 value_cnt = i2
+		1 value_qual[*]
+		 2 value_f8 = f8
+		 2 value_i4 = i2
+		 2 value_vc = vc
+	)
+	
+	/*
+	$(4)L3
+	$(4.1)F8=20265987.000000
+	$(4.2)I4=20265575
+	$(4.3)C4=test
+	*/
+	set prompt_values->prompt_num = pPromptNum
+	set par = reflect(parameter(pPromptNum,0))
+	
+	if (substring(1,1,par) = "L") ;this is list type
+		call SubroutineLog(build("$(",pPromptNum,")",par))
+		set lnum = 1
+		while (lnum>0)
+			set par = reflect(parameter(pPromptNum,lnum))
+				if (par = " ")
+					;no more items in list for parameter
+					set cnt2 = lnum-1
+					set lnum = 0
+				else
+					;valid item in list for parameter
+					call SubroutineLog(build("$(",pPromptNum,".",lnum,")",par,"=",parameter(pPromptNum,lnum)))
+					
+					set prompt_values->value_cnt += 1
+					set stat = alterlist(prompt_values->value_qual,prompt_values->value_cnt)
+					if (substring(1,1,par) = "F")
+						set prompt_values->value_qual[prompt_values->value_cnt].value_f8 = parameter(pPromptNum,lnum)
+					elseif (substring(1,1,par) = "I")
+						set prompt_values->value_qual[prompt_values->value_cnt].value_i4 = parameter(pPromptNum,lnum)
+					elseif (substring(1,1,par) = "C")
+						set prompt_values->value_qual[prompt_values->value_cnt].value_vc = parameter(pPromptNum,lnum)
+					endif
+					set lnum = lnum+1
+				endif
+		endwhile
+	else
+		call SubroutineLog(build("$(",pPromptNum,")",par,"=",parameter(pPromptNum,lnum)))
+	endif
+	
+	call SubroutineLog("prompt_values","RECORD")
+	
+	return(cnvtrectojson(prompt_values))
+	
+end ;add_log_message
+
 call echo(build2("finishing ",trim(cnvtlower(curprog))))
  
 end go
