@@ -147,7 +147,10 @@ endif
 ;	go to exit_script
 ;endif
 
-set t_rec->user_message = "Please see Physician/Surgeon notes for the report"
+set t_rec->user_message = build2( "Radiologist interpretation is not required for this procedure.  "
+								 ,"Procedure report is provided by the performing and/or treating physician.  "
+								 ,"Please see the medical record for this report."
+								)
 
 record 455014request (
   1 ord_rad [*]
