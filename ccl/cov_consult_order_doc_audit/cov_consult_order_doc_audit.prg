@@ -6,8 +6,8 @@
 	Author:				Chad Cummings
 	Date Written:		
 	Solution:			
-	Source file name:	cov_consult_order_audit.prg
-	Object name:		cov_consult_order_audit
+	Source file name:	cov_consult_order_doc_audit.prg
+	Object name:		cov_consult_order_doc_audit
 	Request #:
 
 	Program purpose:
@@ -109,6 +109,8 @@ record t_rec
 	 2 loc_facility_cd = f8
 	 2 unit = vc
 	 2 loc_unit_cd = f8
+	 2 consulting_provider = vc
+	 2 consulting_id = f8
 	 2 fin = vc
 	 2 mrn = vc
 	 2 name = vc
@@ -205,6 +207,8 @@ from
 	,encounter e
 	,person p
 	,order_detail od
+	,order_detail od2
+	,prsnl p2
 plan o
 	where expand(i,1,t_rec->catalog_cnt,o.catalog_cd,t_rec->catalog_qual[i].catalog_cd)
 	and   o.orig_order_dt_tm between cnvtdatetime(t_rec->dates.start_dt_tm) and cnvtdatetime(t_rec->dates.end_dt_tm)
@@ -217,11 +221,17 @@ join p
 join od
 	where od.order_id = o.order_id
 	and   od.oe_field_id = 12657;Priority	PRIORITY	
-	and   operator(od.oe_field_value, t_rec->cons.opr_priority_var, $PRIORITY)  
+	and   operator(od.oe_field_value, t_rec->cons.opr_priority_var, $PRIORITY)
+join od2
+	where od2.order_id 		= outerjoin(o.order_id)
+	and   od2.oe_field_id 	= outerjoin(12581.00)	;Consulting Physician
+join p2
+	where p2.person_id = outerjoin(od2.oe_field_value)	 
 order by
 	 o.encntr_id
 	,o.order_id
 	,od.action_sequence desc
+	,od2.action_sequence desc
 head report
 	j = 0
 head o.order_id
@@ -240,6 +250,9 @@ head o.order_id
 	t_rec->qual[j].priority = od.oe_field_display_value
 	t_rec->qual[j].unit = uar_get_code_display(e.loc_nurse_unit_cd)
 	t_rec->qual[j].catalog_cd = o.catalog_cd
+	t_rec->qual[j].consulting_id = p2.person_id
+	t_rec->qual[j].consulting_provider = p2.name_full_formatted
+	t_rec->qual[j].order_status = uar_get_code_display(o.order_status_cd)
 foot report
 	t_rec->cnt = j
 with nocounter
@@ -279,18 +292,18 @@ order by
 	 encntr_id
 	,order_id
 	,ce.event_end_dt_tm
-	,ce.event_id
+	,ce.parent_event_id
 head report
 	i=0
 head encntr_id
 	null
 head order_id
 	i=0
-head ce.event_id
+head ce.parent_event_id
 	i += 1
 	stat = alterlist(t_rec->qual[d2.seq].note_qual,i)
 	
-	t_rec->qual[d2.seq].note_qual[i].event_id = ce.event_id
+	t_rec->qual[d2.seq].note_qual[i].event_id = ce.parent_event_id
 	t_rec->qual[d2.seq].note_qual[i].note_dt_tm = ce.event_end_dt_tm
 	t_rec->qual[d2.seq].note_qual[i].note_author = p.name_full_formatted
 	t_rec->qual[d2.seq].note_qual[i].note_type = uar_get_code_display(ce.event_cd)
@@ -356,6 +369,7 @@ else
 		,priority = substring(1,10,t_rec->qual[d1.seq].priority)
 		,order_status = substring(1,20,t_rec->qual[d1.seq].order_status)
 		,order_date = format(t_rec->qual[d1.seq].orig_order_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
+		,oef_consult = substring(1,100,t_rec->qual[d1.seq].consulting_provider)
 		,note_date = format(t_rec->qual[d1.seq].note_qual[d2.seq].note_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
 		,note_author = substring(1,100,t_rec->qual[d1.seq].note_qual[d2.seq].note_author)
 		,note_type = substring(1,100,t_rec->qual[d1.seq].note_qual[d2.seq].note_type)	
