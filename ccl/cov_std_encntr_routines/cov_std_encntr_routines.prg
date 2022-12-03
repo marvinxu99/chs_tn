@@ -176,6 +176,180 @@ subroutine sGetPersonID_ByFIN(vFIN)
 end
 
 
+
+/**********************************************************************************************************************
+** Function sGetPersonID_ByAlias()
+** ---------------------------------------------------------------------------------------
+** Returns the person IDs for the Alias supplied in the cov_person_alias JSON record structure
+**********************************************************************************************************************/
+declare sGetPersonID_ByAlias(vAlias=vc,vType=vc(VALUE,"SSN")) = vc  with copy, persist
+subroutine sGetPersonID_ByAlias(vAlias,vType)
+	
+	call SubroutineLog(build2('start sGetPersonID_ByAlias(',vAlias,',',vType,')'))
+	
+	free record cov_person_alias
+	record cov_person_alias
+	(
+		1 cnt = i2
+		1 qual[*]
+		 2 person_id = f8
+		 2 alias = vc
+		 2 alias_type_cd = f8
+		 2 alias_type_mean = vc
+	)
+	
+	select into "nl:"
+	from
+		 person_alias pa
+		,person p
+	plan pa
+		where pa.alias = vAlias
+		and   pa.active_ind = 1
+		and   pa.beg_effective_dt_tm <= cnvtdatetime(sysdate)
+		and   pa.end_effective_dt_tm >= cnvtdatetime(sysdate)
+		and   pa.person_alias_type_cd = value(uar_get_code_by("MEANING",4,vType))
+	join p
+		where p.person_id = pa.person_id
+		and   p.active_ind = 1
+	order by
+		pa.person_id
+	head report
+		cov_person_alias->cnt = 0
+	head pa.person_id
+		cov_person_alias->cnt += 1
+		stat = alterlist(cov_person_alias->qual,cov_person_alias->cnt)
+		cov_person_alias->qual[cov_person_alias->cnt].person_id = p.person_id
+		cov_person_alias->qual[cov_person_alias->cnt].alias_type_cd = pa.person_alias_type_cd
+		cov_person_alias->qual[cov_person_alias->cnt].alias_type_mean = uar_get_code_meaning(pa.person_alias_type_cd)
+	with nocounter
+	
+	call SubroutineLog(build2('end sGetPersonID_ByAlias(',vAlias,',',vType,')'))
+	
+	return (cnvtrectojson(cov_person_alias))
+
+end
+
+/**********************************************************************************************************************
+** Function sGetDOB_ByPersonID(vPersonID=f8) = c8
+** ---------------------------------------------------------------------------------------
+** Returns the MMDDYYYY DOB for the provider person_id
+**********************************************************************************************************************/
+declare sGetDOB_ByPersonID(vPersonID=f8) = c8  with copy, persist
+subroutine sGetDOB_ByPersonID(vPersonID)
+
+	call SubroutineLog(build2('start sGetDOB_ByPersonID(',vPersonID,')'))
+	
+	declare vReturnDOB = c8 with protect
+	
+	select into "nl:"
+	from
+		person p
+	plan p
+		where p.person_id = vPersonID
+		and   p.active_ind = 1
+	order by
+		p.person_id
+	head p.person_id
+		vReturnDOB = DateBirthFormat(p.birth_dt_tm,p.birth_tz,p.birth_prec_flag,"MMDDYYYY",0,0)
+	with nocounter
+	
+	call SubroutineLog(build2('end sGetDOB_ByPersonID(',vPersonID,')'))
+	
+	return (vReturnDOB)
+
+end
+
+
+/**********************************************************************************************************************
+** Function sValidate_DOB(vPersonID=f8,vDOB=c8) = i2
+** ---------------------------------------------------------------------------------------
+** Returns the TRUE or FALSE if supplied DOB MMDDYYYY matchs DOB for the provided person_id
+**********************************************************************************************************************/
+declare sValidate_DOB(vPersonID=f8,vDOB=c8) = i2  with copy, persist
+subroutine sValidate_DOB(vPersonID,vDOB)
+
+	call SubroutineLog(build2('start sValidate_DOB(',vPersonID,',',vDOB,')'))
+	
+	declare vReturnValue = i2 with noconstant(FALSE), protect
+	declare vDOBCheck = c8 with private, protect
+
+	set vDOBCheck = sGetDOB_ByPersonID(vPersonID)
+	
+	if (vDOBCheck = vDOB)
+		set vReturnValue = TRUE
+	endif
+	
+	call SubroutineLog(build2('end sValidate_DOB(',vPersonID,',',vDOB,')'))
+	
+	return (vReturnValue)
+
+end
+
+/**********************************************************************************************************************
+** Function sGetSex_ByPersonID(vPersonID=f8) = vc
+** ---------------------------------------------------------------------------------------
+** Returns the alias for sex_cd from the Covenant contr. source  for the provider person_id
+**********************************************************************************************************************/
+declare sGetSex_ByPersonID(vPersonID=f8) = vc  with copy, persist
+subroutine sGetSex_ByPersonID(vPersonID)
+
+	call SubroutineLog(build2('start sGetSex_ByPersonID(',vPersonID,')'))
+	
+	declare vReturnSex = vc with protect
+	
+	select into "nl:"
+	from
+		 person p
+		,code_value_alias cva
+		,code_value cv
+	plan p
+		where p.person_id = vPersonID
+		and   p.active_ind = 1
+	join cva
+		where cva.code_value = p.sex_cd
+	join cv
+		where cv.code_value = cva.contributor_source_cd
+		and   cv.display = "COVENANT"
+		and   cv.active_ind = 1
+	order by
+		 p.person_id
+	head p.person_id
+		vReturnSex = cva.alias
+	with nocounter
+	
+	call SubroutineLog(build2('->vReturnSex=',vReturnSex,'<end>'))
+	
+	call SubroutineLog(build2('end sGetSex_ByPersonID(',vPersonID,')'))
+	
+	return (vReturnSex)
+
+end
+
+/**********************************************************************************************************************
+** Function sValidate_Sex(vPersonID=f8,vSex=vc) = i2
+** ---------------------------------------------------------------------------------------
+** Returns the TRUE or FALSE if supplied Sex matchs Sex_cd for the provided person_id on the Covenant contr. source
+**********************************************************************************************************************/
+declare sValidate_Sex(vPersonID=f8,vSex=vc) = i2  with copy, persist
+subroutine sValidate_Sex(vPersonID,vSex)
+
+	call SubroutineLog(build2('start sValidate_Sex(',vPersonID,',',vSex,')'))
+	
+	declare vReturnValue = i2 with noconstant(FALSE), protect
+	declare vDOBCheck = vc with private, protect
+
+	set vSexCheck = sGetSex_ByPersonID(vPersonID)
+	
+	if (vSexCheck = vSex)
+		set vReturnValue = TRUE
+	endif
+	
+	call SubroutineLog(build2('end sValidate_Sex(',vPersonID,',',vSex,')'))
+	
+	return (vReturnValue)
+
+end
+
 /**********************************************************************************************************************
 ** Function sGetPersonID_ByEncntrID()
 ** ---------------------------------------------------------------------------------------

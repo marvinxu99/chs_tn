@@ -69,9 +69,28 @@ set request->params = ^"MINE"^ go
  
 execute VCCL_RUN_PROGRAM go
 */
+free record patient_request go
+record patient_request
+(
+	1 criteria[*]
+	 2 value = vc
+	 2 type = vc
+) go
+
+set stat = alterlist(patient_request->criteria,3) go
+set patient_request->criteria[1].value = "515947969" go
+set patient_request->criteria[1].type = "SSN" go
+
+set patient_request->criteria[2].value = "05151992"  go
+set patient_request->criteria[2].type = "DOB" go
+
+set patient_request->criteria[3].value = "F" go
+set patient_request->criteria[3].type = "SEX" go
+
+call echo(cnvtrectojson(patient_request)) go
 
 set debug_ind = 1 go 
-execute cov_patient_find_svc ^nl:^,^{"PATIENT_REQUEST":{"DOB":"03241980","SEX":"M","SSN":"505967933"}}^  go
+execute cov_patient_find_svc ^nl:^,cnvtrectojson(patient_request)  go
 
  
  
