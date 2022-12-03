@@ -6,8 +6,8 @@
 	Author:				Chad Cummings
 	Date Written:		
 	Solution:			
-	Source file name:	cov_patient_info_svc.prg
-	Object name:		cov_patient_info_svc
+	Source file name:	cov_patient_find_svc.prg
+	Object name:		cov_patient_find_svc
 	Request #:
 
 	Program purpose:
@@ -25,15 +25,14 @@ Mod 	Mod Date	  Developer				      Comment
 000 	08/12/2021  Chad Cummings			Initial Release
 ******************************************************************************/
 
-drop program cov_patient_info_svc:dba go
-create program cov_patient_info_svc:dba
+drop program cov_patient_find_svc:dba go
+create program cov_patient_find_svc:dba
 
 prompt 
-	"Output to File/Printer/MINE" = "MINE"
-	, "ALIAS" = ""
-	, "ALIAS_TYPE" = "CMRN" 
+	"Output to File/Printer/MINE" = "MINE"   ;* Enter or select the printer or file name to send this report to.
+	, "REQUEST" = "" 
 
-with OUTDEV, ALIAS, ALIAS_TYPE
+with OUTDEV, REQUEST
 
 execute cov_std_encntr_routines
 
@@ -59,17 +58,13 @@ record  reply
 )
 endif
 
-call set_codevalues(null)
-call check_ops(null)
-
 ;free set t_rec
 record t_rec
 (
 	1 cnt			= i4
 	1 prompts
 	 2 outdev		= vc
-	 2 alias	= vc
-	 2 alias_type	= vc
+	 2 request		= vc
 	1 files
 	 2 records_attachment		= vc
 	1 dminfo
@@ -95,8 +90,7 @@ record t_rec
 set t_rec->files.records_attachment = concat(trim(cnvtlower(curprog)),"_rec_",trim(format(sysdate,"yyyy_mm_dd_hh_mm_ss;;d")),".dat")
 
 set t_rec->prompts.outdev 		= $OUTDEV
-set t_rec->prompts.alias 		= $ALIAS
-set t_rec->prompts.alias_type 	= cnvtupper($ALIAS_TYPE)
+set t_rec->prompts.request 		= $REQUEST
 
 set t_rec->cons.run_dt_tm 		= cnvtdatetime(curdate,curtime3)
 
@@ -107,12 +101,8 @@ call writeLog(build2("**********************************************************
 call writeLog(build2("************************************************************"))
 call writeLog(build2("* START Validating Alias   *******************************************"))
 
-if (t_rec->prompts.alias_type = "CMRN")
-	set t_rec->cons.person_id = sGetPersonID_ByCMRN(t_rec->prompts.alias) 
-elseif (t_rec->prompts.alias_type = "FIN")
-	set t_rec->cons.person_id = sGetPersonID_ByFIN(t_rec->prompts.alias) 
-	set t_rec->cons.encntr_id = sGetEncntrID_ByFIN(t_rec->prompts.alias) 
-endif   
+set stat = cnvtjsontorec(t_rec->prompts.request)
+call echorecord(patient_request)
     
 call writeLog(build2("* END   Validating Alias   *******************************************"))
 call writeLog(build2("************************************************************"))
@@ -120,7 +110,6 @@ call writeLog(build2("**********************************************************
 call writeLog(build2("************************************************************"))
 call writeLog(build2("* START Custom   *******************************************"))
 
-set stat = cnvtjsontorec(sGetPatientDemo(t_rec->cons.person_id,t_rec->cons.encntr_id))
 
 call writeLog(build2("* END   Custom   *******************************************"))
 call writeLog(build2("************************************************************"))
@@ -129,7 +118,7 @@ call writeLog(build2("**********************************************************
 call writeLog(build2("************************************************************"))
 call writeLog(build2("* START Custom   *******************************************"))
 
-set _MEMORY_REPLY_STRING = cnvtrectojson(cov_patient_info)
+set _MEMORY_REPLY_STRING = cnvtrectojson(reply)
 
 call writeLog(build2("* END   Custom   *******************************************"))
 call writeLog(build2("************************************************************"))
@@ -145,7 +134,7 @@ call writeLog(build2("**********************************************************
 
 call exitScript(null)
 call echorecord(t_rec)
-call echorecord(cov_patient_info)
+;call echorecord(cov_patient_info)
 ;call echorecord(code_values)
 ;call echorecord(program_log)
 
