@@ -6,8 +6,8 @@
 	Author:				Chad Cummings
 	Date Written:		
 	Solution:			
-	Source file name:	cov_patient_info_svc.prg
-	Object name:		cov_patient_info_svc
+	Source file name:	cov_patient_find_svc.prg
+	Object name:		cov_patient_find_svc
 	Request #:
 
 	Program purpose:
@@ -25,15 +25,14 @@ Mod 	Mod Date	  Developer				      Comment
 000 	08/12/2021  Chad Cummings			Initial Release
 ******************************************************************************/
 
-drop program cov_patient_info_svc:dba go
-create program cov_patient_info_svc:dba
+drop program cov_patient_find_svc:dba go
+create program cov_patient_find_svc:dba
 
 prompt 
-	"Output to File/Printer/MINE" = "MINE"
-	, "ALIAS" = ""
-	, "ALIAS_TYPE" = "CMRN" 
+	"Output to File/Printer/MINE" = "MINE"   ;* Enter or select the printer or file name to send this report to.
+	, "REQUEST" = "" 
 
-with OUTDEV, ALIAS, ALIAS_TYPE
+with OUTDEV, REQUEST
 
 execute cov_std_encntr_routines
 
@@ -59,17 +58,13 @@ record  reply
 )
 endif
 
-call set_codevalues(null)
-call check_ops(null)
-
 ;free set t_rec
 record t_rec
 (
 	1 cnt			= i4
 	1 prompts
 	 2 outdev		= vc
-	 2 alias	= vc
-	 2 alias_type	= vc
+	 2 request		= vc
 	1 files
 	 2 records_attachment		= vc
 	1 dminfo
@@ -88,15 +83,23 @@ record t_rec
 	 2 mrn			= vc
 	 2 fin			= vc
 	 2 name_full_formatted = vc
+	 2 valid_ind	= i2
+	 2 dob			= vc
+	 2 sex			= vc
+	1 pass_cnt		= i2
+	1 pass[*]
+	 2 person_id	= f8
+	 2 encntr_id	= f8
 )
+
+
 
 ;call addEmailLog("chad.cummings@covhlth.com")
 
 set t_rec->files.records_attachment = concat(trim(cnvtlower(curprog)),"_rec_",trim(format(sysdate,"yyyy_mm_dd_hh_mm_ss;;d")),".dat")
 
 set t_rec->prompts.outdev 		= $OUTDEV
-set t_rec->prompts.alias 		= $ALIAS
-set t_rec->prompts.alias_type 	= cnvtupper($ALIAS_TYPE)
+set t_rec->prompts.request 		= $REQUEST
 
 set t_rec->cons.run_dt_tm 		= cnvtdatetime(curdate,curtime3)
 
@@ -107,12 +110,49 @@ call writeLog(build2("**********************************************************
 call writeLog(build2("************************************************************"))
 call writeLog(build2("* START Validating Alias   *******************************************"))
 
-if (t_rec->prompts.alias_type = "CMRN")
-	set t_rec->cons.person_id = sGetPersonID_ByCMRN(t_rec->prompts.alias) 
-elseif (t_rec->prompts.alias_type = "FIN")
-	set t_rec->cons.person_id = sGetPersonID_ByFIN(t_rec->prompts.alias) 
-	set t_rec->cons.encntr_id = sGetEncntrID_ByFIN(t_rec->prompts.alias) 
-endif   
+set stat = cnvtjsontorec(t_rec->prompts.request)
+call echorecord(patient_request)
+
+if (not (validate(patient_request->criteria)))
+	set stat = sSet_ErrorReply("Invalid or Missing Request")
+	go to exit_script
+endif
+
+if (validate(patient_request->criteria[1].type))
+	if (patient_request->criteria[1].type in("SSN"))
+		set stat = cnvtjsontorec(sGetPersonID_ByAlias(patient_request->criteria[1].value,patient_request->criteria[1].type))
+		if (validate(cov_person_alias))
+			for (i=1 to cov_person_alias->cnt)
+				set t_rec->cnt = i
+				set stat = alterlist(t_rec->qual,t_rec->cnt)
+				set t_rec->qual[t_rec->cnt].person_id = cov_person_alias->qual[i].person_id
+				set t_rec->qual[t_rec->cnt].valid_ind = 1
+			endfor
+		endif
+	else
+		set stat = sSet_ErrorReply("First search parameter type invalid")
+		go to exit_script
+	endif
+else
+	set stat = sSet_ErrorReply("Invalid or Missing Request")
+	go to exit_script
+endif
+
+if (t_rec->cnt > 0)
+	;process other criteria for each patient
+	for (j=2 to size(patient_request->criteria,5))
+		for (i=1 to t_rec->cnt)
+			if (t_rec->qual[i].valid_ind = 1)
+				if (patient_request->criteria[j].type = "DOB")
+					set t_rec->qual[i].valid_ind = sValidate_DOB(t_rec->qual[i].person_id,patient_request->criteria[j].value)
+				endif
+				if (patient_request->criteria[j].type = "SEX")
+					set t_rec->qual[i].valid_ind = sValidate_Sex(t_rec->qual[i].person_id,patient_request->criteria[j].value)
+				endif
+			endif
+		endfor		
+	endfor
+endif
     
 call writeLog(build2("* END   Validating Alias   *******************************************"))
 call writeLog(build2("************************************************************"))
@@ -120,22 +160,42 @@ call writeLog(build2("**********************************************************
 call writeLog(build2("************************************************************"))
 call writeLog(build2("* START Custom   *******************************************"))
 
-set stat = cnvtjsontorec(sGetPatientDemo(t_rec->cons.person_id,t_rec->cons.encntr_id))
+for (i=1 to t_rec->cnt)
+	if (t_rec->qual[i].valid_ind = 1)
+		set t_rec->pass_cnt += 1
+		set stat = alterlist(t_rec->pass,t_rec->pass_cnt)
+		set t_rec->pass[t_rec->pass_cnt].person_id = t_rec->qual[i].person_id
+	endif
+endfor	
 
-call writeLog(build2("* END   Custom   *******************************************"))
-call writeLog(build2("************************************************************"))
-
-
-call writeLog(build2("************************************************************"))
-call writeLog(build2("* START Custom   *******************************************"))
-
-set _MEMORY_REPLY_STRING = cnvtrectojson(cov_patient_info)
+if (t_rec->pass_cnt > 1)
+	set stat = sSet_ErrorReply("Multiple patient matches for provided criteria")
+	go to exit_script
+elseif (t_rec->pass_cnt = 0)
+	set stat = sSet_ErrorReply("No patients matching supplied criteria were found")
+	set reply->status_data.status = "Z"
+	go to exit_script
+else
+	set _MEMORY_REPLY_STRING = sGetPatientDemo(t_rec->pass[1].person_id,t_rec->pass[1].encntr_id)
+	set reply->status_data.status = "S"
+endif
 
 call writeLog(build2("* END   Custom   *******************************************"))
 call writeLog(build2("************************************************************"))
 
 
 #exit_script
+
+call writeLog(build2("************************************************************"))
+call writeLog(build2("* START Custom   *******************************************"))
+
+if (reply->status_data != "S")
+	set _MEMORY_REPLY_STRING = cnvtrectojson(reply)
+endif
+
+call writeLog(build2("* END   Custom   *******************************************"))
+call writeLog(build2("************************************************************"))
+
 
 
 ;call echojson(t_rec, concat("cclscratch:",t_rec->files.records_attachment) , 1)
@@ -145,7 +205,8 @@ call writeLog(build2("**********************************************************
 
 call exitScript(null)
 call echorecord(t_rec)
-call echorecord(cov_patient_info)
+call echo(build2("_MEMORY_REPLY_STRING=",_MEMORY_REPLY_STRING))
+;call echorecord(cov_patient_info)
 ;call echorecord(code_values)
 ;call echorecord(program_log)
 
