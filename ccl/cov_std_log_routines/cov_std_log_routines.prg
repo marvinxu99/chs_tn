@@ -315,6 +315,27 @@ subroutine sGet_PromptValues(pPromptNum)
 	
 end ;add_log_message
 
+/**********************************************************************************************************************
+** Function sSet_ErrorReply(vMessage)
+** ---------------------------------------------------------------------------------------
+** 
+**********************************************************************************************************************/
+
+declare sSet_ErrorReply(vMessage = vc) = i2 with copy, persist
+subroutine sSet_ErrorReply(vMessage)
+
+	if (validate(reply->status_data))
+		set reply->status_data = "F"
+	endif
+	
+	if (validate(reply->text))
+		set reply->text = vMessage
+	endif
+	
+	return (TRUE)
+
+end	;sSet_ErrorReply
+
 call echo(build2("finishing ",trim(cnvtlower(curprog))))
  
 end go
