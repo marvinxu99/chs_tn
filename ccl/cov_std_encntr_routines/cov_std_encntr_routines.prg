@@ -709,7 +709,7 @@ end
 declare sGetPatientInfo(vPersonID=f8,vEncntrID=f8) = vc  with copy, persist
 subroutine sGetPatientInfo(vPersonID,vEncntrID)
 
-call SubroutineLog(build2('start sGetPatientDemo(',vPersonID,',',vEncntrID,')'))	
+call SubroutineLog(build2('start sGetPatientInfo(',vPersonID,',',vEncntrID,')'))	
  	free record cov_patient_info
  	
  	declare _memory_reply_string = vc with noconstant(" "), protect
@@ -718,7 +718,7 @@ call SubroutineLog(build2('start sGetPatientDemo(',vPersonID,',',vEncntrID,')'))
  	set stat = cnvtjsontorec(_memory_reply_string)
  	set stat = copyrec(record_data,cov_patient_info,1)
  	
- 	call SubroutineLog(build2('end sGetPatientDemo(',vPersonID,',',vEncntrID,')'))
+ 	call SubroutineLog(build2('end sGetPatientInfo(',vPersonID,',',vEncntrID,')'))
  	return (cnvtrectojson(cov_patient_info))
 end 
 
