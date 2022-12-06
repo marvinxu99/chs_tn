@@ -168,16 +168,21 @@ for (i=1 to t_rec->cnt)
 	endif
 endfor	
 
-if (t_rec->pass_cnt > 1)
-	set stat = sSet_ErrorReply("Multiple patient matches for provided criteria")
-	go to exit_script
-elseif (t_rec->pass_cnt = 0)
+if (t_rec->pass_cnt > 0)
+	for (i=1 to t_rec->pass_cnt)
+		if (1>1)
+			set _MEMORY_REPLY_STRING = build2(_MEMORY_REPLY_STRING,char(13),char(10))
+		endif
+		set _MEMORY_REPLY_STRING = build2(
+												_MEMORY_REPLY_STRING,
+												sGetPatientDemo(t_rec->pass[i].person_id,t_rec->pass[i].encntr_id)
+											)
+	endfor
+	set reply->status_data.status = "S"
+else
 	set stat = sSet_ErrorReply("No patients matching supplied criteria were found")
 	set reply->status_data.status = "Z"
 	go to exit_script
-else
-	set _MEMORY_REPLY_STRING = sGetPatientDemo(t_rec->pass[1].person_id,t_rec->pass[1].encntr_id)
-	set reply->status_data.status = "S"
 endif
 
 call writeLog(build2("* END   Custom   *******************************************"))
