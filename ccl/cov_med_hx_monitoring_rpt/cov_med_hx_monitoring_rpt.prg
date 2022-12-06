@@ -15,6 +15,20 @@
 	Executing from:		CCL
 
  	Special Notes:		Called by ccl program(s).
+						Facility
+						Unit
+						FIN
+						Encntr Type
+						Location Path
+						ED Arrival Time
+						ED Decision to Admit
+						PSO Time
+						Med Hx Time
+						Admission Med Rec Time
+						First Med order post PSO?
+						
+						Is Med Hx done before PSO
+						Med hx done X hours after PSO
 
 ******************************************************************************
   GENERATED MODIFICATION CONTROL LOG
@@ -30,11 +44,13 @@ create program cov_med_hx_monitoring_rpt:dba
 
 prompt 
 	"Output to File/Printer/MINE" = "MINE"
-	, "Start Date and Time" = "SYSDATE"
-	, "End Date and Time" = "SYSDATE" 
+	, "Start Date and Time" = "CURDATE"
+	, "End Date and Time" = "CURDATE"
+	, "Facility" = 0 
 
-with OUTDEV, START_DT_TM, END_DT_TM
+with OUTDEV, START_DT_TM, END_DT_TM, FACILITY
 
+execute cov_std_log_routines
 
 call echo(build("loading script:",curprog))
 set nologvar = 0	;do not create log = 1		, create log = 0
@@ -79,6 +95,10 @@ record t_rec
 	1 dates
 	 2 start_dt_tm	= dq8
 	 2 end_dt_tm	= dq8
+	1 facility_cnt	= i4
+	1 facility_qual[*]
+	 2 loc_facility_cd = f8
+	 2 facility_display = vc
 	1 qual[*]
 	 2 person_id	= f8
 	 2 encntr_id	= f8
@@ -102,10 +122,36 @@ call writeLog(build2("**********************************************************
 
 
 call writeLog(build2("************************************************************"))
-call writeLog(build2("* START Finding Diagnosis   *******************************************"))
- 
-    
-call writeLog(build2("* END   Finding Diagnosis   *******************************************"))
+call writeLog(build2("* START Finding Facility ***********************************"))
+
+set stat = cnvtjsontorec(sGet_PromptValues(parameter2($FACILITY)))
+call echorecord(prompt_values)
+
+select into "nl:"
+from
+	code_value cv
+plan cv
+	where expand(i,1,prompt_values->value_cnt,cv.code_value,prompt_values->value_qual[i].value_f8)
+	and   cv.active_ind = 1
+order by
+	 cv.display
+	,cv.code_value
+head cv.code_value
+	t_rec->facility_cnt += 1
+	stat = alterlist(t_rec->facility_qual,t_rec->facility_cnt)
+	t_rec->facility_qual[t_rec->facility_cnt].loc_facility_cd = cv.code_value
+	t_rec->facility_qual[t_rec->facility_cnt].facility_display = cv.display
+with nocounter
+	
+/*
+if (prompt_values->value_cnt = 0)
+	set t_rec->cons.opr_catalog_var = "1=1"
+else
+	set t_rec->cons.opr_catalog_var = "expand(i,1,prompt_values->value_cnt,oc.catalog_cd,prompt_values->value_qual[i].value_f8)"
+endif 
+*/
+   
+call writeLog(build2("* END   Finding Facility  **********************************"))
 call writeLog(build2("************************************************************"))
 
 call writeLog(build2("************************************************************"))
