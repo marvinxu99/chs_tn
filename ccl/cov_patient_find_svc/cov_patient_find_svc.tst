@@ -76,20 +76,23 @@ record patient_request
 	 2 value = vc
 	 2 type = vc
 ) go
+;~{'PATIENT_REQUEST':{'CRITERIA':[{'VALUE':'999999999','TYPE':'SSN'},
+;{'VALUE':'11051955','TYPE':'DOB'},{'VALUE':'U','TYPE':'SEX'}]}}~
 
 set stat = alterlist(patient_request->criteria,3) go
-set patient_request->criteria[1].value = "515947969" go
+set patient_request->criteria[1].value = "999999999" go
 set patient_request->criteria[1].type = "SSN" go
 
-set patient_request->criteria[2].value = "05151992"  go
+set patient_request->criteria[2].value = "11051955"  go
 set patient_request->criteria[2].type = "DOB" go
 
-set patient_request->criteria[3].value = "F" go
+set patient_request->criteria[3].value = "U" go
 set patient_request->criteria[3].type = "SEX" go
 
 call echo(cnvtrectojson(patient_request)) go
+;declare _MEMORY_REPLY_STRING = vc go
 
-set debug_ind = 1 go 
+set debug_ind = 0 go 
 execute cov_patient_find_svc ^nl:^,cnvtrectojson(patient_request)  go
 
  
