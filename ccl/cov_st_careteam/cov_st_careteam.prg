@@ -49,8 +49,6 @@ record  reply
 )
 endif
  
-call get_rtf_definitions(null)
- 
 record t_rec
 (
 	1 cnt			= i4
@@ -63,6 +61,7 @@ record t_rec
 	 2 quaternary = vc
 ) with protect
  
+call get_rtf_definitions(null)
  
 call SubroutineLog(build2("* END   Custom Section  ************************************"))
 call SubroutineLog(build2("************************************************************"))
@@ -103,6 +102,8 @@ call SubroutineLog(build2("* START Getting Careteam   **************************
 set stat = cnvtjsontorec(sGetCareTeam(t_rec->person_id,t_rec->encntr_id))
 
 call echorecord(cov_careteam_info)
+call echojson(cov_careteam_info,"cov_careteam_info")
+
 /* 
 if (stat = TRUE)
 	call echorecord(insurance_list)
@@ -153,46 +154,49 @@ call SubroutineLog(build2("*****************************************************
 call SubroutineLog(build2("************************************************************"))
 call SubroutineLog(build2("* START Building Reply  ************************************"))
  
+
 set reply->text =  build2(reply->text,rtf_definitions->st.rhead)
 set reply->text =  build2(reply->text,rtf_definitions->st.wr)
 
 call echorecord(rtf_definitions)
 
-if (t_rec->insurance.primary > "")
-	set reply->text =  build2(	 reply->text
-								,"Primary:"
-								,rtf_definitions->st.rtab
-								,t_rec->insurance.primary
+for (i=1 to size(cov_careteam_info->care_teams,5))
+	call SubroutineLog(build2("care_teams"))
+	set reply->text =  build2(
+								 reply->text
 								,rtf_definitions->st.reol
+								,cov_careteam_info->care_teams[i].pct_med_service_display
+								,":"
+								,rtf_definitions->st.rtab
+								,cov_careteam_info->care_teams[i].prsnl_name 	
 							)
-endif
+	call echo(build2("reply->text=",reply->text,'<eol>'))
+endfor
 
-if (t_rec->insurance.secondary > "")
-	set reply->text =  build2(	 reply->text
-								," Secondary:"
-								,rtf_definitions->st.rtab
-								,t_rec->insurance.secondary
+for (i=1 to size(cov_careteam_info->lifetime_reltn,5))
+	call SubroutineLog(build2("lifetime_reltn"))
+	set reply->text =  build2(
+								 reply->text
 								,rtf_definitions->st.reol
-							  )
-endif
+								,cov_careteam_info->lifetime_reltn[i].reltn_type
+								,":"
+								,rtf_definitions->st.rtab
+								,cov_careteam_info->lifetime_reltn[i].prsnl_name	
+	)
+endfor
 
-if (t_rec->insurance.tertiary > "")
-	set reply->text =  build2(	 reply->text
-								," Tertiary:"
-								,rtf_definitions->st.rtab
-								,t_rec->insurance.tertiary
+for (i=1 to size(cov_careteam_info->provider_reltn,5))
+	call SubroutineLog(build2("provider_reltn"))
+		set reply->text =  build2(
+								 reply->text
 								,rtf_definitions->st.reol
-							  )
-endif
+								,cov_careteam_info->provider_reltn[i].reltn_type
+								,":"
+								,rtf_definitions->st.rtab
+								,cov_careteam_info->provider_reltn[i].prsnl_name	
+	)
+endfor
 
-if (t_rec->insurance.quaternary > "")
-	set reply->text =  build2(	 reply->text
-								," Quaternary:"
-								,rtf_definitions->st.rtab
-								,t_rec->insurance.quaternary
-								,rtf_definitions->st.reol
-							 )
-endif
 set reply->text =  build2(reply->text,rtf_definitions->st.rtfeof)
 
 call echorecord(reply)

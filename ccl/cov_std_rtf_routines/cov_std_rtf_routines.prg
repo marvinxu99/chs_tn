@@ -111,7 +111,7 @@ subroutine get_rtf_definitions(null)
 	set rtf_definitions->st.rhead				= concat("{\rtf1\ansi \deff0{\fonttbl{\f0\fswiss Tahoma;}}"
 													,"{\colortbl;\red0\green0\blue0;\red255\green255\blue255;}\deftab1134")
 	set rtf_definitions->st.rh2r				= "\plain \f0 \fs18 \cb2 \pard\sl0 "
-	set rtf_definitions->st.rh2b				= "\plain \f0 \fs24 \b \cb2 \pard\sl0 "
+	set rtf_definitions->st.rh2b 				= "\plain \f0 \fs24 \b \cb2 \pard\sl0 "
 	set rtf_definitions->st.rh2bu				= "\plain \f0 \fs18 \b \ul \cb2 \pard\sl0 "
 	set rtf_definitions->st.rh2u				= "\plain \f0 \fs18 \u \cb2 \pard\sl0 "
 	set rtf_definitions->st.rh2i				= "\plain \f0 \fs18 \i \cb2 \pard\sl0 "
@@ -185,7 +185,7 @@ subroutine Set_RTFReply(str)
 	if (rtf_definitions->start_ind = 0)
 		call SubroutineLog(build2('->starting rtf_definitions->start_ind'))
 		set reply->text 			= str
-		set reply_rtf				= str
+		;set reply_rtf				= str
 		set rtf_definitions->start_ind = 1
 	elseif ((rtf_definitions->start_ind = 1) and (rtf_definitions->end_ind = 1))
 		call SubroutineLog(build2('->finishing rtf_definitions->start_ind'))
@@ -194,7 +194,7 @@ subroutine Set_RTFReply(str)
 	else
 		call SubroutineLog(build2('->adding to reply text'))
 		set reply->text = concat(reply->text,str)
-		set reply_rtf 	= concat(reply_rtf,str)
+		;set reply_rtf 	= concat(reply_rtf,str)
 	endif
 	
 	set vReturnRTFReply = TRUE
