@@ -54,11 +54,9 @@ record t_rec
 	1 cnt			= i4
 	1 encntr_id		= f8
 	1 person_id		= f8
-	1 insurance
-	 2 primary = vc
-	 2 secondary = vc
-	 2 tertiary = vc
-	 2 quaternary = vc
+	1 qual[*]
+	 2 role			= vc
+	 2 name			= vc
 ) with protect
  
 call get_rtf_definitions(null)
@@ -102,50 +100,32 @@ call SubroutineLog(build2("* START Getting Careteam   **************************
 set stat = cnvtjsontorec(sGetCareTeam(t_rec->person_id,t_rec->encntr_id))
 
 call echorecord(cov_careteam_info)
-call echojson(cov_careteam_info,"cov_careteam_info")
 
-/* 
-if (stat = TRUE)
-	call echorecord(insurance_list)
-	
-	set t_rec->insurance.primary 		= concat(
-													 insurance_list->insurance.primary.plan_name
-													,rtf_definitions->st.rtab
-													," Group#: ",trim(insurance_list->insurance.primary.group_nbr)
-													,rtf_definitions->st.rtab
-													," Member#: ",trim(insurance_list->insurance.primary.member_nbr)
-												)
-	set t_rec->insurance.secondary 		= concat(
-													 insurance_list->insurance.secondary.plan_name 
-													 ,rtf_definitions->st.rtab
-													 ," Group#: ",trim(insurance_list->secondary.group_nbr)
-													 ,rtf_definitions->st.rtab
-													 ," Member#: ",trim(insurance_list->secondary.member_nbr)
-												)
-	set t_rec->insurance.tertiary	 	= concat(
-													 insurance_list->insurance.tertiary.plan_name 
-													 ,rtf_definitions->st.rtab
-													 ," Group#: ",trim(insurance_list->insurance.tertiary.group_nbr)
-													 ,rtf_definitions->st.rtab
-													 ," Member#: ",trim(insurance_list->insurance.tertiary.member_nbr)
-												) 
-	set t_rec->insurance.quaternary 	= concat(
-													 insurance_list->insurance.quaternary.plan_name 
-													 ,rtf_definitions->st.rtab
-													 ," Group#: ",trim(insurance_list->insurance.quaternary.group_nbr)
-													 ,rtf_definitions->st.rtab
-													 ," Member#: ",trim(insurance_list->insurance.quaternary.member_nbr)
-												) 
-	
-else
-	set reply->status_data.status = "F"
-	set reply->status_data.subeventstatus.operationname = "INSURANCE_LIST"
-	set reply->status_data.subeventstatus.operationstatus = "F"
-	set reply->status_data.subeventstatus.targetobjectname = "INSURANCE_LIST"
-	set reply->status_data.subeventstatus.targetobjectvalue = "Standard Insurance List routine failed"
-	go to exit_script
-endif
-*/
+call echorecord(rtf_definitions)
+
+for (i=1 to size(cov_careteam_info->care_teams,5))
+	call SubroutineLog(build2("care_teams"))
+	set t_rec->cnt += 1
+	set stat = alterlist(t_rec->qual,t_rec->cnt)
+	set t_rec->qual[t_rec->cnt].role = cov_careteam_info->care_teams[i].pct_med_service_display
+	set t_rec->qual[t_rec->cnt].name = cov_careteam_info->care_teams[i].prsnl_name 
+endfor
+
+for (i=1 to size(cov_careteam_info->lifetime_reltn,5))
+	call SubroutineLog(build2("lifetime_reltn"))
+	set t_rec->cnt += 1
+	set stat = alterlist(t_rec->qual,t_rec->cnt)
+	set t_rec->qual[t_rec->cnt].role = cov_careteam_info->lifetime_reltn[i].reltn_type
+	set t_rec->qual[t_rec->cnt].name = cov_careteam_info->lifetime_reltn[i].prsnl_name	
+endfor
+
+for (i=1 to size(cov_careteam_info->provider_reltn,5))
+	call SubroutineLog(build2("provider_reltn"))
+	set t_rec->cnt += 1
+	set stat = alterlist(t_rec->qual,t_rec->cnt)
+	set t_rec->qual[t_rec->cnt].role = cov_careteam_info->provider_reltn[i].reltn_type
+	set t_rec->qual[t_rec->cnt].name = cov_careteam_info->provider_reltn[i].prsnl_name	
+endfor
  
 call SubroutineLog(build2("* END   Getting Careteam   ********************************"))
 call SubroutineLog(build2("************************************************************"))
@@ -158,44 +138,23 @@ call SubroutineLog(build2("* START Building Reply  *****************************
 set reply->text =  build2(reply->text,rtf_definitions->st.rhead)
 set reply->text =  build2(reply->text,rtf_definitions->st.wr)
 
-call echorecord(rtf_definitions)
-
-for (i=1 to size(cov_careteam_info->care_teams,5))
-	call SubroutineLog(build2("care_teams"))
-	set reply->text =  build2(
+select into "nl:"
+from
+	(dummyt d1 with seq=t_rec->cnt)
+order by
+	 t_rec->qual[d1.seq].role
+	,t_rec->qual[d1.seq].name
+detail
+	reply->text = build2(
 								 reply->text
+								,rtf_definitions->st.wb
+								,t_rec->qual[d1.seq].role
+								,": "
+								,rtf_definitions->st.wr
+								,t_rec->qual[d1.seq].name	
 								,rtf_definitions->st.reol
-								,cov_careteam_info->care_teams[i].pct_med_service_display
-								,":"
-								,rtf_definitions->st.rtab
-								,cov_careteam_info->care_teams[i].prsnl_name 	
-							)
-	call echo(build2("reply->text=",reply->text,'<eol>'))
-endfor
-
-for (i=1 to size(cov_careteam_info->lifetime_reltn,5))
-	call SubroutineLog(build2("lifetime_reltn"))
-	set reply->text =  build2(
-								 reply->text
-								,rtf_definitions->st.reol
-								,cov_careteam_info->lifetime_reltn[i].reltn_type
-								,":"
-								,rtf_definitions->st.rtab
-								,cov_careteam_info->lifetime_reltn[i].prsnl_name	
 	)
-endfor
-
-for (i=1 to size(cov_careteam_info->provider_reltn,5))
-	call SubroutineLog(build2("provider_reltn"))
-		set reply->text =  build2(
-								 reply->text
-								,rtf_definitions->st.reol
-								,cov_careteam_info->provider_reltn[i].reltn_type
-								,":"
-								,rtf_definitions->st.rtab
-								,cov_careteam_info->provider_reltn[i].prsnl_name	
-	)
-endfor
+with nocounter
 
 set reply->text =  build2(reply->text,rtf_definitions->st.rtfeof)
 

@@ -35,6 +35,114 @@ execute cov_std_log_routines
 declare i=i4 with noconstant(0), protect
 declare j=i4 with noconstant(0), protect
 declare k=i4 with noconstant(0), protect
+
+
+declare crowdef = c2000 with noconstant(fillstring(2000," ")), protect, persist
+declare crowdata = c32768 with noconstant(fillstring(32768," ")), protect, persist
+declare crowprefix = c2000 with noconstant(fillstring(2000," ")), protect, persist
+declare ncellpos = i4 with noconstant(0), protect, persist
+declare cprot_l = vc with constant("{\*\txfieldstart\txfieldtype0\txfieldflags19}"), protect, persist
+declare cprot_r = vc with constant("{\*\txfieldend}"), protect, persist
+declare csyscolor = c5 with constant("\cf8 "), protect, persist
+declare csysedit = c5 with constant("\cf9 "), protect, persist
+ 
+; function definitions
+; --------------------
+ 
+; Generic function to add Rich Text to REPLY structure
+declare add_rtf(ctext) = vc with copy, persist
+subroutine add_rtf(ctext) 
+	set reply->text = concat(trim(reply->text), trim(ctext))
+end
+ 
+; Clear spreadsheet row
+declare clear_row(nfont, nfontsize) = vc with copy, persist
+subroutine clear_row(nfont, nfontsize)
+	set crowdef = " "
+	set crowdata = " "
+	set ncellpos = 0
+ 
+;	set crowdef = build("{\pard\trowd\trgaph30\trleft30")
+	set crowdef = build("{\pard\trowd")
+	set crowprefix = build("\pard\intbl\plain\f", nfont, "\fs", nfontsize)
+end
+ 
+; Add defintion and data for spreadsheet row
+declare add_cell(ctext, cstyle, nwidth, nattribs, nlocked) = null with copy, persist
+subroutine add_cell(ctext, cstyle, nwidth, nattribs, nlocked)
+	set ncellpos = ncellpos + nwidth		; place the cursor position
+ 
+	; parse out the cell attributes
+	; four digit number. positions indicate the following
+	; 1 - not used
+	; 2 - not used
+	; 3 - text alignment (0-left, 1-center)
+	; 4 - color (0 - 9, see color tables below)
+	set cattribs = format(nattribs,"####;P0")
+	set nbgcolor = substring(4,1,cattribs)
+ 
+	if (substring(3,1,cattribs) = "0")
+		set calign = "\ql"
+	else
+		set calign = "\qc"
+	endif
+ 
+	case (cstyle)
+		of "NONE":		set crowdef = build(crowdef, "\clvertalt\clcbpat", nbgcolor, "\cellx", ncellpos)
+		of "UNDERLINE": set crowdef = build(crowdef, "\clvertalt\clbrdrb\brdrs\brdrw15\clcbpat", nbgcolor, "\cellx", ncellpos)
+		of "OVERLINE":  set crowdef = build(crowdef, "\clvertalt\clbrdrt\brdrs\brdrw15\clcbpat", nbgcolor, "\cellx", ncellpos)
+		of "BOX":		set crowdef = build(crowdef, "\clvertalt\clbrdrl\brdrs\brdrw15\clcbpat", nbgcolor, "\clbrdrt\brdrs\brdrw15",
+													 "\clbrdrr\brdrs\brdrw15\clbrdrb\brdrs\brdrw15\cellx", ncellpos)
+	endcase
+ 
+	if (nlocked = 1)
+		set crowdata = concat(trim(crowdata,3), cprot_l)
+		set crowdata = concat(trim(crowdata,3), trim(crowprefix,3), calign, " {", trim(ctext), "}")
+		set crowdata = concat(trim(crowdata,3), cprot_r)
+		set crowdata = concat(trim(crowdata,3), "\cell")
+	else
+		set crowdata = concat(trim(crowdata,3), trim(crowprefix,3), calign, " {", trim(ctext), "}\cell")
+	endif
+end
+ 
+; Write the table row to the RTF document
+declare write_row(x)= null with copy, persist
+subroutine write_row(x) 
+	call add_rtf(crowdef)
+	call add_rtf(crowdata)
+	call add_rtf("\row}")
+end
+ 
+; Create a line that goes the full page length
+declare write_line(x) = null with copy, persist
+subroutine write_line(x)
+	call clear_row(0,maxval(x,8))
+	call add_cell(" ", "overrline", 12000, 0, 0)
+	call write_row(0)
+end
+ 
+; Document Header
+declare rtf_header(x) = null with copy, persist
+subroutine rtf_header(x)
+	; define beginning of document and font
+	call add_rtf("{\rtf1\ansi\deff0{\fonttbl{\f0\fswiss arial;}{\f9\fmodern Courier New;}}")
+ 
+	; define the color table
+	; ----------------------
+	call add_rtf("{\colortbl;")											; init color definition
+	call add_rtf("\red0\green0\blue0;")									; black
+	call add_rtf("\red255\green255\blue255;")							; white
+	call add_rtf("\red0\green255\blue0;")								; green
+	call add_rtf("\red255\green0\blue0;")								; red
+	call add_rtf("\red192\green192\blue192;")							; grey
+	call add_rtf("\red215\green215\blue236;")							; pale blue
+	call add_rtf("\red0\green128\blue255;")								; medium blue
+	call add_rtf("\red0\green0\blue200;")								; dark blue
+	call add_rtf("\red0\green128\blue0;")								; dark green
+	call add_rtf("}")													; end color definition
+end
+
+
  
 /* Subroutines */
 /**********************************************************************************************************************
