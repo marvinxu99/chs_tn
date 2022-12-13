@@ -90,6 +90,7 @@ record t_rec
 	1 pass[*]
 	 2 person_id	= f8
 	 2 encntr_id	= f8
+	1 pass_idx		= i4
 )
 
 
@@ -138,6 +139,8 @@ else
 	go to exit_script
 endif
 
+call echorecord(t_rec->cnt)
+
 if (t_rec->cnt > 0)
 	;process other criteria for each patient
 	for (j=2 to size(patient_request->criteria,5))
@@ -168,16 +171,19 @@ for (i=1 to t_rec->cnt)
 	endif
 endfor	
 
+declare pass_idx = i2 with noconstant(0)
+
 if (t_rec->pass_cnt > 0)
-	for (i=1 to t_rec->pass_cnt)
-		if (1>1)
+	for (pass_idx=1 to t_rec->pass_cnt)
+		if (pass_idx > 1)
 			set _MEMORY_REPLY_STRING = build2(_MEMORY_REPLY_STRING,char(13),char(10))
 		endif
 		set _MEMORY_REPLY_STRING = build2(
 												_MEMORY_REPLY_STRING,
-												sGetPatientDemo(t_rec->pass[i].person_id,t_rec->pass[i].encntr_id)
+												sGetPatientDemo(t_rec->pass[pass_idx].person_id,t_rec->pass[pass_idx].encntr_id)
 											)
 	endfor
+	call echo(sGetPatientDemo(t_rec->pass[t_rec->pass_idx].person_id,t_rec->pass[pass_idx].encntr_id))
 	set reply->status_data.status = "S"
 else
 	set stat = sSet_ErrorReply("No patients matching supplied criteria were found")
@@ -209,8 +215,10 @@ call writeLog(build2("**********************************************************
 
 
 call exitScript(null)
-call echorecord(t_rec)
+;call echorecord(t_rec)
+;call echorecord(t_rec->pass_cnt)
 call echo(build2("_MEMORY_REPLY_STRING=",_MEMORY_REPLY_STRING))
+
 ;call echorecord(cov_patient_info)
 ;call echorecord(code_values)
 ;call echorecord(program_log)
