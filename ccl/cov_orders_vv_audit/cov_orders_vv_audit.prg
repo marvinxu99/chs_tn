@@ -126,6 +126,7 @@ select into "nl:"
 	,o.primary_mnemonic
 	,synonym=ocs.mnemonic
 	,facility=uar_get_code_display(f.facility_cd)
+	,facility_ind = nullind(f.synonym_id)
 from
      order_catalog o,
      order_catalog_synonym ocs,
@@ -155,7 +156,7 @@ head ocs.synonym_id
 head facility
 	j += 1
 	stat = alterlist(t_rec->qual[i].fac_qual,j)
-	if (f.facility_cd = 0)
+	if ((f.facility_cd = 0) and (f.synonym_id > 0.0))
 		t_rec->qual[i].fac_qual[j].facility_cd = 0.0
 		t_rec->qual[i].fac_qual[j].facility = "<All facilities included>"
 		t_rec->qual[i].fac_qual[j].selected = 1
