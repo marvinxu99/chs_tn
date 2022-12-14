@@ -720,6 +720,35 @@ call SubroutineLog(build2('start sGetPatientInfo(',vPersonID,',',vEncntrID,')'))
  	
  	call SubroutineLog(build2('end sGetPatientInfo(',vPersonID,',',vEncntrID,')'))
  	return (cnvtrectojson(cov_patient_info))
+end
+
+/**********************************************************************************************************************
+** Function sGetCareTeam(PERSON_ID,ENCNTR_ID)
+** ---------------------------------------------------------------------------------------
+** Returns a JSON object that is convertable to a record structure containting all the careteam information for the
+** encounter supplied.  
+** 
+** COV_PATIENT_INFO
+
+** 
+** NOTE: The record structure is destroyed on execution. 
+**
+**********************************************************************************************************************/
+declare sGetCareTeam(vPersonID=f8,vEncntrID=f8) = vc  with copy, persist
+subroutine sGetCareTeam(vPersonID,vEncntrID)
+
+call SubroutineLog(build2('start sGetCareTeam(',vPersonID,',',vEncntrID,')'))	
+ 	free record cov_careteam_info
+ 	
+ 	declare _memory_reply_string = vc with noconstant(" "), protect
+ 	
+ 	execute mp_get_care_team_assign ~MINE~,vPersonID,vEncntrID,0.0,0.0,0,0,0,0
+ 	
+ 	set stat = cnvtjsontorec(_memory_reply_string)
+ 	set stat = copyrec(record_data,cov_careteam_info,1)
+ 	
+ 	call SubroutineLog(build2('end sGetCareTeam(',vPersonID,',',vEncntrID,')'))
+ 	return (cnvtrectojson(cov_careteam_info))
 end 
 
 
