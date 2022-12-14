@@ -84,7 +84,7 @@ elseif (t_rec->prompts.encntr_id > 0.0)
 		clinical_event ce
 	plan ce
 		where ce.encntr_id = t_rec->prompts.encntr_id
-	    and   ce.event_class_cd in(value(uar_get_code_by("MEANING",53,"DOC")))
+	    and   ce.event_class_cd in(value(uar_get_code_by("MEANING",53,"MDOC")))
 	    and   ce.valid_from_dt_tm <= cnvtdatetime(curdate,curtime3)
 		and   ce.valid_until_dt_tm >= cnvtdatetime(curdate, curtime3)
 	order by
