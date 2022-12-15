@@ -31,7 +31,7 @@ create program cov_remove_checkin:dba
 prompt 
 	"Output to File/Printer/MINE" = "MINE"
 	;<<hidden>>"FIN" = ""
-	, "Scheduling Locks" = 0 
+	, "Select Active Check-in To Remove" = 0   ;* The selected Check-in event for the associated tracking group will be removed 
 
 with OUTDEV, CHECKIN_ID
 
@@ -122,6 +122,8 @@ if (t_rec->cons.checkin_id > 0.0)
 	update into tracking_checkin set active_ind = 0 where tracking_checkin_id = t_rec->cons.checkin_id
 	commit
 	set t_rec->lock.message = concat("Check-in Removed")
+else
+	set t_rec->errors.message = "No tracking check-in selected for removal"
 endif
 
 
