@@ -471,8 +471,12 @@ select into t_rec->prompts.outdev
 	,med_hx_dt_tm = format(t_rec->qual[d1.seq].med_history_complete_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
 	,med_rec_dt_tm = format(t_rec->qual[d1.seq].admission_med_rec_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
 	,disch_dt_tm = format(t_rec->qual[d1.seq].disch_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
-	,med_hx_before_pso=if (t_rec->qual[d1.seq].med_hx_before_pso = 1) "X" endif
-	,med_hx_after_pso_hrs=concat(cnvtstring(t_rec->qual[d1.seq].med_hx_after_pso_hrs,11,2)," hours")
+	,med_hx_before_pso= if (t_rec->qual[d1.seq].med_hx_before_pso = 1) "X" else "" endif
+	,med_hx_after_pso_hrs= if (t_rec->qual[d1.seq].med_hx_after_pso_hrs > 0)
+							 concat(cnvtstring(t_rec->qual[d1.seq].med_hx_after_pso_hrs,11,2)," hours")
+						   else
+						   	""
+						   endif 
 from
 	(dummyt d1 with seq=t_rec->cnt)
 plan d1
