@@ -146,7 +146,9 @@ record t_rec
 	 2 admission_med_rec_status = vc
 	 2 admission_med_rec_role = vc  
 	 2 med_hx_before_pso = i2
-	 2 med_hx_after_pso_hrs = i4	 
+	 2 med_hx_after_pso_hrs = f8
+	 2 medhx_after_pso = vc
+	 2 medhx_before_pso = vc	 
 )
 
 ;call addEmailLog("chad.cummings@covhlth.com")
@@ -361,7 +363,7 @@ join oef
 order by
 	 o.encntr_id
 	,o.catalog_cd
-	,o.orig_order_dt_tm desc
+	,o.orig_order_dt_tm
 	,od.action_sequence desc
 	,o.order_id
 head report
@@ -441,10 +443,13 @@ head oc.encntr_id
 	
 	if (oc.performed_dt_tm < t_rec->qual[d1.seq].pso_admit_dt_tm)
 		t_rec->qual[d1.seq].med_hx_before_pso = 1
+		t_rec->qual[d1.seq].medhx_before_pso = "X"
 	else
-		t_rec->qual[d1.seq].med_hx_after_pso_hrs = datetimediff(t_rec->qual[d1.seq].pso_admit_dt_tm,oc.performed_dt_tm,3)
+		t_rec->qual[d1.seq].med_hx_after_pso_hrs = datetimediff(oc.performed_dt_tm,t_rec->qual[d1.seq].pso_admit_dt_tm,3)
+		if (t_rec->qual[d1.seq].pso_admit_dt_tm > 0.0)
+			t_rec->qual[d1.seq].medhx_after_pso = concat(cnvtstring(t_rec->qual[d1.seq].med_hx_after_pso_hrs,11,2)," hours")
+		endif
 	endif
-	
 with nocounter
  
 call writeLog(build2("* END   Determine Med Hx Compliance ************************"))
@@ -471,12 +476,8 @@ select into t_rec->prompts.outdev
 	,med_hx_dt_tm = format(t_rec->qual[d1.seq].med_history_complete_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
 	,med_rec_dt_tm = format(t_rec->qual[d1.seq].admission_med_rec_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
 	,disch_dt_tm = format(t_rec->qual[d1.seq].disch_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
-	,med_hx_before_pso= if (t_rec->qual[d1.seq].med_hx_before_pso = 1) "X" else "" endif
-	,med_hx_after_pso_hrs= if (t_rec->qual[d1.seq].med_hx_after_pso_hrs > 0)
-							 concat(cnvtstring(t_rec->qual[d1.seq].med_hx_after_pso_hrs,11,2)," hours")
-						   else
-						   	""
-						   endif 
+	,medhx_before_pso = substring(1,30,t_rec->qual[d1.seq].medhx_before_pso)
+	,medhx_after_pso = substring(1,30,t_rec->qual[d1.seq].medhx_after_pso)
 from
 	(dummyt d1 with seq=t_rec->cnt)
 plan d1
@@ -484,7 +485,7 @@ order
 	 facility
 	,unit
 	,name_full_formatted
-with nocounter, format, seperator = " "
+with nocounter, format, separator = " "
 
 
 call writeLog(build2("* END   Creating Output   *******************************************"))
