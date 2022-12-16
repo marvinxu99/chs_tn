@@ -511,6 +511,16 @@ subroutine sGet_PromptValues(pPromptNum)
 		endwhile
 	else
 		call SubroutineLog(build("$(",pPromptNum,")",par,"=",parameter(pPromptNum,lnum)))
+		set par = reflect(parameter(pPromptNum,lnum))
+		set prompt_values->value_cnt += 1
+		set stat = alterlist(prompt_values->value_qual,prompt_values->value_cnt)
+		if (substring(1,1,par) = "F")
+			set prompt_values->value_qual[prompt_values->value_cnt].value_f8 = parameter(pPromptNum,lnum)
+		elseif (substring(1,1,par) = "I")
+			set prompt_values->value_qual[prompt_values->value_cnt].value_i4 = parameter(pPromptNum,lnum)
+		elseif (substring(1,1,par) = "C")
+			set prompt_values->value_qual[prompt_values->value_cnt].value_vc = parameter(pPromptNum,lnum)
+		endif
 	endif
 	
 	call SubroutineLog("prompt_values","RECORD")
