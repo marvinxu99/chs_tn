@@ -132,6 +132,7 @@ record t_rec
   	 2 medication_hx_dt_tm	= dq8
   	 2 admission_med_rec_dt_tm = dq8
   	 2 first_med_post_pso_dt_tm = dq8
+  	 2 first_med_post_desc = vc
 	 2 med_history_complete_ind = i2
 	 2 med_history_complete_dt_tm  =dq8
 	 2 med_history_complete_prsnl = vc
@@ -368,6 +369,8 @@ order by
 	,o.order_id
 head report
 	null
+head o.encntr_id	
+	null
 head o.catalog_cd
 	case (oc.description)
 		of "PSO Admit*":			t_rec->qual[d1.seq].pso_admit_dt_tm		= od.oe_field_dt_tm_value
@@ -447,7 +450,7 @@ head oc.encntr_id
 	else
 		t_rec->qual[d1.seq].med_hx_after_pso_hrs = datetimediff(oc.performed_dt_tm,t_rec->qual[d1.seq].pso_admit_dt_tm,3)
 		if (t_rec->qual[d1.seq].pso_admit_dt_tm > 0.0)
-			t_rec->qual[d1.seq].medhx_after_pso = concat(cnvtstring(t_rec->qual[d1.seq].med_hx_after_pso_hrs,11,2)," hours")
+			t_rec->qual[d1.seq].medhx_after_pso = concat(trim(cnvtstring(t_rec->qual[d1.seq].med_hx_after_pso_hrs,11,2))," hours")
 		endif
 	endif
 with nocounter
@@ -455,6 +458,39 @@ with nocounter
 call writeLog(build2("* END   Determine Med Hx Compliance ************************"))
 call writeLog(build2("************************************************************"))
  
+call writeLog(build2("************************************************************"))
+call writeLog(build2("* START Finding First Med Orders   *******************************************"))
+
+select into "nl:"
+from
+	 orders o
+	,order_catalog oc
+	,(dummyt d1 with seq=t_rec->cnt)
+plan d1
+	where t_rec->qual[d1.seq].pso_admit_dt_tm > 0.0
+join o
+	where o.encntr_id = t_rec->qual[d1.seq].encntr_id
+	and   o.orig_order_dt_tm >= cnvtdatetime(t_rec->qual[d1.seq].pso_admit_dt_tm)
+	and   o.catalog_type_cd = value(uar_get_code_by("MEANING",6000,"PHARMACY"))
+	and   o.orig_ord_as_flag = 0
+join oc
+	where oc.catalog_cd = o.catalog_cd
+order by
+	 o.encntr_id
+	,o.orig_order_dt_tm
+	,o.order_id
+head report
+	null
+head o.encntr_id
+	t_rec->qual[d1.seq].first_med_post_pso_dt_tm = o.orig_order_dt_tm
+	t_rec->qual[d1.seq].first_med_post_desc = o.ordered_as_mnemonic
+foot report
+	null
+with nocounter
+	
+
+call writeLog(build2("* END   Finding First Med Orders  *******************************************"))
+call writeLog(build2("************************************************************"))
 
 
 call get_mrn(0)
@@ -475,6 +511,8 @@ select into t_rec->prompts.outdev
 	,pso_admit_dt_tm = format(t_rec->qual[d1.seq].pso_admit_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
 	,med_hx_dt_tm = format(t_rec->qual[d1.seq].med_history_complete_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
 	,med_rec_dt_tm = format(t_rec->qual[d1.seq].admission_med_rec_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
+	,med_post_pso_dt_tm = format(t_rec->qual[d1.seq].first_med_post_pso_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
+	,med_post_desc = substring(1,100,t_rec->qual[d1.seq].first_med_post_desc)
 	,disch_dt_tm = format(t_rec->qual[d1.seq].disch_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
 	,medhx_before_pso = substring(1,30,t_rec->qual[d1.seq].medhx_before_pso)
 	,medhx_after_pso = substring(1,30,t_rec->qual[d1.seq].medhx_after_pso)
