@@ -254,7 +254,7 @@ call writeLog(build2("**********************************************************
 
 if (reply->status_data.status in("Z","S"))
 	call writeLog(build2("* START Set Date Range ************************************"))
-	call set_dminfo_date(t_rec->dminfo.info_domain,t_rec->dminfo.info_name,t_rec->dates.end_dt_tm)
+	;call set_dminfo_date(t_rec->dminfo.info_domain,t_rec->dminfo.info_name,t_rec->dates.end_dt_tm)
 	call writeLog(build2("* END Set Date Range ************************************v1"))
 endif
 ;001 end

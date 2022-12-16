@@ -29,8 +29,8 @@ create program cov_smart_template_test
 
 prompt 
 	"Output to File/Printer/MINE" = "MINE"   ;* Enter or select the printer or file name to send this report to.
-	, "FIN" = "2302913670"
-	, "Template" = "" 
+	, "FIN" = "2122000324"
+	, "Template" = "cov_st_careteam" 
 
 with OUTDEV, FIN, TEMPLATE
 

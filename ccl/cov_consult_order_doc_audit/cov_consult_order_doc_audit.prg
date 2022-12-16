@@ -285,7 +285,11 @@ join ce
 	and   ce.event_end_dt_tm >= cnvtdatetime(t_rec->qual[d2.seq].orig_order_dt_tm)
 join cv1
 	where cv1.code_value = ce.event_cd
-	and   cv1.display in ("*Consultation*")
+	and   (
+					cv1.display = "*Consultation*"
+				or	cv1.display = "*Operative*"
+				or	cv1.display = "*Progress*"
+		   )
 join p
 	where p.person_id = ce.verified_prsnl_id
 order by
