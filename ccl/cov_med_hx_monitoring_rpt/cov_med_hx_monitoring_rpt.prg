@@ -46,9 +46,10 @@ prompt
 	"Output to File/Printer/MINE" = "MINE"
 	, "Start Date and Time" = "SYSDATE"
 	, "End Date and Time" = "SYSDATE"
-	, "Facility" = 0 
+	, "Facility" = 0
+	, "Encounter Type(s)" = 0 
 
-with OUTDEV, START_DT_TM, END_DT_TM, FACILITY
+with OUTDEV, START_DT_TM, END_DT_TM, FACILITY, ENCNTR_TYPE
 
 execute cov_std_log_routines
 
@@ -99,6 +100,10 @@ record t_rec
 	1 facility_qual[*]
 	 2 loc_facility_cd = f8
 	 2 facility_display = vc
+	1 encntr_type_cnt	= i4
+	1 encntr_type_qual[*]
+	 2 code_value = f8
+	 2 encntr_type_display = vc
 	1 qual[*]
 	 2 person_id			= f8
 	 2 encntr_id			= f8
@@ -189,6 +194,25 @@ head cv.code_value
 	stat = alterlist(t_rec->facility_qual,t_rec->facility_cnt)
 	t_rec->facility_qual[t_rec->facility_cnt].loc_facility_cd = cv.code_value
 	t_rec->facility_qual[t_rec->facility_cnt].facility_display = cv.display
+with nocounter
+
+set stat = cnvtjsontorec(sGet_PromptValues(parameter2($ENCNTR_TYPE)))
+call echorecord(prompt_values)
+
+select into "nl:"
+from
+	code_value cv
+plan cv
+	where expand(i,1,prompt_values->value_cnt,cv.code_value,prompt_values->value_qual[i].value_f8)
+	and   cv.active_ind = 1
+order by
+	 cv.display
+	,cv.code_value
+head cv.code_value
+	t_rec->encntr_type_cnt += 1
+	stat = alterlist(t_rec->encntr_type_qual,t_rec->encntr_type_cnt)
+	t_rec->encntr_type_qual[t_rec->encntr_type_cnt].code_value = cv.code_value
+	t_rec->encntr_type_qual[t_rec->encntr_type_cnt].encntr_type_display = cv.display
 with nocounter
 	
 /*
@@ -505,6 +529,7 @@ select into t_rec->prompts.outdev
 	,unit = substring(1,30,t_rec->qual[d1.seq].unit)
 	,fin = substring(1,30,t_rec->qual[d1.seq].fin)
 	,name_full_formatted = substring(1,100,t_rec->qual[d1.seq].name_full_formatted)
+	,encntr_type = substring(1,100,t_rec->qual[d1.seq].encntr_type)
 	,arrival_dt_tm = format(t_rec->qual[d1.seq].arrival_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
 	,reg_dt_tm = format(t_rec->qual[d1.seq].reg_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
 	,ed_decision_dt_tm = format(t_rec->qual[d1.seq].ed_decision_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
