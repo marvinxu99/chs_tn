@@ -205,6 +205,7 @@ from
 plan cv
 	where expand(i,1,prompt_values->value_cnt,cv.code_value,prompt_values->value_qual[i].value_f8)
 	and   cv.active_ind = 1
+	and   cv.code_value > 0.0
 order by
 	 cv.display
 	,cv.code_value
@@ -214,6 +215,25 @@ head cv.code_value
 	t_rec->encntr_type_qual[t_rec->encntr_type_cnt].code_value = cv.code_value
 	t_rec->encntr_type_qual[t_rec->encntr_type_cnt].encntr_type_display = cv.display
 with nocounter
+
+if (t_rec->encntr_type_cnt = 0)
+	select into "nl:"
+	from
+		code_value cv
+	plan cv
+		where cv.code_set = 71
+		and   cv.active_ind = 1
+		and   cv.code_value > 0.0
+	order by
+		 cv.display
+		,cv.code_value
+	head cv.code_value
+		t_rec->encntr_type_cnt += 1
+		stat = alterlist(t_rec->encntr_type_qual,t_rec->encntr_type_cnt)
+		t_rec->encntr_type_qual[t_rec->encntr_type_cnt].code_value = cv.code_value
+		t_rec->encntr_type_qual[t_rec->encntr_type_cnt].encntr_type_display = cv.display
+	with nocounter
+endif
 	
 /*
 if (prompt_values->value_cnt = 0)
@@ -236,6 +256,7 @@ plan e
 	where e.reg_dt_tm between cnvtdatetime(t_rec->dates.start_dt_tm) and cnvtdatetime(t_rec->dates.end_dt_tm)
 	and   e.active_ind = 1
 	and   expand(i,1,t_rec->facility_cnt,e.loc_facility_cd,t_rec->facility_qual[i].loc_facility_cd)
+	and   expand(j,1,t_rec->encntr_type_cnt,e.encntr_type_cd,t_rec->encntr_type_qual[j].code_value)
 order by
 	e.encntr_id
 head report
@@ -431,12 +452,12 @@ head report
 	i = 0
 detail 
 	if (oc.recon_type_flag = 1)
-		t_rec->qual[t_rec->cnt].admission_med_rec_ind = 1
-		t_rec->qual[t_rec->cnt].admission_med_rec_prsnl = p1.name_full_formatted
-		t_rec->qual[t_rec->cnt].admission_med_rec_prsnl_id = p1.person_id
-		t_rec->qual[t_rec->cnt].admission_med_rec_dt_tm = oc.performed_dt_tm
-		t_rec->qual[t_rec->cnt].admission_med_rec_role = uar_get_code_display(p1.position_cd)
-		t_rec->qual[t_rec->cnt].admission_med_rec_status = uar_get_code_display(oc.recon_status_cd)
+		t_rec->qual[d1.seq].admission_med_rec_ind = 1
+		t_rec->qual[d1.seq].admission_med_rec_prsnl = p1.name_full_formatted
+		t_rec->qual[d1.seq].admission_med_rec_prsnl_id = p1.person_id
+		t_rec->qual[d1.seq].admission_med_rec_dt_tm = oc.performed_dt_tm
+		t_rec->qual[d1.seq].admission_med_rec_role = uar_get_code_display(p1.position_cd)
+		t_rec->qual[d1.seq].admission_med_rec_status = uar_get_code_display(oc.recon_status_cd)
 	endif
 with nocounter
  
@@ -530,6 +551,7 @@ select into t_rec->prompts.outdev
 	,fin = substring(1,30,t_rec->qual[d1.seq].fin)
 	,name_full_formatted = substring(1,100,t_rec->qual[d1.seq].name_full_formatted)
 	,encntr_type = substring(1,100,t_rec->qual[d1.seq].encntr_type)
+	,location_history = substring(1,100,t_rec->qual[d1.seq].location_history)
 	,arrival_dt_tm = format(t_rec->qual[d1.seq].arrival_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
 	,reg_dt_tm = format(t_rec->qual[d1.seq].reg_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
 	,ed_decision_dt_tm = format(t_rec->qual[d1.seq].ed_decision_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
