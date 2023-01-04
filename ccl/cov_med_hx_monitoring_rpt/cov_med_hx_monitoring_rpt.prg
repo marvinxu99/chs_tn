@@ -157,7 +157,7 @@ record t_rec
 	 2 medhx_before_pso = vc	 
 )
 
-;call addEmailLog("chad.cummings@covhlth.com")
+call addEmailLog("chad.cummings@covhlth.com")
 
 set t_rec->files.records_attachment = concat(trim(cnvtlower(curprog)),"_rec_",trim(format(sysdate,"yyyy_mm_dd_hh_mm_ss;;d")),".dat")
 
@@ -390,10 +390,15 @@ from
 plan d1
 join o
 	where o.encntr_id = t_rec->qual[d1.seq].encntr_id
-	and o.order_status_cd in(
+	and (
+	
+			(o.order_status_cd in(
 								 value(uar_get_code_by("MEANING",6004,"ORDERED"))
 								,value(uar_get_code_by("MEANING",6004,"COMPLETED"))
-								)
+								))
+		or 	(		o.order_status_cd in(value(uar_get_code_by("MEANING",6004,"DISCONTINUED")))
+			 and 	o.discontinue_type_cd in(value(uar_get_code_by("MEANING",4038,"SYSTEMDISCH")))
+		))
 
 join oc
 	where oc.catalog_cd = o.catalog_cd
