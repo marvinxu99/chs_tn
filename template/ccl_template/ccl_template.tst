@@ -1,4 +1,4 @@
-
+/*
 ;OPERATIONS -> sys_runccl (4903)
 set debug_ind = 1 go 
 free record request go
@@ -69,9 +69,9 @@ set request->params = ^"MINE"^ go
  
 execute VCCL_RUN_PROGRAM go
 */
-/*
+
 set debug_ind = 1 go 
-execute cov_careteam_person_info "MINE"  go
- */
+execute cov_wh_active_group_no_prob "MINE"  go
+
  
  

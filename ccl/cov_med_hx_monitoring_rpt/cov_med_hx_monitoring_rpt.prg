@@ -29,6 +29,8 @@
 						
 						Is Med Hx done before PSO
 						Med hx done X hours after PSO
+						
+						inp, obs, oib and outpatient monitoring
 
 ******************************************************************************
   GENERATED MODIFICATION CONTROL LOG
@@ -132,6 +134,7 @@ record t_rec
   	  3 encntr_loc_hist_id	= f8
   	 2 pso_admit_dt_tm		= dq8
   	 2 pso_admit_desc		= vc
+  	 2 observation_dt_tm 	= dq8
   	 2 ed_decision_dt_tm	= dq8
   	 2 ed_decision_desc		= vc
   	 2 medication_hx_dt_tm	= dq8
@@ -155,6 +158,7 @@ record t_rec
 	 2 med_hx_after_pso_hrs = f8
 	 2 medhx_after_pso = vc
 	 2 medhx_before_pso = vc	 
+	 2 anchor_dt_tm = dq8
 )
 
 call addEmailLog("chad.cummings@covhlth.com")
@@ -436,6 +440,38 @@ with nocounter
 call writeLog(build2("* END   Finding Orders   *******************************************"))
 call writeLog(build2("************************************************************"))
 
+call writeLog(build2("* START Finding Observation Date and Time ******************"))
+select into "nl:"
+from
+	 patient_event ea
+	,(dummyt d1 with seq=t_rec->cnt)
+plan d1
+join ea
+	where ea.encntr_id = t_rec->qual[d1.seq].encntr_id
+	and   ea.active_ind	= 1
+order by
+	 ea.encntr_id
+	,ea.event_type_cd
+	,ea.transaction_dt_tm desc
+head report
+	call writeLog(build2("->Inside patient_event query"))
+	j = 0
+head ea.encntr_id
+	j = locateval(i,1,t_rec->cnt,ea.encntr_id,t_rec->qual[i].encntr_id)
+	call writeLog(build2("-->entering encntr_id=",trim(cnvtstring(ea.encntr_id))," at position=",trim(cnvtstring(j))))
+head ea.event_type_cd
+ if (j > 0)
+	case (uar_get_code_display(ea.event_type_cd))
+		of "Observation Start": t_rec->qual[j].observation_dt_tm = ea.event_dt_tm
+								call writeLog(build2("--->adding observation start=",trim(format(ea.event_dt_tm,";;q"))))
+	endcase
+ endif
+foot ea.encntr_id
+	call writeLog(build2("-->leaving encntr_id=",trim(cnvtstring(ea.encntr_id))," at position=",trim(cnvtstring(j))))
+	j = 0
+with nocounter
+ 
+call writeLog(build2("* END   Finding Observation Date and Time ******************"))
 
 call writeLog(build2("************************************************************"))
 call writeLog(build2("* START Finding Admission Med Rec *********************************"))
@@ -494,12 +530,26 @@ head oc.encntr_id
 	t_rec->qual[d1.seq].med_history_complete_dt_tm = oc.performed_dt_tm
 	t_rec->qual[d1.seq].med_history_complete_role = uar_get_code_display(p1.position_cd)
 	
-	if (oc.performed_dt_tm < t_rec->qual[d1.seq].pso_admit_dt_tm)
+	t_rec->qual[d1.seq].anchor_dt_tm = t_rec->qual[d1.seq].reg_dt_tm
+	
+	if (t_rec->qual[d1.seq].ed_decision_dt_tm > 0.0)
+		t_rec->qual[d1.seq].anchor_dt_tm = t_rec->qual[d1.seq].ed_decision_dt_tm
+	endif
+
+	if (t_rec->qual[d1.seq].observation_dt_tm > 0.0)
+		t_rec->qual[d1.seq].anchor_dt_tm = t_rec->qual[d1.seq].observation_dt_tm
+	endif
+	
+		if (t_rec->qual[d1.seq].pso_admit_dt_tm > 0.0)
+		t_rec->qual[d1.seq].anchor_dt_tm = t_rec->qual[d1.seq].pso_admit_dt_tm
+	endif
+	
+	if (oc.performed_dt_tm < t_rec->qual[d1.seq].anchor_dt_tm)
 		t_rec->qual[d1.seq].med_hx_before_pso = 1
 		t_rec->qual[d1.seq].medhx_before_pso = "X"
 	else
-		t_rec->qual[d1.seq].med_hx_after_pso_hrs = datetimediff(oc.performed_dt_tm,t_rec->qual[d1.seq].pso_admit_dt_tm,3)
-		if (t_rec->qual[d1.seq].pso_admit_dt_tm > 0.0)
+		t_rec->qual[d1.seq].med_hx_after_pso_hrs = datetimediff(oc.performed_dt_tm,t_rec->qual[d1.seq].anchor_dt_tm,3)
+		if (t_rec->qual[d1.seq].anchor_dt_tm > 0.0)
 			t_rec->qual[d1.seq].medhx_after_pso = concat(trim(cnvtstring(t_rec->qual[d1.seq].med_hx_after_pso_hrs,11,2))," hours")
 		endif
 	endif
@@ -517,10 +567,10 @@ from
 	,order_catalog oc
 	,(dummyt d1 with seq=t_rec->cnt)
 plan d1
-	where t_rec->qual[d1.seq].pso_admit_dt_tm > 0.0
+	where t_rec->qual[d1.seq].anchor_dt_tm > 0.0
 join o
 	where o.encntr_id = t_rec->qual[d1.seq].encntr_id
-	and   o.orig_order_dt_tm >= cnvtdatetime(t_rec->qual[d1.seq].pso_admit_dt_tm)
+	and   o.orig_order_dt_tm >= cnvtdatetime(t_rec->qual[d1.seq].anchor_dt_tm)
 	and   o.catalog_type_cd = value(uar_get_code_by("MEANING",6000,"PHARMACY"))
 	and   o.orig_ord_as_flag = 0
 join oc
@@ -560,12 +610,14 @@ select into t_rec->prompts.outdev
 	,arrival_dt_tm = format(t_rec->qual[d1.seq].arrival_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
 	,reg_dt_tm = format(t_rec->qual[d1.seq].reg_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
 	,ed_decision_dt_tm = format(t_rec->qual[d1.seq].ed_decision_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
+	,observation_dt_tm = format(t_rec->qual[d1.seq].observation_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
 	,pso_admit_dt_tm = format(t_rec->qual[d1.seq].pso_admit_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
 	,med_hx_dt_tm = format(t_rec->qual[d1.seq].med_history_complete_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
 	,med_rec_dt_tm = format(t_rec->qual[d1.seq].admission_med_rec_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
 	,med_post_pso_dt_tm = format(t_rec->qual[d1.seq].first_med_post_pso_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
 	,med_post_desc = substring(1,100,t_rec->qual[d1.seq].first_med_post_desc)
 	,disch_dt_tm = format(t_rec->qual[d1.seq].disch_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
+	,anchor_dt_tm = format(t_rec->qual[d1.seq].anchor_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
 	,medhx_before_pso = substring(1,30,t_rec->qual[d1.seq].medhx_before_pso)
 	,medhx_after_pso = substring(1,30,t_rec->qual[d1.seq].medhx_after_pso)
 from
