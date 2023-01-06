@@ -159,6 +159,7 @@ record t_rec
 	 2 medhx_after_pso = vc
 	 2 medhx_before_pso = vc	 
 	 2 anchor_dt_tm = dq8
+	 2 anchor_meaning = vc
 )
 
 call addEmailLog("chad.cummings@covhlth.com")
@@ -531,17 +532,21 @@ head oc.encntr_id
 	t_rec->qual[d1.seq].med_history_complete_role = uar_get_code_display(p1.position_cd)
 	
 	t_rec->qual[d1.seq].anchor_dt_tm = t_rec->qual[d1.seq].reg_dt_tm
+	t_rec->qual[d1.seq].anchor_meaning = "Reg Dt Tm"
 	
 	if (t_rec->qual[d1.seq].ed_decision_dt_tm > 0.0)
 		t_rec->qual[d1.seq].anchor_dt_tm = t_rec->qual[d1.seq].ed_decision_dt_tm
+		t_rec->qual[d1.seq].anchor_meaning = "ED Decision Dt Tm"
 	endif
 
 	if (t_rec->qual[d1.seq].observation_dt_tm > 0.0)
 		t_rec->qual[d1.seq].anchor_dt_tm = t_rec->qual[d1.seq].observation_dt_tm
+		t_rec->qual[d1.seq].anchor_meaning = "Observation Dt Tm"
 	endif
 	
 		if (t_rec->qual[d1.seq].pso_admit_dt_tm > 0.0)
 		t_rec->qual[d1.seq].anchor_dt_tm = t_rec->qual[d1.seq].pso_admit_dt_tm
+		t_rec->qual[d1.seq].anchor_meaning = "PSO Dt Tm"
 	endif
 	
 	if (oc.performed_dt_tm < t_rec->qual[d1.seq].anchor_dt_tm)
@@ -618,8 +623,9 @@ select into t_rec->prompts.outdev
 	,med_post_desc = substring(1,100,t_rec->qual[d1.seq].first_med_post_desc)
 	,disch_dt_tm = format(t_rec->qual[d1.seq].disch_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
 	,anchor_dt_tm = format(t_rec->qual[d1.seq].anchor_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
-	,medhx_before_pso = substring(1,30,t_rec->qual[d1.seq].medhx_before_pso)
-	,medhx_after_pso = substring(1,30,t_rec->qual[d1.seq].medhx_after_pso)
+	,anchor_meaning = substring(1,30,t_rec->qual[d1.seq].anchor_meaning)
+	,medhx_before_anchor = substring(1,30,t_rec->qual[d1.seq].medhx_before_pso)
+	,medhx_after_anchor = substring(1,30,t_rec->qual[d1.seq].medhx_after_pso)
 from
 	(dummyt d1 with seq=t_rec->cnt)
 plan d1
