@@ -618,6 +618,8 @@ select into t_rec->prompts.outdev
 	,observation_dt_tm = format(t_rec->qual[d1.seq].observation_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
 	,pso_admit_dt_tm = format(t_rec->qual[d1.seq].pso_admit_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
 	,med_hx_dt_tm = format(t_rec->qual[d1.seq].med_history_complete_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
+	,med_hx_prsnl = substring(1,100,t_rec->qual[d1.seq].med_history_complete_prsnl)
+	,med_hx_role = substring(1,100,t_rec->qual[d1.seq].med_history_complete_role)
 	,med_rec_dt_tm = format(t_rec->qual[d1.seq].admission_med_rec_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
 	,med_post_pso_dt_tm = format(t_rec->qual[d1.seq].first_med_post_pso_dt_tm,"dd-mmm-yyyy hh:mm:ss;;d")
 	,med_post_desc = substring(1,100,t_rec->qual[d1.seq].first_med_post_desc)
