@@ -87,6 +87,9 @@ set t_rec->end_disch_dt_tm = cnvtdatetime($END_DISCH_DT_TM)
 call writeLog(build2("-->t_rec->beg_disch_dt_tm = ",format(t_rec->beg_disch_dt_tm,";;q")))
 call writeLog(build2("-->t_rec->end_disch_dt_tm = ",format(t_rec->end_disch_dt_tm,";;q")))
 
+declare ADMIT_PHY_VAR = f8 with constant(uar_get_code_by("DISPLAYKEY",  333, "ADMITTINGPHYSICIAN")),protect ;001
+declare ATTEND_PHY_VAR = f8 with constant(uar_get_code_by("DISPLAYKEY",  333, "ATTENDINGPHYSICIAN")),protect ;001
+
 call writeLog(build2("* END   Custom Section  ************************************"))
 call writeLog(build2("************************************************************"))
 
@@ -170,6 +173,8 @@ select into $OUTDEV
 	,disch_date = trim(format(e.disch_dt_tm,"DD-MMM-YYYY;;q"))
 	,disch_disp = trim(uar_get_code_display(e.disch_disposition_cd))
 	,encounter_type = trim(uar_get_code_display(e.encntr_type_cd))
+	,admitting=p1.name_full_formatted
+	,attending=p2.name_full_formatted
 	,e.encntr_id
 from
 	(dummyt d1 with seq = value(t_rec->cnt))
@@ -177,6 +182,10 @@ from
 	,encntr_alias fin
 	,encntr_alias mrn
 	,person p
+	,encntr_prsnl_reltn epr1
+	,prsnl p1
+	,encntr_prsnl_reltn epr2
+	,prsnl p2
 plan d1
 join e
 	where  	e.encntr_id = t_rec->qual[d1.seq].encntr_id
@@ -194,6 +203,20 @@ join mrn
 	and		mrn.encntr_alias_type_cd = outerjoin(code_values->cv.cs_319.mrn_cd)
 	and		mrn.beg_effective_dt_tm <= outerjoin(cnvtdatetime(curdate,curtime3))
 	and     mrn.end_effective_dt_tm >= outerjoin(cnvtdatetime(curdate,curtime3))
+join epr1 
+	where epr1.encntr_id = outerjoin(e.encntr_id)
+		and epr1.encntr_prsnl_r_cd = outerjoin(ADMIT_PHY_VAR) ;1116
+		and epr1.end_effective_dt_tm > outerjoin(cnvtdatetime(curdate,curtime3))
+		and epr1.active_ind = outerjoin(1)
+join p1 
+	where p1.person_id = outerjoin(epr1.prsnl_person_id) ;admitting physician
+join epr2 
+	where epr2.encntr_id = outerjoin(e.encntr_id)
+		and epr2.encntr_prsnl_r_cd = outerjoin(ATTEND_PHY_VAR)
+		and epr2.end_effective_dt_tm > outerjoin(cnvtdatetime(curdate,curtime3))
+		and epr2.active_ind = outerjoin(1)
+join p2 
+	where p2.person_id = outerjoin(epr2.prsnl_person_id) ;attending physician
 order by
 	 facility
 	,encounter_type
