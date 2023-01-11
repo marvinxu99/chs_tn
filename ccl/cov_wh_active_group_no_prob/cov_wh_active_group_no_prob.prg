@@ -29,9 +29,10 @@ drop program cov_wh_active_group_no_prob:dba go
 create program cov_wh_active_group_no_prob:dba
 
 prompt 
-	"Output to File/Printer/MINE" = "MINE" 
+	"Output to File/Printer/MINE" = "MINE"
+	, "Email" = "" 
 
-with OUTDEV
+with OUTDEV, Email
 
 
 call echo(build("loading script:",curprog))
@@ -67,6 +68,7 @@ record t_rec
 	 2 outdev		= vc
 	 2 start_dt_tm	= vc
 	 2 end_dt_tm	= vc
+	 2 email = vc
 	1 files
 	 2 records_attachment		= vc
 	1 dminfo
@@ -103,8 +105,13 @@ call addEmailLog("chad.cummings@covhlth.com")
 set t_rec->files.records_attachment = concat(trim(cnvtlower(curprog)),"_rec_",trim(format(sysdate,"yyyy_mm_dd_hh_mm_ss;;d")),".dat")
 
 set t_rec->prompts.outdev = $OUTDEV
+set t_rec->prompts.email = $EMAIL
 
 set t_rec->cons.run_dt_tm 		= cnvtdatetime(curdate,curtime3)
+
+if (t_rec->prompts.email > " ")
+	call addEmailLog(t_rec->prompts.email)
+endif	
 
 declare problem_var = vc
 
@@ -259,7 +266,24 @@ endfor
 call writeLog(build2("* END   Creating Audit *************************************"))
 call writeLog(build2("************************************************************"))
 
-
+select into t_rec->prompts.outdev
+	 location = substring(1,100,uar_get_code_display(t_rec->qual[d1.seq].loc_unit_cd))
+	,fin = substring(1,100,t_rec->qual[d1.seq].fin)
+	,name = substring(1,100,t_rec->qual[d1.seq].name_full_formatted)
+	,encntr_type = substring(1,100,uar_get_code_display(t_rec->qual[d1.seq].encntr_type_cd))
+	,encntr_status = substring(1,100,uar_get_code_display(t_rec->qual[d1.seq].encntr_status_cd))
+	,reg_dt_tm = substring(1,100,format(t_rec->qual[d1.seq].reg_dt_tm ,"dd-mmm-yyyy hh:mm:ss;;d"))
+	,disch_dt_tm = substring(1,100,format(t_rec->qual[d1.seq].disch_dt_tm ,"dd-mmm-yyyy hh:mm:ss;;d"))
+	,group_dt_tm = substring(1,100,format(t_rec->qual[d1.seq].label_dt_tm ,"dd-mmm-yyyy hh:mm:ss;;d"))
+	,label = substring(1,100,t_rec->qual[d1.seq].dynamic_label)
+	,preg_prob_ind = t_rec->qual[d1.seq].preg_prob_ind
+from
+	(dummyt d1 with seq=t_rec->cnt)
+plan d1
+order by
+	 t_rec->qual[d1.seq].unit
+	,t_rec->qual[d1.seq].name_full_formatted
+with nocounter, format, check, separator = " "
 #exit_script
 
 
